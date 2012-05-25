@@ -713,5 +713,4 @@ void AddSC_warlock_spell_scripts ()
     new spell_warl_shadow_bite();
     new spell_warl_drain_life();
     new spell_warl_fear();
-    new spell_warl_fel_flame();
 }
