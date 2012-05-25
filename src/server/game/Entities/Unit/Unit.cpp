@@ -9938,7 +9938,7 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
 {
     sLog->outDebug(LOG_FILTER_UNITS, "SetMinion %u for %u, apply %u", minion->GetEntry(), GetEntry(), apply);
 
-    if (slot == PET_SLOT_ACTUAL_PET_SLOT)
+    if (slot == PET_SAVE_AS_CURRENT)
         slot = ToPlayer()->_currentPetSlot;
 
     if (apply)
@@ -9966,7 +9966,7 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
                 {
                     // remove existing minion pet
                     if (oldPet->isPet())
-                        ((Pet*)oldPet)->Remove(PET_SLOT_ACTUAL_PET_SLOT);
+                        ((Pet*)oldPet)->Remove(PET_SAVE_AS_CURRENT);
                     else
                         oldPet->UnSummon();
                     SetPetGUID(minion->GetGUID());
@@ -10609,7 +10609,7 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
                     break;
                 }
                 break;
-            }           
+            }
             case 7293: // Rage of Rivendare
             {
                 if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, 0, 0x02000000, 0))
@@ -10653,7 +10653,7 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
         case SPELLFAMILY_PRIEST:
             // Smite
             if (spellProto->SpellFamilyFlags[0] & 0x80)
-            {              
+            {
                 if (AuraEffect* aurEff = GetAuraEffect(55692, 0)) // Glyph of Smite
                     if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x100000, 0, 0, GetGUID()))
                         AddPctN(DoneTotalMod, aurEff->GetAmount());
@@ -11880,7 +11880,7 @@ void Unit::MeleeDamageBonus(Unit* victim, uint32 *pdamage, WeaponAttackType attT
                 }
                 // Tundra Stalker
                 else
-                {                  
+                {
                     if (victim->HasAura(55095)) // Frost Fever (target debuff)
                         AddPctN(DoneTotalMod, (*i)->GetAmount());
                 }

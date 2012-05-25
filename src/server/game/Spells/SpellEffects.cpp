@@ -4287,7 +4287,7 @@ void Spell::EffectLearnPetSpell(SpellEffIndex effIndex)
         return;
 
     pet->learnSpell(learn_spellproto->Id);
-    pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
     pet->GetOwner()->PetSpellInitialize();
 }
 
@@ -6368,7 +6368,7 @@ void Spell::EffectDismissPet(SpellEffIndex effIndex)
     Pet* pet = unitTarget->ToPet();
 
     ExecuteLogEffectUnsummonObject(effIndex, pet);
-    pet->GetOwner()->RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
+    pet->GetOwner()->RemovePet(pet, PET_SAVE_AS_CURRENT);
 }
 
 void Spell::EffectSummonObject(SpellEffIndex effIndex)
@@ -6927,7 +6927,7 @@ void Spell::EffectSummonDeadPet(SpellEffIndex /*effIndex*/)
 
     // pet->AIM_Initialize();
     // _player->PetSpellInitialize();
-    pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 
 void Spell::EffectDestroyAllTotems(SpellEffIndex /*effIndex*/)
@@ -7487,7 +7487,7 @@ void Spell::EffectCreateTamedPet(SpellEffIndex effIndex)
     pet->GetMap()->AddToMap(pet->ToCreature());
 
     // unitTarget has pet now
-    unitTarget->SetMinion(pet, true, PET_SLOT_ACTUAL_PET_SLOT);
+    unitTarget->SetMinion(pet, true, PET_SAVE_AS_CURRENT);
 
     pet->InitTalentForLevel();
 
