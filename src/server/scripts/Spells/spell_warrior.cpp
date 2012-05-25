@@ -89,37 +89,38 @@ class spell_warr_improved_spell_reflection : public SpellScriptLoader
             return new spell_warr_improved_spell_reflection_SpellScript();
         }
 };
-
-enum Bloodthirst
-{
-    SPELL_BLOODTHIRST = 23885,
-};
-
+// Bloodthirst
+// Spell Id: 23881
 class spell_warr_bloodthirst : public SpellScriptLoader
 {
-public:
-    spell_warr_bloodthirst() : SpellScriptLoader("spell_warr_bloodthirst") { }
+    public:
+        spell_warr_bloodthirst() : SpellScriptLoader("spell_warr_bloodthirst") { }
 
-    class spell_warr_bloodthirst_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
-
-        void HandleDummy(SpellEffIndex /* effIndex */)
+        class spell_warr_bloodthirst_SpellScript : public SpellScript
         {
-            int32 damage = GetEffectValue();
-            GetCaster()->CastCustomSpell(GetCaster(), SPELL_BLOODTHIRST, &damage, NULL, NULL, true, NULL);
+            PrepareSpellScript(spell_warr_bloodthirst_SpellScript);
+            void CalculateDamage(SpellEffIndex /*effect*/)
+            {
+                // Formula: AttackPower * BasePoints / 100
+                if (Unit* caster = GetCaster())
+                {
+                    int32 dmg = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 80 / 100);
+                    SetHitDamage(dmg);
+                    caster->CastCustomSpell(caster, 23885, &dmg, NULL, NULL, true);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst::spell_warr_bloodthirst_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+              return new spell_warr_bloodthirst_SpellScript();
         }
 
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_warr_bloodthirst_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_warr_bloodthirst_SpellScript();
-    }
 };
 
 // Victory Rush
@@ -137,7 +138,7 @@ public:
         {
             // Formula: AttackPower * BasePoints / 100
             if (Unit* caster = GetCaster())
-                SetHitDamage(int32(GetHitDamage() * caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100));
+                SetHitDamage(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 56 / 100);
         }
 
         void HandleAfterHit()
@@ -326,8 +327,14 @@ public:
             // Formula: [Effect2BasePoints] / 100 * AttackPower
             if (Unit* caster = GetCaster())
             {
-                int32 bp2 = caster->CalculateSpellDamage(GetHitUnit(), GetSpellInfo(), EFFECT_2);
-                SetHitDamage(int32(bp2 / 100 * caster->GetTotalAttackPowerValue(BASE_ATTACK)));
+					int32 rank1 = caster->GetAuraCount(87095);
+					int32 rank2 = caster->GetAuraCount(87096);
+					int32 modify = rank1*5 + rank2*10 + 100;
+                    //int32 bp2 = caster->CalculateSpellDamage(GetHitUnit(), GetSpellInfo(), EFFECT_2);
+					SetHitDamage((caster->GetTotalAttackPowerValue(BASE_ATTACK)*75/100) * modify / 100);
+
+					caster->RemoveAura(87095); // Remove Thunderstruck buff rank1
+					caster->RemoveAura(87096); // Remove Thunderstruck buff rank2
             }
         }
 
@@ -369,7 +376,17 @@ public:
             targetList = unitList;
         }
 
-        void OnTargetHit(SpellEffIndex effect)
+		void OnCastHandler()
+            {
+                if (Unit* caster = GetCaster()){
+                    if(caster->HasAura(80979)) // Thunderstruck rank1
+						caster->AddAura(87095,caster);
+					if(caster->HasAura(80980)) // Thunderstruck rank2
+						caster->AddAura(87096,caster);
+				}
+            }
+
+		void OnTargetHit(SpellEffIndex effect)
         {
             if (CheckAgain) // Dont re-cast the thing on each target if its already applied
             {
@@ -397,6 +414,7 @@ public:
         {
             OnEffectHitTarget += SpellEffectFn(spell_warr_thunderclap::spell_warr_thunderclap_SpellScript::OnTargetHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             OnUnitTargetSelect += SpellUnitTargetFn(spell_warr_thunderclap::spell_warr_thunderclap_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnCast += SpellCastFn(spell_warr_thunderclap::spell_warr_thunderclap_SpellScript::OnCastHandler);
         }
     };
 
