@@ -1244,7 +1244,7 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
     }
 
     // item can't be added
-    sLog->outError("STORAGE: Can't equip or store initial item %u for race %u class %u , error msg = %u", titem_id, getRace(), getClass(), msg);
+    sLog->outError("STORAGE: Can't equip or store initial item %u for race %u class %u, error msg = %u", titem_id, getRace(), getClass(), msg);
     return false;
 }
 
@@ -2978,7 +2978,7 @@ void Player::RemoveFromGroup(Group* group, uint64 guid, RemoveMethod method /* =
 
 void Player::SendPlayerMoneyNotify(Player* player, uint32 Money, uint32 Modifier)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO , "World: SMSG_LOOT_MONEY_NOTIFY Player %s looted money: %d, Money Modifier: %d , Guild Money: %d", player->GetName(), Money, Modifier, Money*Modifier);
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "World: SMSG_LOOT_MONEY_NOTIFY Player %s looted money: %d, Money Modifier: %d, Guild Money: %d", player->GetName(), Money, Modifier, Money*Modifier);
 
     WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, (4 + 4 + 1));
     data << uint32(Money);
@@ -4788,7 +4788,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
         return TRAINER_SPELL_RED;
 
     bool hasSpell = true;
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS ; ++i)
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (!trainer_spell->learnedSpell[i])
             continue;
@@ -4811,7 +4811,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     if (getLevel() < trainer_spell->reqLevel)
         return TRAINER_SPELL_RED;
 
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS ; ++i)
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (!trainer_spell->learnedSpell[i])
             continue;
@@ -4838,7 +4838,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
 
     // check primary prof. limit
     // first rank of primary profession spell when there are no proffesions avalible is disabled
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS ; ++i)
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (!trainer_spell->learnedSpell[i])
             continue;
@@ -7321,9 +7321,9 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
             uint32 victim_title = victim->GetUInt32Value(PLAYER_CHOSEN_TITLE);
                                                         // Get Killer titles, CharTitlesEntry::bit_index
             // Ranks:
-            //  title[1..14]  -> rank[5..18]
-            //  title[15..28] -> rank[5..18]
-            //  title[other]  -> 0
+            //  title[1..14]  ->rank[5..18]
+            //  title[15..28] ->rank[5..18]
+            //  title[other]  ->0
             if (victim_title == 0)
                 victim_guid = 0;                        // Don't show HK: <rank> message, only log.
             else if (victim_title < 15)
@@ -10018,12 +10018,12 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(0xaa3) << uint32(0x0);       // 27 2723 Boold Elf - Alliance control
                 data << uint32(0xaa2) << uint32(0x1);       // 28 2722 Boold Elf uncontrolled (1 - yes, 0 - no)
                 data << uint32(0xac5) << uint32(0x1);       // 29 2757 Flag (1 - show, 0 - hide) - doesn't work exactly this way!
-                data << uint32(0xad2) << uint32(0x1);       // 30 2770 Horde top-stats (1 - show, 0 - hide) // 02 -> horde picked up the flag
-                data << uint32(0xad1) << uint32(0x1);       // 31 2769 Alliance top-stats (1 - show, 0 - hide) // 02 -> alliance picked up the flag
+                data << uint32(0xad2) << uint32(0x1);       // 30 2770 Horde top-stats (1 - show, 0 - hide) // 02 ->horde picked up the flag
+                data << uint32(0xad1) << uint32(0x1);       // 31 2769 Alliance top-stats (1 - show, 0 - hide) // 02 ->alliance picked up the flag
                 data << uint32(0xabe) << uint32(0x0);       // 32 2750 Horde resources
                 data << uint32(0xabd) << uint32(0x0);       // 33 2749 Alliance resources
                 data << uint32(0xa05) << uint32(0x8e);      // 34 2565 unk, constant?
-                data << uint32(0xaa0) << uint32(0x0);       // 35 2720 Capturing progress-bar (100 -> empty (only grey), 0 -> blue|red (no grey), default 0)
+                data << uint32(0xaa0) << uint32(0x0);       // 35 2720 Capturing progress-bar (100 ->empty (only grey), 0 ->blue|red (no grey), default 0)
                 data << uint32(0xa9f) << uint32(0x0);       // 36 2719 Capturing progress-bar (0 - left, 100 - right)
                 data << uint32(0xa9e) << uint32(0x0);       // 37 2718 Capturing progress-bar (1 - show, 0 - hide)
                 data << uint32(0xc0d) << uint32(0x17b);     // 38 3085 unk
@@ -10220,7 +10220,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(0xdf3) << uint32(0x0);       // 13 3571 bonus timer (1 - on, 0 - off)
                 data << uint32(0xded) << uint32(0x0);       // 14 3565 Horde Attacker
                 data << uint32(0xdec) << uint32(0x0);       // 15 3564 Alliance Attacker
-                // End Round (timer), better explain this by example, eg. ends in 19:59 -> A:BC
+                // End Round (timer), better explain this by example, eg. ends in 19:59 ->A:BC
                 data << uint32(0xde9) << uint32(0x0);       // 16 3561 C
                 data << uint32(0xde8) << uint32(0x0);       // 17 3560 B
                 data << uint32(0xde7) << uint32(0x0);       // 18 3559 A
@@ -19645,7 +19645,7 @@ void Player::_SaveAuras(SQLTransaction& trans)
     stmt->setUInt32(0, GetGUIDLow());
     trans->Append(stmt);
 
-    for (AuraMap::const_iterator itr = m_ownedAuras.begin(); itr != m_ownedAuras.end() ; ++itr)
+    for (AuraMap::const_iterator itr = m_ownedAuras.begin(); itr != m_ownedAuras.end(); ++itr)
     {
         if (!itr->second->CanBeSaved())
             continue;
@@ -21075,9 +21075,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
             (node->z - GetPositionZ())*(node->z - GetPositionZ()) >
             (2*INTERACTION_DISTANCE)*(2*INTERACTION_DISTANCE)*(2*INTERACTION_DISTANCE))
         {
-            WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
-            data << uint32(ERR_TAXITOOFARAWAY);
-            GetSession()->SendPacket(&data);
+            GetSession()->SendActivateTaxiReply(ERR_TAXIPLAYERBUSY);           
             return false;
         }
     }
@@ -21986,7 +21984,7 @@ void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
     }
 }
 
-                                                            //if false -> then toggled off if was on| if true -> toggled on if was off AND meets requirements
+                                                            //if false ->then toggled off if was on| if true ->toggled on if was off AND meets requirements
 void Player::ToggleMetaGemsActive(uint8 exceptslot, bool apply)
 {
     //cycle all equipped items
@@ -22384,20 +22382,20 @@ void Player::InitPrimaryProfessions()
         prof_skills.push_back(755);     // Jewelcrafting
         prof_skills.push_back(773);     // Inscription
 
-        for(std::vector<uint32>::iterator itr = prof_skills.begin(); itr != prof_skills.end(); ++itr)
+        for (std::vector<uint32>::iterator itr = prof_skills.begin(); itr != prof_skills.end(); ++itr)
         {
             uint32 skill_id = *itr;
-            if(HasSkill(skill_id))
+            if (HasSkill(skill_id))
             {
                 ++prof_count;
-                if(prof_count > 2)
+                if (prof_count > 2)
                 {
-                    SetSkill(skill_id,0 , 0, 0);
-                    sLog->outError("Player %s has more than two professions. Skill %u removed",GetName(),skill_id);
-                    // sWorld->BanAccount(BAN_CHARACTER, GetName(), "60d" , "To much professions - cheating", "Server-Anticheat")
+                    SetSkill(skill_id, 0, 0, 0);
+                    sLog->outError("Player %s has more than two professions. Skill %u removed", GetName(), skill_id);
                 }
             }
         }
+    }
     }
 }
 
@@ -24694,7 +24692,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
             }
 
             //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-            sLog->outStaticDebug("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d" , movementInfo.pos.GetPositionZ(), height, GetPositionZ(), movementInfo.fallTime, height, damage, safe_fall);
+            sLog->outStaticDebug("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d", movementInfo.pos.GetPositionZ(), height, GetPositionZ(), movementInfo.fallTime, height, damage, safe_fall);
         }
     }
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LANDING); // No fly zone - Parachute
@@ -25994,7 +25992,7 @@ void Player::RefundItem(Item* item)
     }
     GetSession()->SendPacket(&data);
 
-    uint32 moneyRefund = item->GetPaidMoney();  // item-> will be invalidated in DestroyItem
+    uint32 moneyRefund = item->GetPaidMoney();  // item->will be invalidated in DestroyItem
 
     // Save all relevant data to DB to prevent desynchronisation exploits
     SQLTransaction trans = CharacterDatabase.BeginTransaction();

@@ -588,7 +588,7 @@ void WorldSession::HandleStablePet(WorldPacket & recv_data)
     Pet* pet = _player->GetPet();
 
     // can't place in stable dead pet
-    if (!pet||!pet->isAlive()||pet->getPetType() != HUNTER_PET)
+    if (!pet || !pet->isAlive() || pet->getPetType() != HUNTER_PET)
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
