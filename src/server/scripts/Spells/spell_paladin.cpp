@@ -550,6 +550,243 @@ class spell_pal_selfless_healer : public SpellScriptLoader
             return new spell_pal_selfless_healer_AuraScript();
         }
 };
+/ Shield of Righteous
+// Spell Id: 53600
+class spell_pal_shield_of_righteous: public SpellScriptLoader
+{
+public:
+    spell_pal_shield_of_righteous () :
+            SpellScriptLoader("spell_pal_shield_of_righteous")
+    {
+    }
+
+    class spell_pal_shield_of_righteous_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_pal_shield_of_righteous_SpellScript)
+
+        void CalculateDamage (SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                int32 damage = GetHitDamage();
+                switch (caster->GetPower(POWER_HOLY_POWER))
+                {
+                case 0:
+                    damage = int32(damage * 1.16f);
+                    break;
+                case 1:
+                    damage = int32((damage * 1.16f) * 3);
+                    break;
+                case 2:
+                    damage = int32((damage * 1.16f) * 6);
+                    break;
+                }
+                SetHitDamage(damage);
+            }
+        }
+
+        void Register ()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_pal_shield_of_righteous_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript () const
+    {
+        return new spell_pal_shield_of_righteous_SpellScript();
+    }
+};
+
+// Judgements of the Wise
+class spell_pal_judgements_of_the_wise: public SpellScriptLoader
+{
+public:
+    spell_pal_judgements_of_the_wise () :
+            SpellScriptLoader("spell_pal_judgements_of_the_wise")
+    {
+    }
+
+    class spell_pal_judgements_of_the_wise_AuraScript: public AuraScript
+    {
+        PrepareAuraScript(spell_pal_judgements_of_the_wise_AuraScript)
+        ;
+
+        void CalculateMana (AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                canBeRecalculated = true;
+                int32 basemana = caster->ToPlayer()->GetCreateMana();
+                amount = (3 * basemana) / 100;          // 3% of base mana
+            }
+        }
+
+        void Register ()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pal_judgements_of_the_wise_AuraScript::CalculateMana, EFFECT_0, SPELL_AURA_PERIODIC_ENERGIZE);
+        }
+    };
+
+    AuraScript* GetAuraScript () const
+    {
+        return new spell_pal_judgements_of_the_wise_AuraScript();
+    }
+};
+
+// Light of Dawn
+class spell_pal_light_of_dawn: public SpellScriptLoader
+{
+public:
+    spell_pal_light_of_dawn () :
+            SpellScriptLoader("spell_pal_light_of_dawn")
+    {
+    }
+
+    class spell_pal_light_of_dawn_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_pal_light_of_dawn_SpellScript)
+        ;
+
+        uint32 totalheal;
+
+        bool Load ()
+        {
+            if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+
+            return true;
+        }
+
+        void ChangeHeal (SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!target)
+                return;
+
+            if (target == caster)
+                return;
+
+            switch (caster->GetPower(POWER_HOLY_POWER))
+            {
+            case 0:          // 1 Holy Power
+            {
+                totalheal = GetHitHeal();
+                break;
+            }
+            case 1:          // 2 Holy Power
+            {
+                totalheal = GetHitHeal() * 2;
+                break;
+            }
+            case 2:          // 3 Holy Power
+            {
+                totalheal = GetHitHeal() * 3;
+                break;
+            }
+            }
+            SetHitHeal(totalheal);
+            caster->SetPower(POWER_HOLY_POWER, 0);
+        }
+
+        void Register ()
+        {
+            OnEffect += SpellEffectFn(spell_pal_light_of_dawn_SpellScript::ChangeHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript () const
+    {
+        return new spell_pal_light_of_dawn_SpellScript();
+    }
+};
+
+// cleanse
+class spell_pal_cleanse: public SpellScriptLoader
+{
+public:
+    spell_pal_cleanse () :
+            SpellScriptLoader("spell_pal_cleanse")
+    {
+    }
+
+    class spell_pal_cleanse_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_pal_cleanse_SpellScript)
+        ;
+
+        void RemoveSnare ()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!caster || !target)
+                return;
+
+            if (caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_PALADIN, 3022, 0) && caster == target && caster->HasAuraType(SPELL_AURA_MOD_ROOT) || caster->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
+
+                caster->RemoveAurasWithMechanic((1 << MECHANIC_ROOT) | (1 << MECHANIC_SNARE), AURA_REMOVE_BY_DEFAULT, 0, 1);
+        }
+
+        void Register ()
+        {
+            AfterHit += SpellHitFn(spell_pal_cleanse_SpellScript::RemoveSnare);
+        }
+    };
+
+    SpellScript* GetSpellScript () const
+    {
+        return new spell_pal_cleanse_SpellScript();
+    }
+};
+
+// Blessing of Kings
+class spell_pall_bless_of_the_king : public SpellScriptLoader
+{
+    public:
+        spell_pall_bless_of_the_king() : SpellScriptLoader("spell_pall_bless_of_the_king") { }
+
+        class spell_pall_bless_of_the_king_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pall_bless_of_the_king_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    std::list<Unit*> PartyMembers;
+                    caster->GetPartyMembers(PartyMembers);
+                    uint32 player = 0;
+                    bool cont=false;
+                    for (std::list <Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr)
+                    {
+                        ++player;
+                        if (cont == false && player > 1) cont = true;
+                    }
+
+                    if (cont==true)
+                        caster->CastSpell(GetHitUnit(), 79063, true);// Blessing of Kings (Raid)
+                    else
+                        caster->CastSpell(GetHitUnit(), 79062, true); // Blessing of Kings (Caster)
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pall_bless_of_the_king_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pall_bless_of_the_king_SpellScript;
+        }
+};
+
 
 void AddSC_paladin_spell_scripts()
 {
@@ -562,4 +799,10 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_judgements_of_the_bold();
     new spell_pal_word_of_glory();
     new spell_pal_selfless_healer();
+
+    new spell_pal_light_of_dawn();
+    new spell_pal_judgements_of_the_wise();
+    new spell_pal_shield_of_righteous();
+    new spell_pal_cleanse();
+    new spell_pall_bless_of_the_king();
 }
