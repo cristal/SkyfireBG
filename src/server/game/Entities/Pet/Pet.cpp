@@ -95,7 +95,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 {
     m_loading = true;
 
-    if (slotID == PET_SLOT_ACTUAL_PET_SLOT)
+    if (slotID == PET_SAVE_AS_CURRENT)
         slotID = owner->_currentPetSlot;
 
     uint32 ownerid = owner->GetGUIDLow();
@@ -363,7 +363,7 @@ void Pet::SavePetToDB(PetSlot mode)
     if (!owner)
         return;
 
-    if (mode == PET_SLOT_ACTUAL_PET_SLOT)
+    if (mode == PET_SAVE_AS_CURRENT)
         mode = owner->_currentPetSlot;
 
     // not save pet as current if another pet temporary unsummoned
@@ -502,7 +502,7 @@ void Pet::Update(uint32 diff)
         {
             if (getPetType() != HUNTER_PET || _corpseRemoveTime <= time(NULL))
             {
-                Remove(PET_SLOT_ACTUAL_PET_SLOT);               //hunters' pets never get removed because of death, NEVER!
+                Remove(PET_SAVE_AS_CURRENT);               //hunters' pets never get removed because of death, NEVER!
                 return;
             }
             break;
@@ -514,7 +514,7 @@ void Pet::Update(uint32 diff)
             if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityRange()) && !isPossessed()) || (isControlled() && !owner->GetPetGUID()))
             //if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGUID() && (owner->GetCharmGUID() != GetGUID()))) || (isControlled() && !owner->GetPetGUID()))
             {
-                Remove(PET_SLOT_ACTUAL_PET_SLOT, true);
+                Remove(PET_SAVE_AS_CURRENT, true);
                 return;
             }
 
@@ -523,7 +523,7 @@ void Pet::Update(uint32 diff)
                 if (owner->GetPetGUID() != GetGUID())
                 {
                     sLog->outError("Pet %u is not pet of owner %s, removed", GetEntry(), _owner->GetName());
-                    Remove(PET_SLOT_ACTUAL_PET_SLOT);
+                    Remove(PET_SAVE_AS_CURRENT);
                     return;
                 }
             }
@@ -534,7 +534,7 @@ void Pet::Update(uint32 diff)
                     m_duration -= diff;
                 else
                 {
-                    Remove(PET_SLOT_ACTUAL_PET_SLOT);
+                    Remove(PET_SAVE_AS_CURRENT);
                     return;
                 }
             }
