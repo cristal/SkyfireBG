@@ -784,6 +784,62 @@ public:
     }
 };
 
+// 56641 Steady Shot
+class spell_hun_steady_shot: public SpellScriptLoader
+{
+public:
+    spell_hun_steady_shot () :
+            SpellScriptLoader("spell_hun_steady_shot")
+    {
+    }
+
+    class spell_hun_steady_shot_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_hun_steady_shot_SpellScript)
+
+        void HandleDummy (SpellEffIndex /*effIndex*/)
+        {
+            ++castCount;
+            if (castCount > 1)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    int32 speed0 = 0;
+                    if (caster->HasAura(53221))
+                        speed0 = 5;
+                    if (caster->HasAura(53222))
+                        speed0 = 10;
+                    if (caster->HasAura(53224))
+                        speed0 = 15;
+
+                    if (speed0)
+                        caster->CastCustomSpell(caster, HUNTER_SPELL_STREADY_SHOT_ATTACK_SPEED, &speed0, NULL, NULL, true, 0, 0, caster->GetGUID());
+
+                    castCount = 0;
+
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    caster->ToPlayer()->KilledMonsterCredit(44175, 0);
+                }
+            }
+        }
+
+        void Register ()
+        {
+            OnEffect += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+        }
+
+    private:
+        int castCount;
+    };
+
+    SpellScript* GetSpellScript () const
+    {
+        return new spell_hun_steady_shot_SpellScript();
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_chimera_shot();
@@ -799,4 +855,6 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_kill_command();
     new spell_hun_focus_fire();
     new spell_hun_frenzy_effect();
+
+    new spell_hun_steady_shot();
 }
