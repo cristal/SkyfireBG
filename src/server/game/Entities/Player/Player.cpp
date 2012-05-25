@@ -1815,8 +1815,8 @@ void Player::Update(uint32 p_time)
     if (IsHasDelayedTeleport() && isAlive())
         TeleportTo(_teleport_dest, _teleport_options);
 
-    //if (getLevel() >= 80)
-        //RemoveOrAddMasterySpells();
+    if (getLevel() >= 80)
+        RemoveOrAddMasterySpells();
 }
 
 void Player::setDeathState(DeathState s)
@@ -2976,6 +2976,18 @@ void Player::RemoveFromGroup(Group* group, uint64 guid, RemoveMethod method /* =
     }
 }
 
+void Player::SendPlayerMoneyNotify(Player* player, uint32 Money, uint32 Modifier)
+{
+    sLog->outDebug(LOG_FILTER_NETWORKIO , "World: SMSG_LOOT_MONEY_NOTIFY Player %s looted money: %d, Money Modifier: %d , Guild Money: %d", player->GetName(), Money, Modifier, Money*Modifier);
+
+    WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, (4 + 4 + 1));
+    data << uint32(Money);
+    data << uint32(Money*Modifier);
+    data << uint8(0);
+
+    player->GetSession()->SendPacket(&data);
+}
+
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool recruitAFriend, float /*group_rate*/)
 {
     WorldPacket data(SMSG_LOG_XPGAIN, 21); // guess size?
@@ -3062,8 +3074,10 @@ void Player::GiveLevel(uint8 level)
     if (level == oldLevel)
         return;
 
-    if (Guild* guild = sGuildMgr->GetGuildById(GetGuildId()))
+    if (Guild* guild = sGuildMgr->GetGuildById(this->GetGuildId()))
         guild->UpdateMemberData(this, GUILD_MEMBER_DATA_LEVEL, level);
+
+    sScriptMgr->OnPlayerLevelChanged(this, level);
 
     PlayerLevelInfo info;
     sObjectMgr->GetPlayerLevelInfo(getRace(), getClass(), level, &info);
@@ -3260,11 +3274,13 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, 0.0f);
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0.0f);
 
-    SetInt32Value(UNIT_FIELD_ATTACK_POWER,            0);
-    //SetInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,       0);
+    SetInt32Value(UNIT_FIELD_ATTACK_POWER, 0);
+    SetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_POS, 0);
+    SetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_NEG, 0);
     SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, 0.0f);
-    SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0);
-    //SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS, 0);
+    SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, 0);
+    SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MOD_POS, 0);
+    SetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MOD_NEG, 0);
     SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER, 0.0f);
 
     // Base crit values (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
@@ -3320,7 +3336,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // cleanup unit flags (will be re-applied if need at aura load).
     RemoveFlag(UNIT_FIELD_FLAGS,
         UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_ATTACKABLE_1 |
-        UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC  | UNIT_FLAG_LOOTING          |
+        UNIT_FLAG_IMMUNE_TO_PC   | UNIT_FLAG_IMMUNE_TO_NPC| UNIT_FLAG_LOOTING          |
         UNIT_FLAG_PET_IN_COMBAT  | UNIT_FLAG_SILENCED     | UNIT_FLAG_PACIFIED         |
         UNIT_FLAG_STUNNED        | UNIT_FLAG_IN_COMBAT    | UNIT_FLAG_DISARMED         |
         UNIT_FLAG_CONFUSED       | UNIT_FLAG_FLEEING      | UNIT_FLAG_NOT_SELECTABLE   |
@@ -4179,7 +4195,8 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
             //if (learn_low_rank)
             //    learnSpell(prev_id, false);
         }
-        // if ranked non-stackable spell: need activate lesser rank and update dendence state
+
+        // if ranked non-stackable spell: need activate lesser rank and update dependency state
         else if (cur_active && !spellInfo->IsStackableWithRanks() && spellInfo->IsRanked())
         {
             // need manually update dependence state (learn spell ignore like attempts)
@@ -4212,17 +4229,20 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
 
     if (spell_id == 46917 && _canTitanGrip)
         SetCanTitanGrip(false);
+
     if (_canDualWield)
     {
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
         if (spellInfo->IsPassive())
         {
             for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            {
                 if (spellInfo->Effects[i].Effect == SPELL_EFFECT_DUAL_WIELD)
                 {
                     SetCanDualWield(false);
                     break;
                 }
+            }
         }
     }
 
@@ -4352,9 +4372,6 @@ void Player::RemoveAllSpellCooldown()
 void Player::_LoadSpellCooldowns(PreparedQueryResult result)
 {
     // some cooldowns can be already set at aura loading...
-
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT spell, item, time FROM character_spell_cooldown WHERE guid = '%u'", GetGUIDLow());
-
     if (result)
     {
         time_t curTime = time(NULL);
@@ -4502,18 +4519,17 @@ bool Player::resetTalents(bool no_cost)
 
         for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
         {
-            // skip non-existant talent ranks
+            // skip non-existent talent ranks
             if (talentInfo->RankID[rank] == 0)
                 continue;
-            SpellInfo const* _spellEntry = sSpellMgr->GetSpellInfo(talentInfo->RankID[rank]);
-            if (!_spellEntry)
-                continue;
+
             removeSpell(talentInfo->RankID[rank], true);
-        // search for spells that the talent teaches and unlearn them
-            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                if (_spellEntry->Effects[i].TriggerSpell > 0 && _spellEntry->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
-                    removeSpell(_spellEntry->Effects[i].TriggerSpell, true);
-                // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
+            if (const SpellInfo* _spellEntry = sSpellMgr->GetSpellInfo(talentInfo->RankID[rank]))
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i) // search through the SpellEntry for valid trigger spells
+                    if (_spellEntry->Effects[i].TriggerSpell > 0 && _spellEntry->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
+                        removeSpell(_spellEntry->Effects[i].TriggerSpell, true);
+
+            // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
             PlayerTalentMap::iterator plrTalent = _talents[_activeSpec]->find(talentInfo->RankID[rank]);
             if (plrTalent != _talents[_activeSpec]->end())
                 plrTalent->second->state = PLAYERSPELL_REMOVED;
@@ -26226,4 +26242,78 @@ PetSlot Player::getSlotForNewPet()
 
     // If there is no slots available, then we should point that out
     return PET_SLOT_FULL_LIST; //(PetSlot)last_known;
+}
+
+void Player::RemoveOrAddMasterySpells()
+{
+    if (!isAlive())
+        return;
+
+    if (!HasAuraType(SPELL_AURA_MASTERY) || GetTalentBranchSpec(GetActiveSpec()) == 0)
+    {
+        if (HasAura(77514))
+            RemoveAurasDueToSpell(77514);
+
+        if (HasAura(77515))
+            RemoveAurasDueToSpell(77515);
+
+        if (HasAura(77493))
+            RemoveAurasDueToSpell(77493);
+
+        if (HasAura(76658))
+            RemoveAurasDueToSpell(76658);
+
+        if (HasAura(76657))
+            RemoveAurasDueToSpell(76657);
+
+        if (HasAura(76595))
+            RemoveAurasDueToSpell(76595);
+
+        if (HasAura(76671))
+            RemoveAurasDueToSpell(76671);
+
+        if (HasAura(77220))
+            RemoveAurasDueToSpell(77220);
+
+        if (HasAura(76857))
+            RemoveAurasDueToSpell(76857);
+    }
+    else if (HasAuraType(SPELL_AURA_MASTERY))
+    {
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_DEATH_KNIGHT_FROST)
+            if (!HasAura(77514))
+             AddAura(77514, this);
+
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_DEATH_KNIGHT_UNHOLY)
+            if (!HasAura(77515))
+                AddAura(77515, this);
+
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_DRUID_FERAL_COMBAT)
+            if (!HasAura(77493))
+                AddAura(77493, this);
+
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_HUNTER_SURVIVAL)
+            if (!HasAura(76658))
+                AddAura(76658, this);
+
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_HUNTER_BEAST_MASTERY)
+            if (!HasAura(76657))
+                AddAura(76657, this);
+
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_MAGE_FIRE)
+            if (!HasAura(76595))
+                AddAura(76595, this);
+
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_PALADIN_PROTECTION)
+            if (!HasAura(76671))
+                AddAura(76671, this);
+
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_WARLOCK_DESTRUCTION)
+            if (!HasAura(77220))
+                AddAura(77220, this);
+
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_WARRIOR_PROTECTION)
+            if (!HasAura(76857))
+                AddAura(76857, this);
+    }
 }

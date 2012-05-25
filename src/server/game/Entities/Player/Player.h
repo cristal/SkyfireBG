@@ -1957,7 +1957,7 @@ class Player : public Unit, public GridObject<Player>
         float GetMasteryPoints() { return CalculateMasteryPoints(_baseRatingValue[CR_MASTERY]); }
         float CalculateMasteryPoints(int32 curr_rating)  { return float(curr_rating * 0.0055779569892473); }
         int32 CalculateMasteryRating(float curr_mastery) { return int32(curr_mastery / 0.0055779569892473); }
-        //void RemoveOrAddMasterySpells();
+        void RemoveOrAddMasterySpells();
 
         void UpdateAllSpellCritChances();
         void UpdateSpellCritChance(uint32 school);
@@ -1977,6 +1977,7 @@ class Player : public Unit, public GridObject<Player>
 
         void BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const;
         void DestroyForPlayer(Player *target, bool anim = false) const;
+        void SendPlayerMoneyNotify(Player* player, uint32 Money, uint32 Modifier);
         void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool recruitAFriend = false, float group_rate=1.0f);
 
         // notifiers
