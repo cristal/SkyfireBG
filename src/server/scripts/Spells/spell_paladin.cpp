@@ -550,7 +550,8 @@ class spell_pal_selfless_healer : public SpellScriptLoader
             return new spell_pal_selfless_healer_AuraScript();
         }
 };
-/ Shield of Righteous
+
+// Shield of Righteous
 // Spell Id: 53600
 class spell_pal_shield_of_righteous: public SpellScriptLoader
 {
@@ -692,7 +693,7 @@ public:
 
         void Register ()
         {
-            OnEffect += SpellEffectFn(spell_pal_light_of_dawn_SpellScript::ChangeHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+            OnEffectHit += SpellEffectFn(spell_pal_light_of_dawn_SpellScript::ChangeHeal, EFFECT_0, SPELL_EFFECT_HEAL);
         }
     };
 

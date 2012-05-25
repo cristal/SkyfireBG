@@ -48,7 +48,9 @@ enum HunterSpells
     HUNTER_PET_SPELL_FOCUS_FIRE_REGEN            = 83468,
     HUNTER_VISUAL_FOCUS_FIRE                     = 88843,
     HUNTER_PET_AURA_FRENZY_TRIGGER               = 20784, // Tamed Pet Passive 07 (DND)
+    HUNTER_SPELL_STREADY_SHOT_ATTACK_SPEED = 53220,
 };
+
 
 // 53209 Chimera Shot
 class spell_hun_chimera_shot : public SpellScriptLoader
@@ -827,7 +829,7 @@ public:
 
         void Register ()
         {
-            OnEffect += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+            OnEffectHit += SpellEffectFn(spell_hun_steady_shot_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
         }
 
     private:
