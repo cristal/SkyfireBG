@@ -8480,6 +8480,17 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 break;
             case SPELLFAMILY_WARLOCK:
             {
+         // Impending Doom
+         if (auraSpellInfo->SpellIconID == 195)
+         {
+             if (Unit* caster = triggeredByAura->GetCaster())
+             {
+
+             caster->ToPlayer()->UpdateSpellCooldown(47241, auraSpellInfo->Effects[1].CalcValue() * 1000);
+             }
+
+           return true;
+         }
                 // Siphon Life
                 if (auraSpellInfo->SpellIconID == 152)
                 {
