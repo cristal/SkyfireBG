@@ -7053,6 +7053,8 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
     uint32 absorb = 0;
     uint32 heal = uint32(damage);
+    if(m_spellInfo->Id == 16491 || m_spellInfo->Id == 16487 || m_spellInfo->Id == 16489) // blood craze
+        heal = heal / 10;
     caster->CalcHealAbsorb(target, GetSpellInfo(), heal, absorb);
     int32 gain = caster->DealHeal(target, heal);
 
