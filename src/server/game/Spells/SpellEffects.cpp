@@ -1507,6 +1507,14 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             break;
         case SPELLFAMILY_DRUID:
         {
+             if(m_spellInfo->Id == 80964)  // Skull Bash (bear) 
+                 {
+                    m_caster->CastSpell(unitTarget,93983,true);  
+                 }
+                 if(m_spellInfo->Id == 80965)  // Skull Bash(cat) 
+                 { 
+                    m_caster->CastSpell(unitTarget,93983,true); 
+                 }
             // Starfall
             if (m_spellInfo->SpellFamilyFlags[2] & SPELLFAMILYFLAG2_DRUID_STARFALL)
             {
@@ -1946,6 +1954,20 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 }
                 return;
             }
+                        // Empower Rune Weapon
+        case 53258:
+            return; // skip, hack-added in spell effect
+            // Coldflame
+        case 33801:
+            return; // just make the core stfu
+		case 91565: // Feral Agression
+                if (m_caster->HasAura(16859) || m_caster->HasAura(16858)){ 
+                    uint8 count=0;
+                    if (m_caster->HasAura(16859))count = m_caster->GetAuraEffect(16859,0)->GetAmount()-1;
+                    if (m_caster->HasAura(16858))count = m_caster->GetAuraEffect(16858,0)->GetAmount()-1;
+                    while(count){m_caster->CastSpell(unitTarget,triggered_spell_id,true);count--;}
+                    return;
+                }
             // Priest Shadowfiend (34433) need apply mana gain trigger aura on pet
             case 41967:
             {
