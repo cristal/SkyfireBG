@@ -22394,7 +22394,6 @@ void Player::InitPrimaryProfessions()
             }
         }
     }
-    }
 }
 
 void Player::ModifyMoney(int32 d)
