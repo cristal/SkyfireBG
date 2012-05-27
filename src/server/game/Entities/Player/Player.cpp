@@ -7573,13 +7573,13 @@ uint32 Player::_GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const
         }
     }
 
-    if (cap != currency->WeekCap && IsInWorld() && !GetSession()->PlayerLoading())
+  /*  if (cap != currency->WeekCap && IsInWorld() && !GetSession()->PlayerLoading())
     {
         WorldPacket packet(SMSG_UPDATE_CURRENCY_WEEK_LIMIT, 8);
         packet << uint32(cap / ((currency->Flags & 0x8) ? 100 : 1));
         packet << uint32(currency->ID);
         GetSession()->SendPacket(&packet);
-    }
+    }*/
 
     return cap;
 }
