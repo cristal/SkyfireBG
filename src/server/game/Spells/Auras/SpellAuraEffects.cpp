@@ -7055,6 +7055,13 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     uint32 heal = uint32(damage);
     if(m_spellInfo->Id == 16491 || m_spellInfo->Id == 16487 || m_spellInfo->Id == 16489) // blood craze
         heal = heal / 10;
+
+    if(m_spellInfo->Id == 29841) // second wind rank 1
+        heal =  caster->GetMaxHealth() /5 * 0.02;
+
+    if(m_spellInfo->Id == 29842) // second wind rank 2
+        heal =  caster->GetMaxHealth() /5 * 0.05;
+
     caster->CalcHealAbsorb(target, GetSpellInfo(), heal, absorb);
     int32 gain = caster->DealHeal(target, heal);
 
