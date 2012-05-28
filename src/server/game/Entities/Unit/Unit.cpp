@@ -6811,7 +6811,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     {
                         if (beaconTarget->IsWithinLOSInMap(victim))
                         {
-                            basepoints0 = damage;
+                            basepoints0 = damage / 2;
                             victim->CastCustomSpell(beaconTarget, 53652, &basepoints0, NULL, NULL, true);
                             return true;
                         }
@@ -6873,6 +6873,15 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     target = this;
                     basepoints0 = int32(target->GetCreateMana() * 0.025);
                     target->CastCustomSpell(target, 89906, &basepoints0, 0, 0, true, 0, triggeredByAura);
+                    break;
+                }
+                // Judgements of the Wise
+                case 31878:
+                {
+                    target = this;
+                    triggered_spell_id = 31930;
+                    basepoints0 = int32(target->GetCreateMana() * 0.030);
+       target->CastCustomSpell(target, 31930, &basepoints0, 0, 0, true, 0, triggeredByAura);
                     break;
                 }
                 // Selfless Healer
