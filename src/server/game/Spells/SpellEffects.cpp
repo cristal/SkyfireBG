@@ -1738,10 +1738,10 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             // Death strike
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE)
             {
-       //         if ((m_caster->CountPctFromMaxHealth(7)) > (20 * m_caster->GetDamageTakenInPastSecs(5) / 100))
+                if ((m_caster->CountPctFromMaxHealth(7)) > (20 * m_caster->GetDamageTakenInPastSecs(5) / 100))
                     bp = m_caster->CountPctFromMaxHealth(7);
-         //       else
-           //         bp = (20 * m_caster->GetDamageTakenInPastSecs(5) / 100);
+                else
+                    bp = (20 * m_caster->GetDamageTakenInPastSecs(5) / 100);
 
                 // Improved Death Strike
                 if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
@@ -1874,8 +1874,9 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
                     unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
 
-                triggered_spell_id = 1784;
-                break;
+				// castit spell stealth
+                unitTarget->CastSpell(unitTarget, 1784, true);
+                return;
             }
             // Demonic Empowerment -- succubus
             case 54437:
@@ -5898,6 +5899,21 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 // remove shields, will still display immune to damage part
                 unitTarget->RemoveAurasWithMechanic(1<<MECHANIC_IMMUNE_SHIELD, AURA_REMOVE_BY_ENEMY_SPELL);
                 return;
+            }
+            break;
+		 }
+          case SPELLFAMILY_MAGE:
+         {
+            if (m_spellInfo->Id == 11129) //Combustion idèko
+            {
+                //ziadne dotky on target
+                int32 bp = 0;
+                Unit::AuraEffectList const &mPeriodic =    unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                //periodický dmg
+                for (Unit::AuraEffectList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)                 
+                    if ((*i)->GetCasterGUID() == m_caster->GetGUID())
+                        bp += (*i)->GetAmount();             
+                m_caster->CastCustomSpell(unitTarget, 83853, &bp,NULL, NULL, true);
             }
             break;
         }

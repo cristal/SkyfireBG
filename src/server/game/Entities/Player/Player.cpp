@@ -23446,7 +23446,9 @@ void Player::RemoveItemDependentAurasAndCasts(Item* pItem)
 
         // skip if not item dependent or have alternative item
         if (HasItemFitToSpellRequirements(spellInfo, pItem))
-        {
+        
+			if (aura->GetId() == 46924)
+		{
             ++itr;
             continue;
         }
