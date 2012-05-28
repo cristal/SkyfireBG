@@ -6752,7 +6752,11 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     if (GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
         caster->SpellHitResult(target, GetSpellInfo(), false) != SPELL_MISS_NONE)
         return;
-
+   /* if(m_spellInfo->Id == 1943 || m_spellInfo->Id == 703) // Venomous wounds
+        if(target->HasAura() || target->HasAura() || target->HasAura() || target->HasAura() || target->HasAura())
+            caster->castspell(
+        */
+        
     // some auras remove at specific health level or more
     if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
     {

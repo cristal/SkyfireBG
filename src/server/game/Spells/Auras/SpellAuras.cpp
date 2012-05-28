@@ -1235,6 +1235,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         else
                             target->AddAura(74396, target);
                     }
+                    case 83301: // Improved Cone of Cold r1 freeze
+                                if (!caster->HasAura(11190)) // r1 talent
+                                        target->RemoveAura(83301);
+                    case 83302: // Improved Cone of Cold r2 freeze
+                                if (!caster->HasAura(12489)) // r2 talent
+                                        target->RemoveAura(83302);
                     default:
                         break;
                 }
@@ -1256,6 +1262,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_WARLOCK:
                 switch (GetId())
                 {
+                    case 6358: // Seduction
+                        if (!caster)
+                            break;
+                        if (Unit *owner = caster->GetOwner())
+                            if (owner->HasAura(56250)) // Glyph of Succubus
+                            {
+                                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
+                                target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                                target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                            }
+                        break;
                     case 48020: // Demonic Circle
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             if (GameObject* obj = target->GetGameObject(48018))
@@ -1305,6 +1322,28 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         caster->CastCustomSpell(caster, 75999, &heal, NULL, NULL, true, NULL, GetEffect(0));
                     }
                 }
+                // Mind fly
+                else if (GetId() == 15407) 
+                {
+                // Pain and Suffering: Rank 1
+                if (Aura* pain = caster->GetAura(47580)) 
+                {
+                    if (Aura* swp = target->GetAura(589)) 
+                    {
+                                        if (roll_chance_i(30))
+                                                swp->RefreshDuration();
+                    }
+                }
+                // Pain and Suffering: Rank 2
+                if (Aura* pain = caster->GetAura(47581))
+                {
+                    if (Aura* swp = target->GetAura(589))
+                    {
+                        if (roll_chance_i(60))
+                            swp->RefreshDuration();
+                    }
+                }
+                }
                 // Renew
                 else if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00000040 && GetEffect(0))
                 {
@@ -1333,8 +1372,33 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     // in official maybe there is only one icon?
                     if (target->HasAura(58039)) // Glyph of Blurred Speed
                         target->CastSpell(target, 61922, true); // Sprint (waterwalk)
+
+                // Deadly Momentum
+                if (GetId() == 84590) {
+                   if (Aura* snd = target->GetAura(5171))
+                      snd->RefreshDuration();
+                   if (Aura* rec = target->GetAura(73651))
+                       rec->RefreshDuration();
+                        }
                 break;
             case SPELLFAMILY_PALADIN:
+                  if (GetId() == 82327) {
+                     if (target->HasAura(85495)) // r1
+                     {
+                         target->CastSpell(target, 85497, true);
+                         target->SetSpeed(MOVE_RUN, 1.2f, true);
+                     }
+                     if (target->HasAura(85498)) // r2
+                     {
+                        target->CastSpell(target, 85497, true);
+                        target->SetSpeed(MOVE_RUN, 1.4f, true);
+                     }
+                     if (target->HasAura(85499)) // r3
+                     {
+                        target->CastSpell(target, 85497, true);
+                        target->SetSpeed(MOVE_RUN, 1.6f, true);
+                     }
+                   }
                 // Sanctfied Wrath Cataclysm proc
                 if (GetId() == 31884)
                     if (caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 3029, 0))
@@ -1607,10 +1671,52 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
                 break;
             case SPELLFAMILY_ROGUE:
-                // Remove Vanish on stealth remove
-                if (GetId() == 1784)
-                    target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, target->GetGUID());
+                        // Remove Vanish on stealth remove
+                        if (GetId() == 1784)
+                                target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0,
+                                                0, target->GetGUID());
+                        else if (GetId() == 6770) // On-sap removal - blackjack talent
+                                        {
+                                if (caster->HasAura(79125)) // rank 2
+                                        caster->CastSpell(target, 79126, true);
+                                else if (caster->HasAura(79123)) // rank 1
+                                        caster->CastSpell(target, 79124, true);
+                        }
                 break;
+            case SPELLFAMILY_PALADIN:
+                  // Remove the immunity shield marker on Forbearance removal if AW marker is not present
+                  if (GetId() == 25771 && target->HasAura(61988) && !target->HasAura(61987))
+                      target->RemoveAura(61988);
+                break;
+            case SPELLFAMILY_DEATHKNIGHT:
+                        // Blood of the North
+                        // Reaping
+                        // Death Rune Mastery
+                     if (GetSpellInfo()->SpellIconID == 3041
+                                       || GetSpellInfo()->SpellIconID == 22
+                                        || GetSpellInfo()->SpellIconID == 2622) {
+                                if (!GetEffect(0)
+                                                || GetEffect(0)->GetAuraType()
+                                                                != SPELL_AURA_PERIODIC_DUMMY)
+                                        break;
+                                if (target->GetTypeId() != TYPEID_PLAYER)
+                                        break;
+                                if (target->ToPlayer()->getClass() != CLASS_DEATH_KNIGHT)
+                                        break;
+
+                                // aura removed - remove death runes
+                                target->ToPlayer()->RemoveRunesByAuraEffect(GetEffect(0));
+                        }
+                        switch (GetId()) {
+                        case 50514: // Summon Gargoyle
+                                if (removeMode != AURA_REMOVE_BY_EXPIRE)
+                                        break;
+                                target->CastSpell(target, GetEffect(0)->GetAmount(), true, NULL,
+                                                GetEffect(0));
+                                break;
+                        }
+                        break;
+
             case SPELLFAMILY_HUNTER:
                 // Wyvern Sting
                 if (removeMode != AURA_REMOVE_BY_STACK && removeMode != AURA_REMOVE_BY_DEATH &&
@@ -1651,6 +1757,32 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     break;
             }
             break;
+               case SPELLFAMILY_DRUID:
+                // Enrage
+                if (GetSpellInfo()->SpellFamilyFlags[0] & 0x80000) {
+                        if (target->HasAura(70726)) // Druid T10 Feral 4P Bonus
+                                        {
+                                if (apply)
+                                        target->CastSpell(target, 70725, true);
+                        } else // armor reduction implemented here
+                        if (AuraEffect * auraEff = target->GetAuraEffectOfRankedSpell(1178, 0)) {
+                                int32 value = auraEff->GetAmount();
+                                int32 mod;
+                                switch (auraEff->GetId()) {
+                                case 1178:
+                                        mod = 27;
+                                        break;
+                                case 9635:
+                                        mod = 16;
+                                        break;
+                                }
+                                mod = value / 100 * mod;
+                                value = value + (apply ? -mod : mod);
+                                auraEff->ChangeAmount(value);
+                        }
+                        break;
+                }
+                break;
         case SPELLFAMILY_ROGUE:
             // Stealth
             if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00400000)
@@ -1709,6 +1841,24 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->RemoveAurasDueToSpell(71166);
                     }
                     break;
+               case 19746:
+               case 31821:
+                        // Aura Mastery Triggered Spell Handler
+                        // If apply Concentration Aura -> trigger -> apply Aura Mastery Immunity
+                        // If remove Concentration Aura -> trigger -> remove Aura Mastery Immunity
+                        // If remove Aura Mastery -> trigger -> remove Aura Mastery Immunity
+                        // Do effects only on aura owner
+                        if (GetCasterGUID() != target->GetGUID())
+                                break;
+                        if (apply) {
+                                if ((GetSpellInfo()->Id == 31821
+                                                && target->HasAura(19746, GetCasterGUID()))
+                                                || (GetSpellInfo()->Id == 19746
+                                                                && target->HasAura(31821)))
+                                        target->CastSpell(target, 64364, true);
+                        } else
+                                target->RemoveAurasDueToSpell(64364, GetCasterGUID());
+                        break;
             }
             break;
 
