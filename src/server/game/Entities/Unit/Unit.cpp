@@ -8762,6 +8762,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Sacred Shield
+        case 85285:
+        {
+            if (!HealthBelowPctDamaged(30, damage))
+                return false;
+
+            int32 ap = int32(GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
+            basepoints0 = int32(CalculatePctN(ap, 280));
+            break;
+        }
         // Greater Heal Refund (Avatar Raiment set)
         case 37594:
         {
