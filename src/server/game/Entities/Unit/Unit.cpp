@@ -8772,6 +8772,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             basepoints0 = int32(CalculatePctN(ap, 280));
             break;
         }
+        // Improved Hamstring
+        case 12289:
+        case 12668:
+        {
+            if (!victim->HasAura(1715)) return false;
+            break;
+        }
         // Greater Heal Refund (Avatar Raiment set)
         case 37594:
         {
