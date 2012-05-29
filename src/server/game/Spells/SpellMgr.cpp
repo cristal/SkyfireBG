@@ -109,6 +109,15 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Charge Stun (own diminishing)
             else if (spellproto->SpellFamilyFlags[0] & 0x01000000)
                 return DIMINISHING_CHARGE;
+            // Concussion Blow
+            else if (spellproto->Id == 12809)
+                return DIMINISHING_CONTROLLED_STUN;
+            // Shockwave
+            else if (spellproto->Id == 46968)
+                return DIMINISHING_CONTROLLED_STUN;
+            // Throwdown
+            else if (spellproto->Id == 85388)
+                return DIMINISHING_CONTROLLED_STUN;
             break;
         }
         case SPELLFAMILY_WARLOCK:
@@ -119,6 +128,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Curses/etc
             else if ((spellproto->SpellFamilyFlags[0] & 0x80000000) || (spellproto->SpellFamilyFlags[1] & 0x200))
                 return DIMINISHING_LIMITONLY;
+            // Howl of Terror
+		    else if (spellproto->SpellFamilyFlags[1] & 0x8)
+			    return DIMINISHING_FEAR;
             // Seduction
             else if (spellproto->SpellFamilyFlags[1] & 0x10000000)
                 return DIMINISHING_FEAR;
@@ -151,14 +163,17 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
         case SPELLFAMILY_ROGUE:
         {
             // Gouge
-            if (spellproto->SpellFamilyFlags[0] & 0x8)
+            if (spellproto->SpellFamilyFlags[0] & 0x88)
                 return DIMINISHING_DISORIENT;
             // Blind
             else if (spellproto->SpellFamilyFlags[0] & 0x1000000)
                 return DIMINISHING_FEAR;
             // Cheap Shot
             else if (spellproto->SpellFamilyFlags[0] & 0x400)
-                return DIMINISHING_OPENING_STUN;
+                return DIMINISHING_CONTROLLED_STUN;
+            // Kidney Shot
+		    else if (spellproto->SpellFamilyFlags[0] & 0x200000)
+			    return DIMINISHING_CONTROLLED_STUN;
             // Crippling poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
             else if (spellproto->SpellIconID == 163)
                 return DIMINISHING_LIMITONLY;
