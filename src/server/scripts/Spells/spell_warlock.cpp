@@ -428,6 +428,48 @@ public:
     }
 };
 
+// 77799 Fel Flame
+class spell_warl_fel_flame: public SpellScriptLoader {
+public:
+    spell_warl_fel_flame() : SpellScriptLoader("spell_warl_fel_flame") {}
+
+    class spell_warl_fel_flame_SpellScript: public SpellScript {
+        PrepareSpellScript(spell_warl_fel_flame_SpellScript)
+
+        void HandleOnHit() 
+        {
+            Unit* unitTarget = GetHitUnit();
+            Unit* caster = GetCaster();
+
+            // Immolate
+            if (Aura* aur = unitTarget->GetOwnedAura(348, caster->GetGUID()))
+            {
+                if (aur->GetDuration() + 6000 > 15000)
+                    aur->SetDuration(15000);
+                else
+                    aur->SetDuration(aur->GetDuration() + 6000);
+            }
+
+            //Unstable Affliction
+            if (Aura* aur = unitTarget->GetOwnedAura(30108, caster->GetGUID()))
+            {
+                if (aur->GetDuration() + 6000 > 15000)
+                    aur->SetDuration(15000);
+                else
+                    aur->SetDuration(aur->GetDuration() + 6000);
+            }
+        }
+
+        void Register() {
+            OnHit += SpellHitFn(spell_warl_fel_flame_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const {
+        return new spell_warl_fel_flame_SpellScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_banish();
@@ -438,4 +480,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_life_tap();
     new spell_warl_fear();
     new spell_warl_drain_life();
+    new spell_warl_fel_flame();
 }
