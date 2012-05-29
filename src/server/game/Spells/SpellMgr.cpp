@@ -3319,6 +3319,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 81206: // Chakra: Sanctuary
                 spellInfo->Effects[2].ApplyAuraName = SPELL_AURA_DUMMY;
                 break;
+            case 44614: // Frostfire Bolt
+			    spellInfo->StackAmount = 0; //TODO: remove when stacking of Decrease Run Speed % aura is fixed
+			    break;
             case 81585: // Chakra: Serenity replace
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_SWAP_SPELLS;
