@@ -2059,7 +2059,8 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
         // may happen when aura is applied on linked event on aura removal
         if (!target->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
         {
-            target->SetShapeshiftForm(FORM_NONE);
+            if(form != 17 && form != 18 && form != 19) // fix for weapon swap removing combat stances
+                target->SetShapeshiftForm(FORM_NONE);
             if (target->getClass() == CLASS_DRUID)
             {
                 target->setPowerType(POWER_MANA);
@@ -2088,27 +2089,26 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
             case FORM_DEFENSIVESTANCE:
             case FORM_BERSERKERSTANCE:
             {
-                int32 Rage_val = 0;
-                // Defensive Tactics
-                if (form == FORM_DEFENSIVESTANCE)
+                int32 Rage_val = target->GetPower(POWER_RAGE);
+                if(target->HasAura(12676,0))
                 {
-                    if (AuraEffect const* aurEff = target->IsScriptOverriden(m_spellInfo, 831))
-                        Rage_val += aurEff->GetAmount() * 10;
+                    if(Rage_val > 750)
+                        Rage_val = 750;
                 }
-                // Stance mastery + Tactical mastery (both passive, and last have aura only in defense stance, but need apply at any stance switch)
-                if (target->GetTypeId() == TYPEID_PLAYER)
+                else if(target->HasAura(12295,0))
                 {
-                    PlayerSpellMap const& sp_list = target->ToPlayer()->GetSpellMap();
-                    for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
-                    {
-                        if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled) continue;
-                        SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
-
-                        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && spellInfo->SpellIconID == 139)
-                            Rage_val += target->CalculateSpellDamage(target, m_spellInfo, 0) * 10;
-                    }
+                    if(Rage_val > 500)
+                        Rage_val = 500;
                 }
-                if (target->GetPower(POWER_RAGE) > Rage_val)
+                else if (target->HasAura(12678,0))
+                {
+                    if(Rage_val > 250)
+                        Rage_val = 250;                     
+                }
+                else
+                {
+                    Rage_val = 0;
+                }
                     target->SetPower(POWER_RAGE, Rage_val);
                 break;
             }
