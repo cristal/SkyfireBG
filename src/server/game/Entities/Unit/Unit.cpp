@@ -6074,6 +6074,28 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 triggered_spell_id = 54181;
                 break;
             }
+            // Bane of havoc
+            if (dummySpell->Id == 80240)
+            {
+                // Get target of beacon of light
+                if (Unit* baneTarget = triggeredByAura->GetBase()->GetCaster())
+                {
+                    // do not proc when target of beacon of light is damaged
+                    if (baneTarget == this)
+                        return false;
+                    // check if it was heal by paladin which casted this beacon of light
+                    if (baneTarget->GetAura(80240, victim->GetGUID()))
+                    {
+                        if (baneTarget->IsWithinLOSInMap(victim))
+                        {
+                            basepoints0 = damage / 100 * 15 * -1;
+                            victim->CastCustomSpell(baneTarget, 53652, &basepoints0, NULL, NULL, true);
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
             // Impending Doom
             if (dummySpell->SpellIconID == 195)
             {
@@ -6610,29 +6632,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             break;
         }
-        case SPELLFAMILY_WARLOCK:
-            // Bane of havoc
-            if (dummySpell->Id == 80240)
-            {
-                // Get target of beacon of light
-                if (Unit* baneTarget = triggeredByAura->GetBase()->GetCaster())
-                {
-                    // do not proc when target of beacon of light is damaged
-                    if (baneTarget == this)
-                        return false;
-                    // check if it was heal by paladin which casted this beacon of light
-                    if (beaconTarget->GetAura(53563, victim->GetGUID()))
-                    {
-                        if (beaconTarget->IsWithinLOSInMap(victim))
-                        {
-                            basepoints0 = damage / 2;
-                            victim->CastCustomSpell(beaconTarget, 53652, &basepoints0, NULL, NULL, true);
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            break;
         case SPELLFAMILY_ROGUE:
         {
             switch (dummySpell->Id)
