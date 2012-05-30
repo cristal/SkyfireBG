@@ -6074,6 +6074,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 triggered_spell_id = 54181;
                 break;
             }
+            /*
             // Bane of havoc
             if (dummySpell->Id == 80240)
             {
@@ -6096,6 +6097,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 }
                 return false;
             }
+            */
             // Impending Doom
             if (dummySpell->SpellIconID == 195)
             {
