@@ -7319,8 +7319,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 case 51563:
                 case 51564:
                 {
-                    target = this;
-                    triggered_spell_id = 53390;
+                    int32 bp0 = -(dummySpell->Effects->BasePoints);
+                    int32 bp1 = dummySpell->Effects->BasePoints;
+                    CastCustomSpell(this, 53390, &bp0, &bp1, NULL, true, 0, 0, GetGUID());
                     break;
                 }
                 // Windfury Weapon (Passive) 1-5 Ranks
