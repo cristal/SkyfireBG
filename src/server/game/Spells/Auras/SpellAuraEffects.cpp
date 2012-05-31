@@ -3497,30 +3497,28 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
 
     // Patch 3.0.3 Bladestorm now breaks all snares and roots on the warrior when activated.
     // however not all mechanic specified in immunity
-    if (apply && GetId() == 46924)
-    {
-        immunity_list.pop_back(); // delete Disarm
-        target->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
+	if (GetId() == 46924) {
+		immunity_list.pop_back(); // delete Disarm
+		immunity_list.push_back(SPELL_AURA_MOD_PACIFY_SILENCE);
+		target->ApplySpellImmune(GetId(), IMMUNITY_EFFECT,
+				SPELL_EFFECT_KNOCK_BACK, apply);
         target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SNARE, apply);
-        immunity_list.push_back(SPELL_AURA_MOD_ROOT);
-        immunity_list.push_back(SPELL_AURA_MOD_DECREASE_SPEED);
-        immunity_list.push_back(SPELL_AURA_MOD_PACIFY_SILENCE);
-        immunity_list.push_back(SPELL_AURA_MOD_POSSESS);
-        immunity_list.push_back(SPELL_AURA_MOD_CHARM);
-        immunity_list.push_back(SPELL_AURA_MOD_STUN);
-    }
+        // Inmunidad a mind control y hex
+        target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_CHARM, apply);
+        target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_POLYMORPH, apply);
 
     if (apply && GetSpellInfo()->AttributesEx & SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY)
         for (std::list <AuraType>::iterator iter = immunity_list.begin(); iter != immunity_list.end(); ++iter)
             target->RemoveAurasByType(*iter);
 
-    // stop handling the effect if it was removed by linked event
-    if (apply && aurApp->GetRemoveMode())
-        return;
 
     // apply immunities
     for (std::list <AuraType>::iterator iter = immunity_list.begin(); iter != immunity_list.end(); ++iter)
         target->ApplySpellImmune(GetId(), IMMUNITY_STATE, *iter, apply);
+
+        // stop handling the effect if it was removed by linked event
+    if (apply && aurApp->GetRemoveMode())
+        return;
 }
 
 void AuraEffect::HandleModMechanicImmunity(AuraApplication const* aurApp, uint8 mode, bool apply) const
