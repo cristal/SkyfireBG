@@ -2976,6 +2976,9 @@ void SpellMgr::LoadSpellCustomAttr()
 
         switch (spellInfo->Id)
         {
+            case 23885: // Bloodthirst
+                spellInfo->Effects[0].BasePoints = 500;
+                break;
             case 76547: // Mana Adept
             case 77226: // Deep Healing
             case 76613: // Frostburn
