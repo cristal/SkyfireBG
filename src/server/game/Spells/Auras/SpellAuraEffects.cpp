@@ -2059,7 +2059,8 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
         // may happen when aura is applied on linked event on aura removal
         if (!target->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
         {
-            target->SetShapeshiftForm(FORM_NONE);
+            if(form != 17 && form != 18 && form != 19) // fix for weapon swap removing combat stances
+                target->SetShapeshiftForm(FORM_NONE);
             if (target->getClass() == CLASS_DRUID)
             {
                 target->setPowerType(POWER_MANA);
@@ -2088,27 +2089,26 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
             case FORM_DEFENSIVESTANCE:
             case FORM_BERSERKERSTANCE:
             {
-                int32 Rage_val = 0;
-                // Defensive Tactics
-                if (form == FORM_DEFENSIVESTANCE)
+                int32 Rage_val = target->GetPower(POWER_RAGE);
+                if(target->HasAura(12676,0))
                 {
-                    if (AuraEffect const* aurEff = target->IsScriptOverriden(m_spellInfo, 831))
-                        Rage_val += aurEff->GetAmount() * 10;
+                    if(Rage_val > 750)
+                        Rage_val = 750;
                 }
-                // Stance mastery + Tactical mastery (both passive, and last have aura only in defense stance, but need apply at any stance switch)
-                if (target->GetTypeId() == TYPEID_PLAYER)
+                else if(target->HasAura(12295,0))
                 {
-                    PlayerSpellMap const& sp_list = target->ToPlayer()->GetSpellMap();
-                    for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
-                    {
-                        if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled) continue;
-                        SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
-
-                        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && spellInfo->SpellIconID == 139)
-                            Rage_val += target->CalculateSpellDamage(target, m_spellInfo, 0) * 10;
-                    }
+                    if(Rage_val > 500)
+                        Rage_val = 500;
                 }
-                if (target->GetPower(POWER_RAGE) > Rage_val)
+                else if (target->HasAura(12678,0))
+                {
+                    if(Rage_val > 250)
+                        Rage_val = 250;                     
+                }
+                else
+                {
+                    Rage_val = 0;
+                }
                     target->SetPower(POWER_RAGE, Rage_val);
                 break;
             }
@@ -3497,30 +3497,28 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
 
     // Patch 3.0.3 Bladestorm now breaks all snares and roots on the warrior when activated.
     // however not all mechanic specified in immunity
-    if (apply && GetId() == 46924)
-    {
-        immunity_list.pop_back(); // delete Disarm
-        target->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
+	if (GetId() == 46924) {
+		immunity_list.pop_back(); // delete Disarm
+		immunity_list.push_back(SPELL_AURA_MOD_PACIFY_SILENCE);
+		target->ApplySpellImmune(GetId(), IMMUNITY_EFFECT,
+				SPELL_EFFECT_KNOCK_BACK, apply);
         target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SNARE, apply);
-        immunity_list.push_back(SPELL_AURA_MOD_ROOT);
-        immunity_list.push_back(SPELL_AURA_MOD_DECREASE_SPEED);
-        immunity_list.push_back(SPELL_AURA_MOD_PACIFY_SILENCE);
-        immunity_list.push_back(SPELL_AURA_MOD_POSSESS);
-        immunity_list.push_back(SPELL_AURA_MOD_CHARM);
-        immunity_list.push_back(SPELL_AURA_MOD_STUN);
+        // Inmunidad a mind control y hex
+        target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_CHARM, apply);
+        target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_POLYMORPH, apply);
     }
-
     if (apply && GetSpellInfo()->AttributesEx & SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY)
         for (std::list <AuraType>::iterator iter = immunity_list.begin(); iter != immunity_list.end(); ++iter)
             target->RemoveAurasByType(*iter);
 
-    // stop handling the effect if it was removed by linked event
-    if (apply && aurApp->GetRemoveMode())
-        return;
 
     // apply immunities
     for (std::list <AuraType>::iterator iter = immunity_list.begin(); iter != immunity_list.end(); ++iter)
         target->ApplySpellImmune(GetId(), IMMUNITY_STATE, *iter, apply);
+
+        // stop handling the effect if it was removed by linked event
+    if (apply && aurApp->GetRemoveMode())
+        return;
 }
 
 void AuraEffect::HandleModMechanicImmunity(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4892,29 +4890,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             }
             switch (GetId())
             {
-                case 94315:  // Early Frost
-                {
-                    if (caster && GetEffIndex() == 0)
-                    {
-                        if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_MAGE, 189, 0))
-                        {
-                            uint32 spell_Id = 0;
-                            switch (aurEff->GetId())
-                            {
-                                case 83049:
-                                    spell_Id = 83162;
-                                    break;
-                                case 83050:
-                                    spell_Id = 83239;
-                                    break;
-                            }
-
-                            if(spell_Id && !caster->GetAura(spell_Id))
-                                caster->CastSpell(caster, spell_Id, true, NULL, aurEff);
-                        }
-                    }
-                    break;
-                }
                 case 1515:                                      // Tame beast
                     // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
                     if (caster && target->CanHaveThreatList())
@@ -5325,16 +5300,26 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     }
                     break;
                 case SPELLFAMILY_PRIEST:
-                    // Vampiric Touch
-                    if (m_spellInfo->SpellFamilyFlags[1] & 0x0400 && aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL && GetEffIndex() == 0)
+                // Vampiric Touch
+                if (m_spellInfo->SpellFamilyFlags[1] & 0x0400 && aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL && GetEffIndex() == 0)
+                {
+                    // Dispel Damage
+                    if (AuraEffect const * aurEff = GetBase()->GetEffect(1)) 
                     {
-                        if (AuraEffect const* aurEff = GetBase()->GetEffect(1))
-                        {
-                            int32 damage = aurEff->GetAmount() * 8;
-                            // backfire damage
-                            target->CastCustomSpell(target, 64085, &damage, NULL, NULL, true, NULL, NULL, GetCasterGUID());
-                        }
+                        int32 damage = aurEff->GetAmount() * 8;
+                        target->CastCustomSpell(target, 64085, &damage, NULL, NULL, true, NULL, NULL, GetCasterGUID());
                     }
+
+                    // Sin and Punishment
+                    if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 1869, 1))
+                    {
+                        int32 chance = 0;
+                        if (aurEff->GetSpellInfo()->Id == 87099) chance = 50;
+                        if (aurEff->GetSpellInfo()->Id == 87100) chance = 100;
+                        if (roll_chance_i(chance))
+                            target->CastCustomSpell(target, 87204, NULL, NULL, NULL, true, NULL, NULL, GetCasterGUID());
+                    }
+                }
                     break;
                 case SPELLFAMILY_WARLOCK:
                     // Haunt

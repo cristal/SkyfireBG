@@ -106,7 +106,8 @@ class spell_dk_anti_magic_shell_raid : public SpellScriptLoader
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
                 // TODO: this should absorb limited amount of damage, but no info on calculation formula
-                amount = -1;
+                //amount = -1;
+                amount = GetCaster()->CountPctFromMaxHealth(50);
             }
 
             void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
