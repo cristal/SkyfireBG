@@ -6246,6 +6246,37 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             switch (dummySpell->Id)
             {
+                // Train of Thought
+               case 92295:
+               case 92297:
+               {
+                   // Greater Heal
+                   if (procSpell->Id == 2060)
+                   {
+                       if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                       {
+                           if (caster->HasSpellCooldown(89485))
+                           {
+                               uint32 seconds = triggeredByAura->GetSpellInfo()->Effects[triggeredByAura->GetEffIndex()].CalcValue();
+                               caster->UpdateSpellCooldown(89485, seconds);
+                               return true;
+                           }
+                       }
+                   }
+
+                   // Penance
+                   if (procSpell->Id == 585)
+                   {
+                       if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                       {
+                           if (caster->HasSpellCooldown(47540))
+                           {
+                               uint32 seconds = triggeredByAura->GetSpellInfo()->Effects[triggeredByAura->GetEffIndex()].CalcValue();
+                               caster->UpdateSpellCooldown(47540, uint32(seconds / 10));
+                               return true;
+                       }
+                   }
+               }
                 // Vampiric Embrace
                 case 15286:
                 {
@@ -6693,6 +6724,45 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         {
             switch (dummySpell->SpellIconID)
             {
+                case 5094: // Posthaste
+               {
+                   triggered_spell_id = 83559;
+                   basepoints0 = triggerAmount;
+                   target = this;
+                   break;
+               }
+               case 4752: // Crouching Tiger, Hidden Chimera
+               {
+                   if (!procSpell)
+                       return false;
+
+                   if (procFlag & PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK || procFlag & PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS)
+                   {
+                        if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                       {
+                           if (caster->HasSpellCooldown(781))
+                           {
+                               uint32 seconds = triggeredByAura->GetSpellInfo()->Effects[triggeredByAura->GetEffIndex()].CalcValue();
+                               caster->UpdateSpellCooldown(781, seconds);
+                               return true;
+                           }
+                       }
+                   }
+
+                   if (procFlag & PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK || procFlag & PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS || procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG)
+                   {
+                        if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                       {
+                           if (caster->HasSpellCooldown(19263))
+                           {
+                               uint32 seconds = triggeredByAura->GetSpellInfo()->Effects[triggeredByAura->GetEffIndex()].CalcValue();
+                               caster->UpdateSpellCooldown(19263, seconds);
+                               return true;
+                           }
+                       }
+                   }
+                   return false;
+               }
                 case 3524: // Marked for Death
                 {
                     if(!roll_chance_i(triggerAmount))
@@ -7239,6 +7309,25 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         {
             switch (dummySpell->Id)
             {
+               // Lava Surge (Rank 1, 2)
+               case 77755:
+               case 77756:
+               {
+                   // procSpell Exist
+                   if (!procSpell)
+                       return false;
+
+                   // Chance as basepoints for dummy aura
+                   if (!roll_chance_i(triggerAmount))
+                       return false;
+
+                   // Lava Burst Has Cooldown
+                   if (!ToPlayer()->HasSpellCooldown(51505))
+                       return false;
+
+                   ToPlayer()->RemoveSpellCooldown(51505, true);
+                   return true;
+               }
                 // Earthen Power (Rank 1, 2)
                 case 51523:
                 case 51524:
@@ -9079,7 +9168,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             break;
         }
         case 46916:  // Slam! (Bloodsurge proc)
-        case 52437:  // Sudden Death
         {
             // Item - Warrior T10 Melee 4P Bonus
             if (AuraEffect const* aurEff = GetAuraEffect(70847, 0))
