@@ -2032,7 +2032,7 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
             if (SpellFamilyFlags[0] & 0x12040000)
                 return SPELL_SPECIFIC_MAGE_ARMOR;
 
-            // Arcane brillance and Arcane intelect (normal check fails because of flags difference)
+            // Arcane brilliance and Arcane intellect (normal check fails because of flags difference)
             if (SpellFamilyFlags[0] & 0x400)
                 return SPELL_SPECIFIC_MAGE_ARCANE_BRILLANCE;
 
