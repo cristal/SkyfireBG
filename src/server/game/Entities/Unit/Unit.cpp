@@ -6699,6 +6699,19 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 32747;
                     break;
                 }
+                case 79134: // Venomous wounds
+                {
+                    triggered_spell_id = 79136;
+                        CastCustomSpell(51637, SPELLVALUE_BASE_POINT0, 10, this, true);
+                    break;
+                }
+                case 79133: // Venomous wounds
+                {
+                    triggered_spell_id = 79136;
+                     CastCustomSpell(51637, SPELLVALUE_BASE_POINT0, 10, this, true);
+                    break;
+                }
+                break;
             }
 
             switch (dummySpell->SpellIconID)
@@ -7325,6 +7338,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         {
             switch (dummySpell->Id)
             {
+            case 86959: // Cleansing Waters rank 1
+                {
+                    target = this;
+                    triggered_spell_id = 86961;
+                    break;
+                }
+            case 86962: // Cleansing Waters rank 2
+                {
+                    target = this;
+                    triggered_spell_id = 86958;
+                    break;
+                }
                // Lava Surge (Rank 1, 2)
                case 77755:
                case 77756:
