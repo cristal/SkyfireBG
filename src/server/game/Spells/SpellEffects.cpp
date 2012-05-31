@@ -2464,17 +2464,54 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     }
 }
 
-void Spell::EffectApplyAura(SpellEffIndex effIndex)
-{
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
-        return;
+void Spell::EffectApplyAura(SpellEffIndex effIndex) {
+    if (!m_spellAura || !unitTarget) return;
 
-    if (!m_spellAura || !unitTarget)
-        return;
+    //For some funky reason, some spells have to be cast as a spell on the enemy even if they're supposed to apply an aura.
+    switch (m_spellInfo->SpellFamilyName) 
+    {
+        case SPELLFAMILY_ROGUE: 
+        {
+            if (m_spellInfo->SpellFamilyFlags[0] == 0x8) //Gouge
+            {
+                m_caster->CastSpell(unitTarget, 1776, true);
+                return;
+            }
+            break;
+        }
+		case SPELLFAMILY_PRIEST: 
+        {
+			// Chakra
+			// Solves the problem that a player has more than one chakra buff active at the same time
+			if(m_spellInfo->Id == 14751 /*Chakra*/) 
+            {
+				if(m_caster->HasAura(81208 /*Chakra: Serenity*/))
+					m_caster->RemoveAura(81208);
+				else if(m_caster->HasAura(81206 /*Chakra: Sanctuary*/))
+					m_caster->RemoveAura(81206);
+				else if(m_caster->HasAura(81209 /*Chakra: Chastise*/))
+					m_caster->RemoveAura(81209);
+			}
+			// Chakra: Sanctuary is now applied on caster if he casts Prayer of Mending and has Aura Chakra
+            if (m_caster->HasAura(14751 /*Chakra*/) && m_spellInfo->Id == 41635 /*Prayer of Mending */)
+				m_caster->CastSpell(m_caster, 81206, true); // Chakra: Sanctuary
+
+			break;
+        }
+    }
+
+    switch (m_spellAura->GetId()) {
+        case 38177: // Blackwhelp Net
+            if (unitTarget->GetEntry() != 21387) //Wyrmcult Blackwhelp
+            return;
+        case 85673: // Word of Glory
+            if (!m_caster->HasAura(93466)) return;
+    }
 
     ASSERT(unitTarget == m_spellAura->GetOwner());
     m_spellAura->_ApplyEffectForTargets(effIndex);
 }
+
 
 void Spell::EffectApplyAreaAura(SpellEffIndex effIndex)
 {

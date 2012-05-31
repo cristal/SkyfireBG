@@ -442,7 +442,7 @@ public:
         {
             Unit* target = GetHitUnit();
             Unit* caster = GetCaster();
-            int32 damage = 0;
+            int32 damage = 
 
             // apply percent damage mods
             damage = caster->SpellDamageBonus(target, GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE);
