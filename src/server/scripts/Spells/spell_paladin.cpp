@@ -682,6 +682,54 @@ class spell_pal_selfless_healer : public SpellScriptLoader
         }
 };
 
+class spell_pal_holy_wrath : public SpellScriptLoader
+{
+public:
+	spell_pal_holy_wrath() : SpellScriptLoader("spell_pal_holy_wrath") { }
+	
+	class spell_pal_holy_wrath_SpellScript : public SpellScript
+	{
+		PrepareSpellScript(spell_pal_holy_wrath_SpellScript);
+		
+		void FilterTargets(std::list<Unit*>& unitList)
+		{
+			std::list<Unit*> tempTargets;
+			Unit* caster = GetCaster();
+			if(!caster)
+				return;
+			
+			for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end(); ++itr)
+			{
+				sLog->outString("HERE 12365");
+				
+				
+				uint32 typeCreature = (*itr)->GetCreatureType();
+				bool isElemsAndDragonkins = caster->HasAura(56420);  // Stun holy wrathu
+				if ( (typeCreature != CREATURE_TYPE_DEMON || typeCreature != CREATURE_TYPE_UNDEAD) ||
+					(isElemsAndDragonkins && (typeCreature != CREATURE_TYPE_DRAGONKIN || typeCreature != CREATURE_TYPE_ELEMENTAL)) ) // Overenie creatury 
+					continue;
+				
+				tempTargets.push_back(*itr);
+			}
+			
+			unitList.clear();
+			for (std::list<Unit*>::iterator itr = tempTargets.begin() ; itr != tempTargets.end(); ++itr)
+				unitList.push_back(*itr);
+			
+		}
+		
+		void Register()
+		{
+			OnUnitTargetSelect += SpellUnitTargetFn(spell_pal_holy_wrath_SpellScript::FilterTargets, EFFECT_1, TARGET_SRC_CASTER);
+		}
+	};
+	
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_pal_holy_wrath_SpellScript();
+	}
+};
+
 class spell_pal_guardian_ancient_kings : public SpellScriptLoader
 {
 public:
@@ -753,6 +801,7 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_judgements_of_the_bold();
     new spell_pal_word_of_glory();
     new spell_pal_selfless_healer();
+    new spell_pal_holy_wrath();
     new spell_pal_guardian_ancient_kings();
     new spell_pal_judgements_of_the_wise();
 }
