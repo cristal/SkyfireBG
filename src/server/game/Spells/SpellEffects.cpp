@@ -855,6 +855,27 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 if (m_spellInfo->Id == 71757)
                     if (unitTarget->GetTypeId() != TYPEID_UNIT || !(unitTarget->IsImmunedToSpellEffect(sSpellMgr->GetSpellInfo(44572), 0)))
                         return;
+                                // FrostBolt
+               if(m_spellInfo->Id == 116)
+               {
+                   // Early Frost
+                   if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_MAGE, 189, 0))
+                   {
+                       uint32 spellId = 0;
+                       switch (aurEff->GetId())
+                       {
+                           case 83049:
+                               spellId = 83162;
+                               break;
+                           case 83050:
+                               spellId = 83239;
+                               break;
+                       }
+                       
+                       if(spellId && !m_caster->HasAura(spellId))
+                           m_caster->CastSpell(m_caster, spellId, true);
+                   }
+               }
                 break;
             }
         }
@@ -1753,6 +1774,17 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         if (m_caster->HasAura(48265) || m_caster->HasAura(48266)) // Only in frost/unholy presence
                             bp = m_caster->CountPctFromMaxHealth(aurEff->GetAmount());
 
+               // Blood Shield
+               if (AuraEffect const* aurEff = m_caster->GetAuraEffect(77513, 1))
+               {
+                   // Blood Presence
+                   if (m_caster->HasAura(48263))
+                   {
+                       int32 shield = CalculatePctN(bp, int32(aurEff->GetAmount() * m_caster->ToPlayer()->GetMasteryPoints()));
+                       m_caster->CastCustomSpell(m_caster, 77535, &shield, NULL, NULL, false);
+                   }
+               }
+
                 m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, false);
                 return;
             }
@@ -1791,6 +1823,17 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 break;
             }
             break;
+            case SPELLFAMILY_WARLOCK:
+           switch (m_spellInfo->Id)
+           {
+               case 19028: // Soul Link
+               {
+                   if(Pet* pet =  m_caster->ToPlayer()->GetPet())
+                       pet->AddAura(25228, pet);
+                   break;
+               }
+           }
+           break;
     }
 
     // spells triggered by dummy effect should not miss
@@ -5653,19 +5696,9 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 
                     return;
                 }
-                // Stoneclaw Totem
-                case 55328: // Rank 1
-                case 55329: // Rank 2
-                case 55330: // Rank 3
-                case 55332: // Rank 4
-                case 55333: // Rank 5
-                case 55335: // Rank 6
-                case 55278: // Rank 7
-                case 58589: // Rank 8
-                case 58590: // Rank 9
-                case 58591: // Rank 10
+                case 55328: // Stoneclaw Totem
                 {
-                    int32 basepoints0 = damage;
+                    int32 basepoints0 = int32(m_spellInfo->Effects[effIndex].CalcValue() + m_caster->getLevel() * 3.00f);
                     // Cast Absorb on totems
                     for (uint8 slot = SUMMON_SLOT_TOTEM; slot < MAX_TOTEM_SLOT; ++slot)
                     {

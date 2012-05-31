@@ -6246,6 +6246,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             switch (dummySpell->Id)
             {
+               // Sin and Punishment
+               case 87100:
+               case 87099:
+               {
+                   if (Player* caster = triggeredByAura->GetCaster()->ToPlayer())
+                   {
+                       if (caster->HasSpellCooldown(34433))
+                       {
+                           uint32 seconds = triggeredByAura->GetSpellInfo()->Effects[triggeredByAura->GetEffIndex()].CalcValue();
+                           caster->UpdateSpellCooldown(34433, seconds);
+                           return true;
+                       }
+                   }
+                   return false;
+               }
                 // Train of Thought
                case 92295:
                case 92297:
@@ -6276,6 +6291,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                                return true;
                        }
                    }
+               }
                }
                 // Vampiric Embrace
                 case 15286:
@@ -7771,7 +7787,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         ToPlayer()->RemoveSpellCooldown(spell);
 
                     CastSpell(target, spell, true, castItem, triggeredByAura);
-                    aurEff->GetBase()->DropCharge();
                     return true;
                 }
                 return false;
