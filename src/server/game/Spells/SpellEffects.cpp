@@ -5735,7 +5735,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 }
                 case 55328: // Stoneclaw Totem
                 {
-                    int32 basepoints0 = int32(m_spellInfo->Effects[effIndex].CalcValue() + m_caster->getLevel() * 3.00f);
+                    int32 basepoints0 = damage;
                     // Cast Absorb on totems
                     for (uint8 slot = SUMMON_SLOT_TOTEM; slot < MAX_TOTEM_SLOT; ++slot)
                     {
