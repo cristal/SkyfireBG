@@ -10695,7 +10695,7 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
                         break;
                     }
                 }
-                AddPctN(DoneTotalMod, modPercent);
+                DoneTotalMod *= (modPercent + 100.0f) / 100.0f;
                 break;
             }
             case 4418: // Increased Shock Damage

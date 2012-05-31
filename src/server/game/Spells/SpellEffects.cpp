@@ -1530,10 +1530,42 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
         {
              if(m_spellInfo->Id == 80964)  // Skull Bash (bear) 
                  {
+                                       if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
+                    {
+                        switch(aurEff->GetId())
+                        {
+                            case 16940: // Brutal Impact (Rank 1)
+                            {
+                                m_caster->CastSpell(unitTarget, 82364 ,true);
+                                break;
+                            }
+                           case 16941: // Brutal Impact (Rank 2)
+                            {
+                                m_caster->CastSpell(unitTarget, 82365 ,true);
+                                break;
+                            }
+                        }
+                    }
                     m_caster->CastSpell(unitTarget,93983,true);  
                  }
                  if(m_spellInfo->Id == 80965)  // Skull Bash(cat) 
                  { 
+                                       if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
+                    {
+                        switch(aurEff->GetId())
+                        {
+                            case 16940: // Brutal Impact (Rank 1)
+                            {
+                                m_caster->CastSpell(unitTarget, 82364 ,true);
+                                break;
+                            }
+                           case 16941: // Brutal Impact (Rank 2)
+                            {
+                                m_caster->CastSpell(unitTarget, 82365 ,true);
+                                break;
+                            }
+                        }
+                    }
                     m_caster->CastSpell(unitTarget,93983,true); 
                  }
             // Starfall

@@ -3187,6 +3187,11 @@ void SpellMgr::LoadSpellCustomAttr()
             case 46915: // Bloodsurge
                 spellInfo->ProcCharges = 1;
                 break;
+           case 12295: // Tactical Mastery (Rank 1)
+           case 12676: // Tactical Mastery (Rank 2)
+           case 12677: // Tactical Mastery (Rank 3)
+               spellInfo->Stances = 0;
+               break;
             case 84726: // Frostfire orb rank 1
             case 84727: // Frostfire orb rank 2
                 spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_SWAP_SPELLS;
