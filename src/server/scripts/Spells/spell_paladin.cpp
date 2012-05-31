@@ -704,7 +704,7 @@ public:
 				
 				
 				uint32 typeCreature = (*itr)->GetCreatureType();
-				bool isElemsAndDragonkins = caster->HasAura(56420);  // Stun holy wrathu
+				bool isElemsAndDragonkins = caster->HasAura(2812);  // Stun holy wrathu
 				if ( (typeCreature != CREATURE_TYPE_DEMON || typeCreature != CREATURE_TYPE_UNDEAD) ||
 					(isElemsAndDragonkins && (typeCreature != CREATURE_TYPE_DRAGONKIN || typeCreature != CREATURE_TYPE_ELEMENTAL)) ) // Overenie creatury 
 					continue;
