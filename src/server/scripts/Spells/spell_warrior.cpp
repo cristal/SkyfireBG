@@ -106,7 +106,7 @@ class spell_warr_bloodthirst : public SpellScriptLoader
                 {
                     int32 dmg = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 80 / 100);
                     SetHitDamage(dmg);
-                    caster->CastCustomSpell(caster, 23885, &dmg, NULL, NULL, true);
+                    caster->CastSpell(caster, 23885, true);
                 }
             }
 

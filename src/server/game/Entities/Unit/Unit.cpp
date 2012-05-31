@@ -9166,7 +9166,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         // Bloodthirst (($m/100)% of max health)
         case 23880:
         {
-            basepoints0 = int32(CountPctFromMaxHealth(5))/10;
+            basepoints0 = int32(CountPctFromMaxHealth(triggerAmount) / 1000);
             break;
         }
         // Shamanistic Rage triggered spell
@@ -17168,6 +17168,15 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form)
                 default: // RACE_TAUREN
                     return 20872;
             }
+        case FORM_MOONKIN:
+            switch (getRace()) {
+                case RACE_TROLL:
+		        case RACE_TAUREN:
+		            return 15375;
+		        case RACE_NIGHTELF:
+		        case RACE_WORGEN:
+		            return 15374;
+		        }
         case FORM_FLIGHT_EPIC:
             switch (getRace())
             {

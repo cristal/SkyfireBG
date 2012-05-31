@@ -391,6 +391,7 @@ public:
                         break;
                 }
                 SetHitDamage(damage);
+                caster->SetPower(POWER_HOLY_POWER, int32(-power));
             }
         }
 
