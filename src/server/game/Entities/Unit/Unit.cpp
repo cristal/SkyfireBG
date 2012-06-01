@@ -8429,6 +8429,53 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
    }
             switch (dummySpell->Id)
             {
+                case 54637: // Blood of the North
+                case 56835: // Reaping
+                case 50034: // Blood Rites
+                    {
+                    *handled = true;
+                    // Convert recently used Blood Rune to Death Rune
+                    if (GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (this->ToPlayer()->getClass() != CLASS_DEATH_KNIGHT)
+                            return false;
+                        RuneType rune = this->ToPlayer()->GetLastUsedRune();
+                        AuraEffect * aurEff = triggeredByAura->GetEffect(0);
+                        if (!aurEff)
+                            return false;
+                        // Reset amplitude - set death rune remove timer to 30s
+                        aurEff->ResetPeriodic(true);
+                        uint32 runesLeft;
+                        
+                        if (dummySpell->SpellIconID == 2622)
+                            runesLeft = 2;
+                         else
+                            runesLeft = 1;
+  
+                        for (uint8 i=0; i < MAX_RUNES && runesLeft; ++i)
+                         {
+                            if (dummySpell->SpellIconID == 2622)
+                            {
+                                if (((Player*)this)->GetCurrentRune(i) == RUNE_DEATH ||
+                                    ((Player*)this)->GetBaseRune(i) == RUNE_BLOOD)
+                                    continue;
+                            }
+                            else
+                            {
+                                if (((Player*)this)->GetCurrentRune(i) == RUNE_DEATH ||
+                                    ((Player*)this)->GetBaseRune(i) != RUNE_BLOOD)
+                                    continue;
+                            }
+                            if (((Player*)this)->GetRuneCooldown(i) != ((Player*)this)->GetRuneBaseCooldown(i))
+                                continue;
+                            --runesLeft;
+                            // Mark aura as used
+                            ((Player*)this)->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                        }
+                        return true;
+                     }
+                    return false;
+                 }
                 // Bone Shield cooldown
                 case 49222:
                 {

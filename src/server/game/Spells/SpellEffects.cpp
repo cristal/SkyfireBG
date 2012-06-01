@@ -1540,7 +1540,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
         {
              if(m_spellInfo->Id == 80964)  // Skull Bash (bear) 
                  {
-                                       if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
+                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
                     {
                         switch(aurEff->GetId())
                         {
@@ -1560,7 +1560,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                  }
                  if(m_spellInfo->Id == 80965)  // Skull Bash(cat) 
                  { 
-                                       if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
+                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
                     {
                         switch(aurEff->GetId())
                         {
