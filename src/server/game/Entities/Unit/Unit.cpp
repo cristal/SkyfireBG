@@ -7671,11 +7671,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         }
 					}
                     return false;
-                }
                 break;
-            }
+                }
                 case 51483: // Earth's Grasp (Rank 1)
                 case 51485: // Earth's Grasp (Rank 2)
+                {
                     // Earthbind Totem summon only
                     if (procSpell->Id != 2484)
                         return false;
@@ -7685,7 +7685,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         return false;
 
                     triggered_spell_id = 64695;
-                break;
+                    break;
+                }
+                }
             // Frozen Power
             if (dummySpell->SpellIconID == 3780)
             {
