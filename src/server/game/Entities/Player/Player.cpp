@@ -2526,7 +2526,7 @@ void Player::RegenerateAll()
 				SetRuneCooldown(i, _cd);
 			}*/
 		}
-
+    }
     if (_regenTimerCount >= 2000)
     {
         // Not in combat or they have regeneration
@@ -2557,7 +2557,6 @@ void Player::RegenerateAll()
     }
 
     _regenTimer = 0;
-}
 }
 
 void Player::Regenerate(Powers power)
