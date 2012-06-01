@@ -1172,18 +1172,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_MAGE:
                 if (!caster)
                     break;
-                if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00000001 && GetSpellInfo()->SpellFamilyFlags[2] & 0x00000008)
-                {
-                    // Glyph of Fireball
-                    if (caster->HasAura(56368))
-                        SetDuration(0);
-                }
-                else if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00000020 && GetSpellInfo()->SpellVisual[0] == 13)
-                {
-                    // Glyph of Frostbolt
-                    if (caster->HasAura(56370))
-                        SetDuration(0);
-                }
                 // Todo: This should be moved to similar function in spell::hit
                 else if (GetSpellInfo()->SpellFamilyFlags[0] & 0x01000000)
                 {

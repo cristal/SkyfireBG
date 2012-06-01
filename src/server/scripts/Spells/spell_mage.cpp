@@ -424,8 +424,8 @@ public:
             if (!roll_chance_i(absorbChance))
                 return;
 
-            target->SetHealth(target->CountPctFromMaxHealth(healthPct)); // Set hp to 40%
-            target->CastSpell(target, SPELL_MAGE_CAUTERIZE_DOT, true);
+            int32 bp2 = target->CountPctFromMaxHealth(healthPct);
+            target->CastCustomSpell(target, SPELL_MAGE_CAUTERIZE_DOT, 0, &bp2, 0, true);
             target->ToPlayer()->AddSpellCooldown(SPELL_MAGE_CAUTERIZE_DOT, 0, time(NULL) + 60);
             absorbAmount = dmgInfo.GetDamage();
         }
