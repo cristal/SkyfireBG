@@ -1511,7 +1511,7 @@ void AchievementMgrBase::SetCriteriaProgress(AchievementCriteriaEntry const* ent
         return;
 
    // sLog->outDebug(LOG_FILTER_ACHIEVEMENTSYS, "AchievementMgr::SetCriteriaProgress(%u, %u) for (GUID:%u)", entry->ID, changeValue, _player->GetGUIDLow());
-
+    
     CriteriaProgress* progress = GetCriteriaProgress(entry);
     if (!progress)
     {
