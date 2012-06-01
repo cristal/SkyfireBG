@@ -7688,6 +7688,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 }
                 break;
             }
+                case 51483: // Earth's Grasp (Rank 1)
+                case 51485: // Earth's Grasp (Rank 2)
+                    // Earthbind Totem summon only
+                    if (procSpell->Id != 2484)
+                        return false;
+
+                    float chance = (float)triggerAmount;
+                    if (!roll_chance_f(chance))
+                        return false;
+
+                    triggered_spell_id = 64695;
+                break;
             // Frozen Power
             if (dummySpell->SpellIconID == 3780)
             {
@@ -7695,20 +7707,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     return false;
 
                 triggered_spell_id = 63685;
-                break;
-            }
-            // Storm, Earth and Fire
-            if (dummySpell->SpellIconID == 3063)
-            {
-                // Earthbind Totem summon only
-                if (procSpell->Id != 2484)
-                    return false;
-
-                float chance = (float)triggerAmount;
-                if (!roll_chance_f(chance))
-                    return false;
-
-                triggered_spell_id = 64695;
                 break;
             }
             // Ancestral Awakening

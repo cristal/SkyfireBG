@@ -59,8 +59,10 @@ class spell_druid_wild_mushroom : public SpellScriptLoader
                     for (std::list<Creature*>::iterator i = list.begin(); i != list.end(); ++i)
                     {
                         if ((*i)->isSummon() && (*i)->GetCharmerOrOwner() == player)
-                            continue;
-
+                            if (!player)
+                                return;
+                        continue;
+ 
                         list.remove((*i));
                     }
 
@@ -109,7 +111,7 @@ class spell_druid_wild_mushroom_detonate : public SpellScriptLoader
             bool Load()
             {
 
-                spellRange = 10;
+                spellRange = 40;
 
                 Player* player = GetCaster()->ToPlayer();
                 if (!player)
