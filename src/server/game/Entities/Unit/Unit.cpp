@@ -6306,6 +6306,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     CastCustomSpell(this, 15290, &team, &self, NULL, true, castItem, triggeredByAura);
                     return true;                                // no hidden cooldown
                 }
+                //Mind Melt
+                case 87160:
+                case 81292:
+                {
+                    if (procSpell->Id != 73510)
+                        return false;
+                    break;
+                }
                 // Priest Tier 6 Trinket (Ashtongue Talisman of Acumen)
                 case 40438:
                 {
@@ -6408,14 +6416,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                             return false;
                         basepoints0 = int32(CalculatePctN(damage, triggerAmount) / (blessHealing->GetMaxDuration() / blessHealing->Effects[0].Amplitude));
                     }
-                    break;
-                }
-                //Mind Melt
-                case 87160:
-                case 81292:
-                {
-                    if (procSpell->Id != 73510)
-                        return false;
                     break;
                 }
                 // Atonement
