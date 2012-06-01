@@ -633,8 +633,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             case BASE_ATTACK:
             {
                 weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 3.5f);
-                if (cleanDamage->hitOutCome == MELEE_HIT_CRIT)
-                    weaponSpeedHitFactor *= 2;
 
                 RewardRage(rage_damage, weaponSpeedHitFactor, true);
 
@@ -643,8 +641,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             case OFF_ATTACK:
             {
                 weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 1.75f);
-                if (cleanDamage->hitOutCome == MELEE_HIT_CRIT)
-                    weaponSpeedHitFactor *= 2;
 
                 RewardRage(rage_damage, weaponSpeedHitFactor, true);
 
@@ -8403,6 +8399,34 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
+    			//Runic Empowerment
+			if (dummySpell->Id == 81229)
+			{
+				if (GetTypeId() != TYPEID_PLAYER)
+					return false;
+
+				if (HasAura(51459) || HasAura(51462)) //Runic Corruption (Rank 1&2)
+					CastSpell(this, 51460, true);
+				else
+                {
+					uint32 cooldownrunes[MAX_RUNES];
+					uint8 runescount = 0;
+					for (uint32 j = 0; j < MAX_RUNES; ++j)
+					{
+						if (ToPlayer()->GetRuneCooldown(j))
+						{
+                            cooldownrunes[runescount] = j;
+                            runescount++;
+                        }
+                    }
+                    if (runescount > 0)
+                    {
+                        uint8 rndrune = urand(0,runescount-1);
+                        ToPlayer()->SetRuneCooldown(cooldownrunes[rndrune], 0);
+						ToPlayer()->ResyncRunes(MAX_RUNES);
+                    }
+                 }
+   }
             switch (dummySpell->Id)
             {
                 // Bone Shield cooldown

@@ -55,15 +55,13 @@ class spell_druid_wild_mushroom : public SpellScriptLoader
                     const SpellInfo* spell = GetSpellInfo();
                     
                     std::list<Creature*> list;
-                    player->GetCreatureListWithEntryInGrid(list, DRUID_NPC_WILD_MUSHROOM, 500.0f);
+                    player->GetCreatureListWithEntryInGrid(list, DRUID_NPC_WILD_MUSHROOM, 50.0f);
                     for (std::list<Creature*>::iterator i = list.begin(); i != list.end(); ++i)
                     {
                         if ((*i)->isSummon() && (*i)->GetCharmerOrOwner() == player)
-                            if (!player)
-                                return;
-                        continue;
+                            continue;
  
-                        list.remove((*i));
+                        list.remove(list.back());
                     }
 
                     if ((int32)list.size() >= spell->Effects[0].BasePoints) // Max 3
@@ -119,7 +117,7 @@ class spell_druid_wild_mushroom_detonate : public SpellScriptLoader
 
                 std::list<Creature*> list;
                 std::list<TempSummon*> summonList;
-                player->GetCreatureListWithEntryInGrid(list, DRUID_NPC_WILD_MUSHROOM, 500.0f);
+                player->GetCreatureListWithEntryInGrid(list, DRUID_NPC_WILD_MUSHROOM, 50.0f);
 
                 for (std::list<Creature*>::const_iterator i = list.begin(); i != list.end(); ++i)
                 {
