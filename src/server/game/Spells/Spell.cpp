@@ -1288,7 +1288,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 {
                     for (std::list<Unit*>::iterator itr = unitTargets.begin() ; itr != unitTargets.end();)
                     {
-                         if ((*itr)->GetTypeId() == TYPEID_PLAYER || (*itr)->GetCreatureType() == CREATURE_TYPE_DEMON || (*itr)->GetCreatureType() == CREATURE_TYPE_UNDEAD) // cast iba na demon/undead 
+                         if ((*itr)->GetCreatureType() == CREATURE_TYPE_DEMON || (*itr)->GetCreatureType() == CREATURE_TYPE_UNDEAD) // cast iba na demon/undead 
                                itr++;
                          else
                              itr = unitTargets.erase(itr);
