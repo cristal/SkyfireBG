@@ -498,7 +498,7 @@ class spell_dru_ferocious_bite : public SpellScriptLoader
 };
 
 // Mark Of The Wild
-// Spell Id: 1126
+// Spell Id: 79061
 class spell_dru_mark_of_the_wild : public SpellScriptLoader
 {
     public:
@@ -521,7 +521,7 @@ class spell_dru_mark_of_the_wild : public SpellScriptLoader
                     if (PartyMembers.size() > 1)
                         caster->CastSpell(GetHitUnit(), 79061, true); // Mark of the Wild (Raid)
                     else
-                        caster->CastSpell(GetHitUnit(), 79060, true); // Mark of the Wild (Caster)
+                        caster->CastSpell(GetHitUnit(), 79061, true); // Mark of the Wild (Caster)
                 }
             }
 
