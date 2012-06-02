@@ -6304,8 +6304,9 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         break;
                     int32 mod = (rage < 100) ? rage : 100;
                     int32 points = target->CalculateSpellDamage(target, GetSpellInfo(), 1);
-                    int32 regen = (target->GetMaxHealth() * (mod * points / 10) / 1000) / 200;
-                    target->CastCustomSpell(target, 22845, &regen, 0, 0, true, 0, this);
+                    int32 regen = (target->GetMaxHealth() * (mod * points / 10) / 100) / 200;
+                    int32 hpamount = target->GetMaxHealth() * 0.3;
+                    target->CastCustomSpell(target, 22845, &regen, &hpamount, 0, true, 0, this);
                     target->SetPower(POWER_RAGE, rage-mod);
                     break;
                 }
