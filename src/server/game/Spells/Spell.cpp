@@ -3702,40 +3702,6 @@ void Spell::finish(bool ok)
 
      // TODO: Kill these hacks
     switch (m_spellInfo->Id) {
-        case 49143: // Frost Strike
-        case 47541: // Death Coil
-        case 56815: // Rune Strike
-            if (m_caster->HasAura(81229)) // Runic Empowerment
-                    {
-                if (roll_chance_i(45)) {
-                    uint32 cooldownrunes[MAX_RUNES];
-                    uint8 runescount = 0;
-                    for (uint32 j = 0; j < MAX_RUNES; ++j) {
-                        if (m_caster->ToPlayer()->GetRuneCooldown(j)) {
-                            cooldownrunes[runescount] = j;
-                            runescount++;
-                        }
-                    }
-                    if (runescount > 0) {
-                        uint8 rndrune = urand(0, runescount - 1);
-                        m_caster->ToPlayer()->SetRuneCooldown(
-                                cooldownrunes[rndrune], 0);
-                    }
-                }
-            }
-            break;
-      case 33395: // Improved Freeze
-            {
-                if (Unit* owner = m_caster->GetOwner()) {
-                    if (owner->HasAura(86259) && roll_chance_i(33)
-                            || (owner->HasAura(86260) && roll_chance_i(67))
-                            || (owner->HasAura(86314))) {
-                        //Gives your Water Elemental's Freeze spell a % chance to grant 2 charges of Fingers of Frost.
-                        owner->SetAuraStack(44544, owner, 2);
-                    }
-                }
-                break;
-            }
         case 30455: // Ice Lance
         case 44572: // Deep Freeze
             if (m_caster->HasAura(44544)) // Fingers of Frost
@@ -3968,13 +3934,9 @@ void Spell::SendSpellGo()
             data << uint8(runeMaskAfterCast);                   // runes state after
             for (uint8 i = 0; i < MAX_RUNES; ++i)
             {
-                uint8 mask = (1 << i);
-                if (mask & runeMaskInitial && !(mask & runeMaskAfterCast))  // usable before andon cooldown now...
-                {
-                    // float casts ensure the division is performed on floats as we need float result
-                    float baseCd = float(player->GetRuneBaseCooldown(i));
-                    data << uint8((baseCd - float(player->GetRuneCooldown(i))) / baseCd * 255); // rune cooldown passed
-                }
+		    	uint8 mask = (1 << i);
+	    		float baseCd = float(player->GetRuneBaseCooldown(i));
+                data << uint8((baseCd - float(player->GetRuneCooldown(i))) / baseCd * 255);
             }
         }
     }

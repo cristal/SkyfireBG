@@ -288,6 +288,11 @@ void Spell::EffectInstaKill(SpellEffIndex /*effIndex*/)
     if (!unitTarget || !unitTarget->isAlive())
         return;
 
+	// Shovel
+	if (m_spellInfo->Id == 89089)
+		if (unitTarget->GetEntry() != 47872)
+			return;
+
     if (m_caster == unitTarget)                              // prevent interrupt message
         finish();
 
@@ -1535,7 +1540,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
         {
              if(m_spellInfo->Id == 80964)  // Skull Bash (bear) 
                  {
-                                       if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
+                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
                     {
                         switch(aurEff->GetId())
                         {
@@ -1555,7 +1560,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                  }
                  if(m_spellInfo->Id == 80965)  // Skull Bash(cat) 
                  { 
-                                       if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
+                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
                     {
                         switch(aurEff->GetId())
                         {
@@ -5994,6 +5999,26 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         m_caster->CastSpell(unitTarget, 55095, true);
                 }
             }
+            			// Festering Strike
+			if (m_spellInfo->Id == 85948)
+            {
+				int32 r = urand(2, 6);
+				if (unitTarget->HasAura(45524)) // Chains of Ice
+				{
+					unitTarget->GetAura(45524)->RefreshDuration();
+					unitTarget->GetAura(45524)->SetDuration((unitTarget->GetAura(45524)->GetDuration() + r * 1000), true);
+				}
+				if (unitTarget->HasAura(55095)) // Frost Fever
+				{
+					unitTarget->GetAura(55095)->RefreshDuration();
+                    unitTarget->GetAura(55095)->SetDuration((unitTarget->GetAura(55095)->GetDuration() + r * 1000), true);
+				}
+				if (unitTarget->HasAura(55078)) // Blood Plague
+				{
+					unitTarget->GetAura(55078)->RefreshDuration();
+                    unitTarget->GetAura(55078)->SetDuration((unitTarget->GetAura(55078)->GetDuration() + r * 1000), true);
+				}
+			}
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -7625,6 +7650,7 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
                 player->SetRuneCooldown(i, 0);
         }
     }
+    player->ResyncRunes(MAX_RUNES);
 }
 
 void Spell::EffectCreateTamedPet(SpellEffIndex effIndex)
