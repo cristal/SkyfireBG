@@ -388,6 +388,7 @@ public:
         return new spell_mage_ice_barrier_AuraScript();
     }
 };
+
 // Cauterize 86948, 86949
 class spell_mage_cauterize : public SpellScriptLoader
 {

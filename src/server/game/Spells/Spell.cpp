@@ -1294,7 +1294,7 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
                              itr = unitTargets.erase(itr);
                         }
                     }
-            case SPELLFAMILY_DRUID:
+			case SPELLFAMILY_DRUID:
                 if (m_spellInfo->SpellFamilyFlags[1] == 0x04000000) // Wild Growth
                 {
                     maxSize = m_caster->HasAura(62970) ? 6 : 5; // Glyph of Wild Growth
