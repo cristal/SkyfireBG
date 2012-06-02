@@ -353,10 +353,10 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                 val2 = (level * 3.0f) + (GetStat(STAT_STRENGTH) * 2.0f) - 20.0f;
                 break;
             case CLASS_ROGUE:
-                val2 = (level * 2.0f) + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20.0f;
+                val2 = (level * 2.0f) + GetStat(STAT_STRENGTH) - 10.0f + ((GetStat(STAT_AGILITY) * 2) - 20.0f);
                 break;
             case CLASS_HUNTER:
-                val2 = (level * 2.0f) + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20.0f;
+                val2 = (level * 2.0f) + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 10.0f;
                 break;
             case CLASS_SHAMAN:
                 val2 = (level * 2.0f) + (GetStat(STAT_STRENGTH) - 10.0f) + ((GetStat(STAT_AGILITY) * 2) - 20.0f);
@@ -367,22 +367,22 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
 				{
 					case FORM_CAT:
 					case FORM_BEAR:
-						val2 = (level * 3.0f) + (GetStat(STAT_STRENGTH) * 2.0f - 20.0f) + (GetStat(STAT_AGILITY) * 2.0f - 20.0f);
+						val2 = (level * 3.0f) + (GetStat(STAT_STRENGTH) * 2.0f - 20.0f) + ((GetStat(STAT_AGILITY) * 2.0f) - 20.0f);
 						break;
 					default:
-						val2 = (level * 3.0f) + (GetStat(STAT_STRENGTH) * 2.0f - 20.0f);
+						val2 = (level * 3.0f) + ((GetStat(STAT_STRENGTH) * 2.0f) - 20.0f);
 						break;
 				}
                 break;
             }
             case CLASS_MAGE:
-                val2 =  GetStat(STAT_STRENGTH) - 10.0f;
+                val2 =  GetStat(STAT_STRENGTH) * 2 - 20.0f;
                 break;
             case CLASS_PRIEST:
-                val2 = GetStat(STAT_STRENGTH) - 10.0f;
+                val2 = GetStat(STAT_STRENGTH) * 2 - 20.0f;
                 break;
             case CLASS_WARLOCK:
-                val2 = GetStat(STAT_STRENGTH) - 10.0f;
+                val2 = GetStat(STAT_STRENGTH) *2 - 20.0f;
                 break;
         }
     }
