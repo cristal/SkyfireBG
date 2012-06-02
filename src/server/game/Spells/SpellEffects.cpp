@@ -1643,7 +1643,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     if(PartyMembers.size() > 1)
                         m_caster->CastSpell(unitTarget, 79061, true); // Mark of the Wild (Raid)
                     else
-                        m_caster->CastSpell(unitTarget, 79060, true); // Mark of the Wild (Caster)
+                        m_caster->CastSpell(unitTarget, 79061, true); // Mark of the Wild (Caster)
                 }
                 break;
             }
