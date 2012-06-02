@@ -1664,6 +1664,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (GetId() == 1784)
                                 target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0,
                                                 0, target->GetGUID());
+                        // Cast stealth at vanish 3 seconds end
+                         else if (GetId() == 11327 && removeMode == AURA_REMOVE_BY_EXPIRE)
+                             caster->AddAura(1784 /* == stealth */, caster);
                         else if (GetId() == 6770) // On-sap removal - blackjack talent
                                         {
                                 if (caster->HasAura(79125)) // rank 2

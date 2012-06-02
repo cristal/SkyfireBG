@@ -2475,15 +2475,6 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex) {
     //For some funky reason, some spells have to be cast as a spell on the enemy even if they're supposed to apply an aura.
     switch (m_spellInfo->SpellFamilyName) 
     {
-        case SPELLFAMILY_ROGUE: 
-        {
-            if (m_spellInfo->SpellFamilyFlags[0] == 0x8) //Gouge
-            {
-                m_caster->CastSpell(unitTarget, 1776, true);
-                return;
-            }
-            break;
-        }
 		case SPELLFAMILY_PRIEST: 
         {
 			// Chakra

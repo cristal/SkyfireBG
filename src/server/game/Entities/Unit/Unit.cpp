@@ -6695,6 +6695,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 32747;
                     break;
                 }
+                case 56807: // Glyph of hemorrhage
+                    {
+                        if(procSpell->Id != 16511)
+	                        return false;
+                        basepoints0 = int32(0.40f * damage);
+                        triggered_spell_id = 89775;
+                        break;
+                    }
                 case 79134: // Venomous wounds
                 {
                     triggered_spell_id = 79136;
@@ -8549,6 +8557,20 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     return true;
             }
             break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            // Gouge
+            if (dummySpell->Id == 1776)
+            {
+                // Prevent drop aura from itself 
+                if (procSpell && procSpell->Id == 1776)
+                {
+                    *handled = true;
+                    return false;
+                    break;
+                }
+            }
         }
         case SPELLFAMILY_WARRIOR:
         {
