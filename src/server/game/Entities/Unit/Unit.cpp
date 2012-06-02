@@ -8550,6 +8550,20 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             }
             break;
         }
+        case SPELLFAMILY_ROGUE:
+        {
+            // Gouge
+            if (dummySpell->Id == 1776)
+            {
+                // Prevent drop aura from itself 
+                if (procSpell && procSpell->Id == 1776)
+                {
+                    *handled = true;
+                    return false;
+                    break;
+                }
+            }
+        }
         case SPELLFAMILY_WARRIOR:
         {
             switch (dummySpell->Id)
