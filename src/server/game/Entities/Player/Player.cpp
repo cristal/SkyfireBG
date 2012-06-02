@@ -2476,9 +2476,12 @@ void Player::RegenerateAll()
     Regenerate(POWER_ENERGY);
     Regenerate(POWER_MANA);
 
+
+
     // Runes act as cooldowns, and they don't need to send any data
     if (getClass() == CLASS_DEATH_KNIGHT)
     {
+        float cdmod = GetFloatValue(PLAYER_RUNE_REGEN_1) * 10.0f;
         for (uint32 i = 0; i < MAX_RUNES; i += 2)
         {
 			switch (GetBaseRune(i))
@@ -2490,7 +2493,7 @@ void Player::RegenerateAll()
 					break;
 				if (uint32 cd = GetRuneCooldown(i))
 				{
-					uint32 _cd = (cd > _regenTimer) ? cd -_regenTimer : 0;
+					uint32 _cd = (cd > _regenTimer) ? cd -_regenTimer * cdmod : 0;
 					SetRuneCooldown(i, _cd);
 				}
 				break;
@@ -2502,7 +2505,7 @@ void Player::RegenerateAll()
 					break;
 				if (uint32 cd = GetRuneCooldown(i))
 				{
-					uint32 _cd = (cd > _regenTimer) ? cd - _regenTimer : 0;
+					uint32 _cd = (cd > _regenTimer) ? cd - _regenTimer * cdmod : 0;
 					SetRuneCooldown(i, _cd);
 				}
 				break;
@@ -2514,7 +2517,7 @@ void Player::RegenerateAll()
 					break;
 				if (uint32 cd = GetRuneCooldown(i))
 				{
-					uint32 _cd = (cd > _regenTimer) ? cd - _regenTimer : 0;
+					uint32 _cd = (cd > _regenTimer) ? cd - _regenTimer * cdmod : 0;
 					SetRuneCooldown(i, _cd);
 				}
 				break;
@@ -24283,16 +24286,7 @@ uint32 Player::GetRuneBaseCooldown(uint8 index)
 {
     uint8 rune = GetBaseRune(index);
     uint32 cooldown = RUNE_BASE_COOLDOWN;
-
-    AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (AuraEffectList::const_iterator i = regenAura.begin();i != regenAura.end(); ++i)
-    {
-        if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetMiscValueB() == rune)
-            cooldown = cooldown*(100-(*i)->GetAmount())/100;
-    }
-     float haste = GetFloatValue(UNIT_MOD_CAST_SPEED);
-     cooldown -= cooldown * (1 - haste);
-   
+  
      return cooldown;
 }
 
@@ -24374,7 +24368,6 @@ void Player::InitRunes()
     _runes = new Runes;
 
     _runes->runeState = 0;
-    _runes->lastUsedRune = RUNE_BLOOD;
 
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
@@ -24383,10 +24376,24 @@ void Player::InitRunes()
         SetRuneCooldown(i, 0);                                         // reset cooldowns
         SetRuneConvertAura(i, NULL);
         _runes->SetRuneState(i);
+        SetDeathRuneUsed(i, false);
     }
 
     for (uint8 i = 0; i < NUM_RUNE_TYPES; ++i)
         SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);
+}
+
+void Player::ApplyRuneRegenPercentMod(float val, bool apply)
+{
+    uint32 cooldown = GetRuneBaseCooldown(0);
+    float basecd = float(1 * IN_MILLISECONDS) / cooldown;
+    float value = GetFloatValue(PLAYER_RUNE_REGEN_1);
+    if (apply)
+        value += basecd * val / 100;
+    else
+        value -= basecd * val / 100;
+    for (uint8 i = 0; i < NUM_RUNE_TYPES; i++)
+        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, value);
 }
 
 bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const

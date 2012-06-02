@@ -7969,6 +7969,33 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (player->GetRuneCooldown(i) == 0)
                         return false;
             }
+            if(dummySpell->Id == 81229)
+                 {
+                     // Runic Corruption
+                    if (this->ToPlayer()->HasAura(51459))
+                     {
+                        int32 bp1 = 50;
+                        CastCustomSpell(this, 51460, NULL, &bp1, NULL, true);
+                        return true;
+                    }
+                    else if (this->ToPlayer()->HasAura(51462))
+                    {
+                        int32 bp1 = 100;
+                        CastCustomSpell(this, 51460, NULL, &bp1, NULL, true);
+                         return true;
+                     }
+                    std::set<uint8> runes;
+                    for (uint8 i = 0; i < MAX_RUNES; i++)
+                        if (this->ToPlayer()->GetRuneCooldown(i) == this->ToPlayer()->GetRuneBaseCooldown(i))
+                            runes.insert(i);
+                     if (runes.size())
+                     {
+                        std::set<uint8>::iterator itr = runes.begin();
+                         std::advance(itr, urand(0, runes.size()-1));
+                        this->ToPlayer()->SetRuneCooldown((*itr), 0);
+                         this->ToPlayer()->ResyncRunes(MAX_RUNES);
+                     }
+            }
             // Dark Simulacrum
             if (dummySpell->Id == 77606)
             {
@@ -8432,45 +8459,70 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 case 54637: // Blood of the North
                 case 56835: // Reaping
                 case 50034: // Blood Rites
-                    {
-                    *handled = true;
-                    // Convert recently used Blood Rune to Death Rune
-                    if (GetTypeId() == TYPEID_PLAYER)
-                    {
-                        if (this->ToPlayer()->getClass() != CLASS_DEATH_KNIGHT)
-                            return false;
-                        RuneType rune = this->ToPlayer()->GetLastUsedRune();
-                        AuraEffect * aurEff = triggeredByAura->GetEffect(0);
-                        if (!aurEff)
-                            return false;
-                        // Reset amplitude - set death rune remove timer to 30s
-                        aurEff->ResetPeriodic(true);
-                        uint32 runesLeft;
-                        
-                        if (dummySpell->SpellIconID == 2622)
-                            runesLeft = 2;
-                         else
-                            runesLeft = 1;
-  
-                        for (uint8 i=0; i < MAX_RUNES && runesLeft; ++i)
-                         {
-                            if (dummySpell->SpellIconID == 2622)
-                            {
-                                if (((Player*)this)->GetCurrentRune(i) == RUNE_DEATH ||
-                                    ((Player*)this)->GetBaseRune(i) == RUNE_BLOOD)
-                                    continue;
-                            }
-                            else
-                            {
-                                if (((Player*)this)->GetCurrentRune(i) == RUNE_DEATH ||
-                                    ((Player*)this)->GetBaseRune(i) != RUNE_BLOOD)
-                                    continue;
-                            }
-                            if (((Player*)this)->GetRuneCooldown(i) != ((Player*)this)->GetRuneBaseCooldown(i))
-                                continue;
-                            --runesLeft;
-                            // Mark aura as used
-                            ((Player*)this)->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                 {
+                     *handled = true;
+                     if (GetTypeId() == TYPEID_PLAYER)
+                     {
+
+                        Player* plr = this->ToPlayer();
+                        if (plr->getClass() != CLASS_DEATH_KNIGHT)
+                             return false;
+                         AuraEffect * aurEff = triggeredByAura->GetEffect(0);
+                         if (!aurEff)
+                             return false;
+                         aurEff->ResetPeriodic(true);
+                         uint32 runesLeft;
+                        switch (procSpell->Id)
+                        {
+                            case 45902: // Blood Strike
+                            case 50842: // Pestilence
+                                runesLeft = 1;
+                                for (uint8 i=0; i < MAX_RUNES && runesLeft; ++i)
+                                {
+                                    if (plr->GetCurrentRune(i) == RUNE_DEATH  
+                                        || plr->GetBaseRune(i) != RUNE_BLOOD
+                                        || plr->IsDeathRuneUsed(i))
+                                        continue;
+
+                                    if (plr->GetRuneCooldown(i) != plr->GetRuneBaseCooldown(i))
+                                        continue;
+                                    --runesLeft;
+                                    plr->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                                }
+                                break;
+                            case 49020: // Obliterate
+                            case 49998: // Death Strike
+                                runesLeft = 2;
+                                for (uint8 i=0; i < MAX_RUNES && runesLeft; ++i)
+                                {
+                                    if (plr->GetCurrentRune(i) == RUNE_DEATH 
+                                        || plr->GetBaseRune(i) == RUNE_BLOOD
+                                        || plr->IsDeathRuneUsed(i))
+                                        continue;
+ 
+                                    if (plr->GetRuneCooldown(i) != plr->GetRuneBaseCooldown(i))
+                                        continue;
+ 
+                                    --runesLeft;
+                                    plr->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                                }
+                                break;
+                            case 85948: // Festering Strike
+                                runesLeft = 2;
+                                for (uint8 i=0; i < MAX_RUNES && runesLeft; ++i)
+                                {
+                                    if (plr->GetCurrentRune(i) == RUNE_DEATH 
+                                        || plr->GetBaseRune(i) == RUNE_UNHOLY
+                                        || plr->IsDeathRuneUsed(i))
+                                        continue;
+
+                                    if (plr->GetRuneCooldown(i) != plr->GetRuneBaseCooldown(i))
+                                        continue;
+ 
+                                    --runesLeft;
+                                    plr->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                                }
+                                break;
                         }
                         return true;
                      }
@@ -15287,6 +15339,10 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply
         ApplyPercentModFloatVar(_modAttackSpeedPct[att], -val, apply);
         ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att, -val, apply);
     }
+
+    if (att == BASE_ATTACK && GetTypeId() == TYPEID_PLAYER)
+        if (ToPlayer()->getClass() == CLASS_DEATH_KNIGHT)
+            ToPlayer()->ApplyRuneRegenPercentMod(val, apply);
     m_attackTimer[att] = uint32(GetAttackTime(att) * _modAttackSpeedPct[att] * remainingTimePct);
 }
 

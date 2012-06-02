@@ -494,17 +494,31 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     float weapon_mindamage = GetWeaponDamageRange(attType, MINDAMAGE);
     float weapon_maxdamage = GetWeaponDamageRange(attType, MAXDAMAGE);
 
+		float weapon_speed;
+        uint32 slot;
+        switch (attType)
+        {
+            case BASE_ATTACK:   slot = EQUIPMENT_SLOT_MAINHAND; break;
+            case OFF_ATTACK:    slot = EQUIPMENT_SLOT_OFFHAND;  break;
+            case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED;   break;
+        }
+        if (Item* pWeapon = GetUseableItemByPos(INVENTORY_SLOT_BAG_0, slot))
+            weapon_speed =  GetAPMultiplier(attType,normalized);
+        else
+            weapon_speed = GetAPMultiplier(attType, true);
+
+
 	if (IsInShapeshiftForm())                                    //check if player is druid and in cat or bear forms
     {
 		if (GetShapeshiftForm() == FORM_CAT)
 		{
-			weapon_mindamage = weapon_mindamage / GetAPMultiplier(attType, true) * 1.0f;
-			weapon_maxdamage = weapon_maxdamage / GetAPMultiplier(attType, true) * 1.0f;
+			weapon_mindamage = (weapon_mindamage / weapon_speed) * att_speed;
+			weapon_maxdamage = (weapon_maxdamage / weapon_speed) * att_speed;
 		}
 		else if (GetShapeshiftForm() == FORM_BEAR)
 		{
-			weapon_mindamage = weapon_mindamage / GetAPMultiplier(attType, true) * 2.5f;
-			weapon_maxdamage = weapon_maxdamage / GetAPMultiplier(attType, true) * 2.5f;
+			weapon_mindamage = (weapon_mindamage / weapon_speed) * att_speed;
+			weapon_maxdamage = (weapon_maxdamage / weapon_speed) * att_speed;
 		}        
     }
 	else if (!CanUseAttackType(attType))      //check if player not in form but still can't use (disarm case)

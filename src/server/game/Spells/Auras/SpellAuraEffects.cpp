@@ -4452,6 +4452,24 @@ void AuraEffect::HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mod
 
     Unit* target = aurApp->GetTarget();
 
+    switch (GetId())
+    {
+    case 63611: // Improved Blood Presence
+        if (target->GetTypeId() == TYPEID_PLAYER)
+            if (GetEffIndex() == EFFECT_1 && GetAmount() > 0)
+                target->ToPlayer()->ApplyRuneRegenPercentMod((float)GetAmount(), apply);    
+        return;
+    case 51460: // Runic Corruption
+        if (target->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (target->HasAura(51459)) // Runic Corruption (rank 1)
+                target->ToPlayer()->ApplyRuneRegenPercentMod(50.0f, apply);
+            else if (target->HasAura(51462)) // Runic Corruption (rank 2)
+                target->ToPlayer()->ApplyRuneRegenPercentMod(100.0f, apply);
+        }
+        return;
+    }
+
     target->ApplyAttackTimePercentMod(BASE_ATTACK,   (float)GetAmount(), apply);
     target->ApplyAttackTimePercentMod(OFF_ATTACK,    (float)GetAmount(), apply);
 }

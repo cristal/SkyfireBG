@@ -357,13 +357,13 @@ struct RuneInfo
     uint8 CurrentRune;
     uint32 Cooldown;
     AuraEffect const* ConvertAura;
+    bool DeathUsed;
 };
 
 struct Runes
 {
     RuneInfo runes[MAX_RUNES];
     uint8 runeState;                                        // mask of available runes
-    RuneType lastUsedRune;
 
     void SetRuneState(uint8 index, bool set = true)
     {
@@ -2536,8 +2536,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetRuneCooldown(uint8 index) const { return _runes->runes[index].Cooldown; }
         uint32 GetRuneBaseCooldown(uint8 index);
         bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const;
-        RuneType GetLastUsedRune() { return _runes->lastUsedRune; }
-        void SetLastUsedRune(RuneType type) { _runes->lastUsedRune = type; }
+        void SetDeathRuneUsed(uint8 index, bool apply) { _runes->runes[index].DeathUsed = apply; }
+        bool IsDeathRuneUsed(uint8 index) { return _runes->runes[index].DeathUsed; }
         void SetBaseRune(uint8 index, RuneType baseRune) { _runes->runes[index].BaseRune = baseRune; }
         void SetCurrentRune(uint8 index, RuneType currentRune) { _runes->runes[index].CurrentRune = currentRune; }
         void SetRuneCooldown(uint8 index, uint32 cooldown) { _runes->runes[index].Cooldown = cooldown; _runes->SetRuneState(index, (cooldown == 0) ? true : false); }
@@ -2549,6 +2549,7 @@ class Player : public Unit, public GridObject<Player>
         void ResyncRunes(uint8 count);
         void AddRunePower(uint8 index);
         void InitRunes();
+        void ApplyRuneRegenPercentMod(float val, bool apply);
 
         AchievementMgr& GetAchievementMgr() { return _achievementMgr; }
         AchievementMgr const& GetAchievementMgr() const { return _achievementMgr; }
