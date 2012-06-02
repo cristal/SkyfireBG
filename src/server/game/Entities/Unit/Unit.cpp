@@ -6695,6 +6695,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 32747;
                     break;
                 }
+                case 56807: // Glyph of hemorrhage
+                    {
+                        if(procSpell->Id != 16511)
+	                        return false;
+                        basepoints0 = int32(0.40f * damage);
+                        triggered_spell_id = 89775;
+                        break;
+                    }
                 case 79134: // Venomous wounds
                 {
                     triggered_spell_id = 79136;
