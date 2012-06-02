@@ -474,26 +474,18 @@ void Player::UpdateShieldBlockValue()
 void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage)
 {
     UnitMods unitMod;
-    UnitMods attPower_pos;
-    UnitMods attPower_neg;
 
     switch (attType)
     {
         case BASE_ATTACK:
         default:
             unitMod = UNIT_MOD_DAMAGE_MAINHAND;
-            attPower_pos = UNIT_MOD_ATTACK_POWER_POS;
-            attPower_neg = UNIT_MOD_ATTACK_POWER_NEG;
             break;
         case OFF_ATTACK:
             unitMod = UNIT_MOD_DAMAGE_OFFHAND;
-            attPower_pos = UNIT_MOD_ATTACK_POWER_POS;
-            attPower_neg = UNIT_MOD_ATTACK_POWER_NEG;
             break;
         case RANGED_ATTACK:
             unitMod = UNIT_MOD_DAMAGE_RANGED;
-            attPower_pos = UNIT_MOD_ATTACK_POWER_RANGED_POS;
-            attPower_neg = UNIT_MOD_ATTACK_POWER_RANGED_NEG;
             break;
     }
 
@@ -507,16 +499,20 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     float weapon_mindamage = GetWeaponDamageRange(attType, MINDAMAGE);
     float weapon_maxdamage = GetWeaponDamageRange(attType, MAXDAMAGE);
 
-    if (IsInShapeshiftForm())                                    //check if player is druid and in cat or bear forms
+	if (IsInShapeshiftForm())                                    //check if player is druid and in cat or bear forms
     {
-        uint8 lvl = getLevel();
-        if (lvl > 60)
-            lvl = 60;
-
-        weapon_mindamage = lvl*0.85f*att_speed;
-        weapon_maxdamage = lvl*1.25f*att_speed;
+		if (GetShapeshiftForm() == FORM_CAT)
+		{
+			weapon_mindamage = weapon_mindamage / GetAPMultiplier(attType, true) * 1.0f;
+			weapon_maxdamage = weapon_maxdamage / GetAPMultiplier(attType, true) * 1.0f;
+		}
+		else if (GetShapeshiftForm() == FORM_BEAR)
+		{
+			weapon_mindamage = weapon_mindamage / GetAPMultiplier(attType, true) * 2.5f;
+			weapon_maxdamage = weapon_maxdamage / GetAPMultiplier(attType, true) * 2.5f;
+		}        
     }
-    else if (!CanUseAttackType(attType))      //check if player not in form but still can't use (disarm case)
+	else if (!CanUseAttackType(attType))      //check if player not in form but still can't use (disarm case)
     {
         //cannot use ranged/off attack, set values to 0
         if (attType != BASE_ATTACK)
