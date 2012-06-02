@@ -1959,9 +1959,8 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
                     unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
 
-				// castit spell stealth
-                unitTarget->CastSpell(unitTarget, 1784, true);
-                return;
+                triggered_spell_id = 1784;
+                break;
             }
             // Demonic Empowerment -- succubus
             case 54437:
