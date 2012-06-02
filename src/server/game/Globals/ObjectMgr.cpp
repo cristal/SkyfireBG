@@ -2363,6 +2363,9 @@ void ObjectMgr::LoadItemTemplates()
                itemTemplate.Class, itemTemplate.SubClass, itemTemplate.Quality, itemTemplate.Delay,
                1, itemTemplate.InventoryType, itemTemplate.Flags2);
 
+        FillItemDamageFields(itemTemplate, &itemTemplate.minDamage, &itemTemplate.maxDamage, &itemTemplate.DPS, itemTemplate.ItemLevel,
+               itemTemplate.Class, itemTemplate.SubClass, itemTemplate.Quality, itemTemplate.Delay,
+               1, itemTemplate.InventoryType, itemTemplate.Flags2);
         // Checks
 
         ItemEntry const *db2item = sItemStore.LookupEntry(entry);
