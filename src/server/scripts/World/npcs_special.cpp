@@ -3394,6 +3394,47 @@ class npc_power_word_barrier : public CreatureScript
     }
 };
 
+/*######
+# npc_mushroom
+######*/
+
+class npc_mushroom : public CreatureScript
+{
+    public:
+    npc_mushroom() : CreatureScript("npc_mushroom") { }
+
+    struct npc_mushroomAI : CasterAI
+    {
+        npc_mushroomAI(Creature *c) : CasterAI(c) {}
+		
+		bool checker;
+        uint32 InvisibleTimer;
+
+        void Reset()
+        {
+            InvisibleTimer = 6000;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+        if (InvisibleTimer > 0)
+        {
+        if (InvisibleTimer < diff)
+            me->CastSpell(me, 92661, true); // zmiznú 
+
+        InvisibleTimer -= diff;
+        return;
+        }
+        CasterAI::UpdateAI(diff);
+        }
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_mushroomAI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -3430,4 +3471,5 @@ void AddSC_npcs_special()
     new npc_ring_of_frost;
     new npc_frostfire_orb;
     new npc_power_word_barrier;
+    new npc_mushroom;
 }
