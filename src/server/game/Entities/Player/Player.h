@@ -169,7 +169,7 @@ enum TalentBranchSpec
     BS_ROGUE_SUBTLETY       = 183,
     BS_PRIEST_DISCIPLINE    = 760,
     BS_PRIEST_HOLY          = 813,
-    BS_PRIEST_SHADOW        = 759,
+    BS_PRIEST_SHADOW        = 795,
     BS_DEATH_KNIGHT_BLOOD   = 398,
     BS_DEATH_KNIGHT_FROST   = 399,
     BS_DEATH_KNIGHT_UNHOLY  = 400,

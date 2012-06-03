@@ -492,6 +492,66 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 }
                 break;
             }
+            case SPELLFAMILY_WARRIOR: {
+                // Bloodthirst
+            if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
+                            {
+                              damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.8);
+                            }
+                // Victory Rush
+                else if (m_spellInfo->SpellFamilyFlags[1] & 0x100)
+                {
+                    damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45); // wowwiki formula
+                    m_caster->RemoveAurasDueToSpell(32216); // Victorious
+                }
+                // Cleave
+                else if (m_spellInfo->Id == 845) 
+                    damage = uint32(6 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45);
+                // Intercept
+                else if (m_spellInfo->Id == 20253) 
+                    damage = uint32(1+ m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12);
+                // Execute
+                else if (m_spellInfo->Id == 5308) 
+                {
+                    float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    damage = uint32(10 + ap * 0.437 * 100 / 100);
+                    uint32 power = m_caster->GetPower(POWER_RAGE);
+                    if (power > 0) 
+                    {
+                        uint32 mod = power > 20 ? 20 : power;
+                        uint32 bonus_rage = 0;
+
+                        if (m_caster->HasAura(29723)) bonus_rage = 5;
+                        if (m_caster->HasAura(29725)) bonus_rage = 10;
+
+                        damage += uint32(ap * 0.874 * 100 / 100 - 1);
+                        m_caster->SetPower(POWER_RAGE,(power - mod) + bonus_rage);
+                    }
+                } 
+                // Heroic Strike
+                else if (m_spellInfo->Id == 78) 
+                       damage = uint32(8 + (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) * 0.6);
+                // Shockwave
+                else if (m_spellInfo->Id == 46968) 
+                {
+                    int32 pct = m_caster->CalculateSpellDamage(unitTarget,m_spellInfo, 2);
+                    if (pct > 0) 
+                        damage += int32(CalculatePctN(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
+                } 
+                else if (m_spellInfo->Id == 6343)
+                {
+                    uint32 trig_spell;
+                    if (m_caster->HasAura(80979)) 
+                       trig_spell = 87095;
+                    else if (m_caster->HasAura(80980)) 
+                       trig_spell = 87096;
+                    else 
+                       break;
+                    if (urand(0, 1)) 
+                           m_caster->CastSpell(m_caster, trig_spell, true);
+                }
+                break;
+            }
             case SPELLFAMILY_WARLOCK:
             {
                 // Incinerate Rank 1 & 2
@@ -559,6 +619,51 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             if (roll_chance_i(chance))
                                 m_caster->CastSpell(m_caster, 77487, true);
                         }
+                        break;
+                    // Mind Blast
+                    case 8092:
+                        // Improved Mind Blast
+                        if (m_caster->GetShapeshiftForm() == FORM_SHADOW)
+                        {
+                            Unit::AuraEffectList const& ImprMindBlast = m_caster->GetAuraEffectsByType(SPELL_AURA_ADD_FLAT_MODIFIER);
+                            for (Unit::AuraEffectList::const_iterator i = ImprMindBlast.begin(); i != ImprMindBlast.end(); ++i)
+                            {
+                                if ((*i)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_PRIEST && ((*i)->GetSpellInfo()->SpellIconID == 95))
+                                {
+                                    int chance = (*i)->GetSpellInfo()->Effects[1].CalcValue();
+                                    // Mind Trauma
+                                    if (roll_chance_i(chance)) m_caster->CastSpell(unitTarget, 48301, true, 0);
+                                }
+                            }
+                        }
+
+                        // Shadow orbs
+                        if (m_caster->HasAura(77487))
+                        {
+                            uint8 stack = m_caster->GetAura(77487)->GetStackAmount();
+                            uint32 pct = stack * 10;
+
+                            // Mastery
+                            if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
+                                if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_PRIEST_SHADOW)
+                                    pct += 1.5f * m_caster->ToPlayer()->GetMasteryPoints();
+
+                            AddPctN(damage, pct);
+                            m_caster->RemoveAurasDueToSpell(77487);
+                        }
+
+                        //Mind Melt Aura remove
+                        m_caster->RemoveAurasDueToSpell(87160);
+                        m_caster->RemoveAurasDueToSpell(81292);
+                        break;
+                    // Smite, Mind Spike
+                    case 585:
+                    case 73510:
+                        // Chakra: Chastise
+                        if (m_caster->HasAura(14751)) 
+                            m_caster->CastSpell(m_caster, 81209, true); 
+                        break;
+                    default:
                         break;
                 }
                 // Evangelism: Rank 1

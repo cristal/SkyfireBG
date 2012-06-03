@@ -10937,12 +10937,31 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
                 }
         break;
         case SPELLFAMILY_PRIEST:
+            {
+            // Mind Flay
+			if (spellProto->SpellFamilyFlags [0] & 0x800000)
+			{
+				// Glyph of Shadow Word: Pain
+				if (AuraEffect * aurEff = GetAuraEffect(55687, 0))
+				// Increase Mind Flay damage if Shadow Word: Pain present on target
+				if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE,
+						SPELLFAMILY_PRIEST, 0x8000, 0, 0, GetGUID())) DoneTotalMod *=
+						(aurEff->GetAmount() + 100.0f) / 100.f;
+
+				// Twisted Faith - Mind Flay part
+				if (AuraEffect * aurEff = GetAuraEffect(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, SPELLFAMILY_PRIEST, 2848, 1))
+				// Increase Mind Flay damage if Shadow Word: Pain present on target
+				if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE,
+						SPELLFAMILY_PRIEST, 0x8000, 0, 0, GetGUID())) DoneTotalMod *=
+						(aurEff->GetAmount() + 100.0f) / 100.f;
+			}
             // Smite
             if (spellProto->SpellFamilyFlags[0] & 0x80)
             {
                 if (AuraEffect* aurEff = GetAuraEffect(55692, 0)) // Glyph of Smite
                     if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x100000, 0, 0, GetGUID()))
                         AddPctN(DoneTotalMod, aurEff->GetAmount());
+            }
             }
         break;
         case SPELLFAMILY_PALADIN:
