@@ -24290,35 +24290,25 @@ uint32 Player::GetRuneBaseCooldown(uint8 index)
      return cooldown;
 }
 
-void Player::RemoveRunesByAuraEffect(AuraEffect const* aura)
+void Player::RemoveRunesBySpell(uint32 spell_id)
 {
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
-        if (_runes->runes[i].ConvertAura == aura)
+        if (_runes->runes[i].spell_id == spell_id)
         {
             ConvertRune(i, GetBaseRune(i));
-            SetRuneConvertAura(i, NULL);
+            SetRuneConvertSpell(i, 0);
         }
     }
 }
 
 void Player::RestoreBaseRune(uint8 index)
 {
-    AuraEffect const* aura = _runes->runes[index].ConvertAura;
-    // If rune was converted by a non-pasive aura that still active we should keep it converted
-    if (aura && !(aura->GetSpellInfo()->Attributes & SPELL_ATTR0_PASSIVE))
-        return;
-    ConvertRune(index, GetBaseRune(index));
-    SetRuneConvertAura(index, NULL);
-    // Don't drop passive talents providing rune convertion
-    if (!aura || aura->GetAuraType() != SPELL_AURA_CONVERT_RUNE)
-        return;
-    for (uint8 i = 0; i < MAX_RUNES; ++i)
-    {
-        if (aura == _runes->runes[i].ConvertAura)
-            return;
-    }
-    aura->GetBase()->Remove();
+    uint32 spell_id = _runes->runes[index].spell_id;
+    SetRuneConvertSpell(index, 0);
+    // Only Blood Tap can be removed
+    if (spell_id == 45529)
+        RemoveAura(45529);
 }
 
 void Player::ConvertRune(uint8 index, RuneType newType)
@@ -24374,7 +24364,7 @@ void Player::InitRunes()
         SetBaseRune(i, runeSlotTypes[i]);                              // init base types
         SetCurrentRune(i, runeSlotTypes[i]);                           // init current types
         SetRuneCooldown(i, 0);                                         // reset cooldowns
-        SetRuneConvertAura(i, NULL);
+        SetRuneConvertSpell(i, 0);
         _runes->SetRuneState(i);
         SetDeathRuneUsed(i, false);
     }

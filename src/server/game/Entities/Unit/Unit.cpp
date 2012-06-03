@@ -8498,10 +8498,8 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         Player* plr = this->ToPlayer();
                         if (plr->getClass() != CLASS_DEATH_KNIGHT)
                              return false;
-                         AuraEffect * aurEff = triggeredByAura->GetEffect(0);
-                         if (!aurEff)
-                             return false;
-                         aurEff->ResetPeriodic(true);
+                        if (AuraEffect * aurEff = triggeredByAura->GetEffect(EFFECT_0))
+                             aurEff->ResetPeriodic(true);
                          uint32 runesLeft;
                         switch (procSpell->Id)
                         {
@@ -8518,7 +8516,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                                     if (plr->GetRuneCooldown(i) != plr->GetRuneBaseCooldown(i))
                                         continue;
                                     --runesLeft;
-                                    plr->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                                    plr->AddRuneBySpell(i, RUNE_DEATH, dummySpell->Id);
                                 }
                                 break;
                             case 49020: // Obliterate
@@ -8535,7 +8533,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                                         continue;
  
                                     --runesLeft;
-                                    plr->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                                    plr->AddRuneBySpell(i, RUNE_DEATH, dummySpell->Id);
                                 }
                                 break;
                             case 85948: // Festering Strike
@@ -8551,7 +8549,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                                         continue;
  
                                     --runesLeft;
-                                    plr->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
+                                    plr->AddRuneBySpell(i, RUNE_DEATH, dummySpell->Id);
                                 }
                                 break;
                         }
