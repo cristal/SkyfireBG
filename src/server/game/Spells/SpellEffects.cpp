@@ -6139,6 +6139,9 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
 
     if (!m_caster->_movedPlayer)
         return;
+    
+    if(this->effectHandleMode ==  SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
+        return;
 
     Player* player = m_caster->_movedPlayer;
 
