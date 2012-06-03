@@ -8000,7 +8000,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (player->GetRuneCooldown(i) == 0)
                         return false;
             }
-            if(dummySpell->Id == 81229)
+  /*          if(dummySpell->Id == 81229)
                  {
                      // Runic Corruption
                     if (this->ToPlayer()->HasAura(51459))
@@ -8026,7 +8026,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         this->ToPlayer()->SetRuneCooldown((*itr), 0);
                          this->ToPlayer()->ResyncRunes(MAX_RUNES);
                      }
-            }
+            }*/
             // Dark Simulacrum
             if (dummySpell->Id == 77606)
             {
