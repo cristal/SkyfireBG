@@ -2481,55 +2481,22 @@ void Player::RegenerateAll()
     // Runes act as cooldowns, and they don't need to send any data
     if (getClass() == CLASS_DEATH_KNIGHT)
     {
-        float cdmod = GetFloatValue(PLAYER_RUNE_REGEN_1) * 10.0f;
         for (uint32 i = 0; i < MAX_RUNES; i += 2)
         {
-			switch (GetBaseRune(i))
-			{
-			case RUNE_BLOOD:
-				{
-				uint8 nextslot = (i > 0)? 0: 1;
-				if (GetRuneCooldown(nextslot) && GetRuneCooldown(nextslot) < GetRuneCooldown(i))
-					break;
-				if (uint32 cd = GetRuneCooldown(i))
-				{
-					uint32 _cd = (cd > _regenTimer) ? cd -_regenTimer * cdmod : 0;
-					SetRuneCooldown(i, _cd);
-				}
-				break;
-				}
-			case RUNE_UNHOLY:
-				{
-				uint8 nextslot = (i > 2)? 2: 3;
-				if (GetRuneCooldown(nextslot) && GetRuneCooldown(nextslot) < GetRuneCooldown(i))
-					break;
-				if (uint32 cd = GetRuneCooldown(i))
-				{
-					uint32 _cd = (cd > _regenTimer) ? cd - _regenTimer * cdmod : 0;
-					SetRuneCooldown(i, _cd);
-				}
-				break;
-				}
-			case RUNE_FROST:
-				{
-				uint8 nextslot = (i > 4)? 4: 5;
-				if (GetRuneCooldown(nextslot) && GetRuneCooldown(nextslot) < GetRuneCooldown(i))
-					break;
-				if (uint32 cd = GetRuneCooldown(i))
-				{
-					uint32 _cd = (cd > _regenTimer) ? cd - _regenTimer * cdmod : 0;
-					SetRuneCooldown(i, _cd);
-				}
-				break;
-				}
-			}
+           uint32 cd1 = GetRuneCooldown(i);
+           uint32 cd2 = GetRuneCooldown(i + 1);
+            float cdmod = GetFloatValue(PLAYER_RUNE_REGEN_1) * 10.0f;
+             if (cd1 && (!cd2 || cd1 <= cd2))
+                SetRuneCooldown(i, (cd1 > _regenTimer * cdmod) ? cd1 - _regenTimer * cdmod : 0);
+             else if (cd2)
+                SetRuneCooldown(i + 1, (cd2 > _regenTimer * cdmod) ? cd2 - _regenTimer * cdmod : 0);
+         }
             /*if (uint32 cd = GetRuneCooldown(i))
 			{
 				uint32 _cd = (cd > m_regenTimer) ? cd - m_regenTimer : 0;
 				SetRuneCooldown(i, _cd);
 			}*/
 		}
-    }
     if (_regenTimerCount >= 2000)
     {
         // Not in combat or they have regeneration
