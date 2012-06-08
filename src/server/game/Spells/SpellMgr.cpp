@@ -3099,10 +3099,10 @@ void SpellMgr::LoadSpellCustomAttr()
             case 22482: // Blade Flurry
             spellInfo->AttributesEx4 |= 0x00000100;
             break;
-            case 80353:  // Time Warp
+            case 80353: // Time Warp
                 spellInfo->Effects[0].TriggerSpell = 80354; // Temporal Displacement
                 break;
-            case 90355:  // Ancient Hysteria
+            case 90355: // Ancient Hysteria
                 spellInfo->Effects[0].TriggerSpell = 95809; // Insanity
                 break;
              // Purification, hotfix 4.0.6
@@ -3118,10 +3118,6 @@ void SpellMgr::LoadSpellCustomAttr()
             // Entries were not updated after spell effect change, we have to do that manually :/
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED;
                 break;
-            case 85113: // Aftermath
-		    case 85114:
-			     spellInfo->Targets = TARGET_UNIT_TARGET_ENEMY;
-			    break;
             case 59725: // Improved Spell Reflection - aoe aura
                 // Target entry seems to be wrong for this spell :/
                 spellInfo->Effects[0].TargetA = TARGET_UNIT_CASTER_AREA_PARTY;
@@ -3143,8 +3139,21 @@ void SpellMgr::LoadSpellCustomAttr()
             case 45761: // Shoot
             case 42611: // Shoot
             case 61588: // Blazing Harpoon
+            case 62016: // Charge Orb
+                spellInfo->MaxAffectedTargets = 1;
+                break;
             case 52479: // Gift of the Harvester
                 spellInfo->MaxAffectedTargets = 1;
+                // a trap always has dst = src?
+                spellInfo->Effects[0].TargetA = TARGET_DEST_CASTER;
+                spellInfo->Effects[1].TargetA = TARGET_DEST_CASTER;
+                break;
+            case 85113: // Aftermath
+            case 85114:
+                spellInfo->Targets = TARGET_UNIT_TARGET_ENEMY;
+                break;
+            case 31818: // Life Tap
+                spellInfo->Effects[0].Effect = SPELL_EFFECT_ENERGIZE_PCT;
                 break;
             case 41376: // Spite
             case 39992: // Needle Spine
@@ -3158,13 +3167,13 @@ void SpellMgr::LoadSpellCustomAttr()
             case 29213: // Curse of the Plaguebringer - Noth
             case 28542: // Life Drain - Sapphiron
             case 66588: // Flaming Spear
-            case 54171: // Divine Storm
-                spellInfo->MaxAffectedTargets = 3;
+            case 54171: case 54172: // Divine Storm (Heal)
+                spellInfo->MaxAffectedTargets = 3;                
                 break;
-            case 38310: // Multi-Shot
             case 53385: // Divine Storm (Damage)
                 spellInfo->MaxAffectedTargets = 4;
                 break;
+            case 38310: // Multi-Shot
             case 42005: // Bloodboil
             case 38296: // Spitfire Totem
             case 37676: // Insidious Whisper
@@ -3186,9 +3195,33 @@ void SpellMgr::LoadSpellCustomAttr()
             case 50312: // Unholy Frenzy
                 spellInfo->MaxAffectedTargets = 15;
                 break;
+            case 81913: case 81914: // Die by the Sword
+                spellInfo->Effects[0].TriggerSpell = 0;
+                break;
+            case 77486: // Shadow orb power
+                spellInfo->Effects[0].TriggerSpell = 0;
+                break;
+            case 33191: case 78228: // Harnessed Shadows
+                spellInfo->Effects[0].TriggerSpell = 0;
+                break;
+            case 87192: case 87195: // Paralysis
+                spellInfo->Effects[0].TriggerSpell = 0;
+                break;
             case 38794: case 33711: // Murmur's Touch
                 spellInfo->MaxAffectedTargets = 1;
                 spellInfo->Effects[0].TriggerSpell = 33760;
+                break;
+            case 80128: // Impending Victory Rank 1
+            case 80129: // Impending Victory Rank 2
+                spellInfo->Effects[0].TriggerSpell = 0;
+                break;
+            case 80979: // Thunderstruck Rank 1
+            case 80980: // Thunderstruck Rank 2
+                spellInfo->Effects[1].TriggerSpell = 0;
+                break;
+            case 84604: // Hold the Line Rank 1
+            case 84621: // Hold the Line Rank 2
+                spellInfo->Effects[0].TriggerSpell = 0;
                 break;
             case 83359: // Sic 'Em Rank 1
             case 89388: // Sic 'Em Rank 2
@@ -3205,6 +3238,8 @@ void SpellMgr::LoadSpellCustomAttr()
             case 64823: // Item - Druid T8 Balance 4P Bonus
             case 34477: // Misdirection
             case 44401: // Missile Barrage
+                spellInfo->ProcCharges = 1;
+                break;
             case 46915: // Bloodsurge
                 spellInfo->ProcCharges = 1;
                 break;
@@ -3238,6 +3273,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 break;
             case 51852: // The Eye of Acherus (no spawn in phase 2 in db)
                 spellInfo->Effects[0].MiscValue |= 1;
+                break;
+            case 52025: // Cleansing Totem Effect
+                spellInfo->Effects[1].DieSides = 1;
                 break;
             case 51904: // Summon Ghouls On Scarlet Crusade (this should use conditions table, script for this spell needs to be fixed)
                 spellInfo->Effects[0].TargetA = TARGET_UNIT_CASTER;
@@ -3309,6 +3347,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->Effects[0].TargetB = TARGET_UNIT_SRC_AREA_ALLY;
                 spellInfo->Effects[1].TargetB = TARGET_UNIT_SRC_AREA_ALLY;
                 break;
+            case 48743: // Death Pact
+                spellInfo->AttributesEx &= ~SPELL_ATTR1_CANT_TARGET_SELF;
+                break;
             case 57994: // Wind Shear - improper data for EFFECT_1 in 3.3.5 DBC, but is correct in 4.x
                 spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_MODIFY_THREAT_PERCENT;
                 spellInfo->Effects[EFFECT_1].BasePoints = -6; // -5%
@@ -3370,6 +3411,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_SWAP_SPELLS;
                 spellInfo->Effects[0].BasePoints = 88685;
+                break;
+            case 42650: // Army of the Dead - can be interrupted
+                spellInfo->InterruptFlags = SPELL_INTERRUPT_FLAG_INTERRUPT;
                 break;
             case 68659: // Launch
                 spellInfo->Effects[1].TriggerSpell = 4336;
