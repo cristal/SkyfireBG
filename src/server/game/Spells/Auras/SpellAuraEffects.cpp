@@ -6273,50 +6273,46 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
     Player* target = aurApp->GetTarget()->ToPlayer();
     if (!target || !target->IsInWorld())
         return;
+	uint32 overrideId = GetAmount();
+	uint32 aura = 0;
+	uint32 affSpell = 0;
 
-    uint32 overrideId = GetAmount();
-    if (!overrideId)
-        return;
+	ActionBarSpellOverride const* actbarSpellOverride = sSpellMgr->GetActionBarSpellOverride(overrideId);
 
-    SpellEntry const* spell = sSpellStore.LookupEntry(overrideId);
-    if (!spell)
-        return;
+	if(actbarSpellOverride)
+	{
+		aura = actbarSpellOverride->aura;
+		affSpell = actbarSpellOverride->affSpell;
+	}
+	else
+	{
+		switch (GetAmount())
+		{
+			default:
+				return;
+		}
+	}
 
-    uint32 affspell = 0;
+	//Check Aura
+	if(aura != 0 && !target->HasAura(aura))
+		return;
 
-    PlayerSpellMap spellMap = target->GetSpellMap();
-    for (PlayerSpellMap::const_iterator itr = spellMap.begin(); itr != spellMap.end(); ++itr)
-    {
-        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
-        if (!spellInfo)
-            continue;
-
-        if (overrideId != itr->first && (spellInfo->SpellFamilyFlags & GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask))
-        {
-            affspell = itr->first;
-            break;
-        }
-    }
-
-    if (!affspell)
-        return;
-
-    if (apply)
-    {
-        target->AddTemporarySpell(overrideId);
-        WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4); // Wrong opcode, we have to find the good one
-        data << uint32(affspell);
-        data << uint32(overrideId);
-        target->GetSession()->SendPacket(&data);
-    }
-    else
-    {
-        target->RemoveTemporarySpell(overrideId);
-        WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4); // Wrong opcode, we have to find the good one
-        data << uint32(overrideId);
-        data << uint32(affspell);
-        target->GetSession()->SendPacket(&data);
-    }
+	if (apply)
+	{
+		target->AddTemporarySpell(overrideId);
+		WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
+		data << uint32(affSpell); // here should be affected spell - not really necessary, after casting the real spell again, it auto-fixes
+		data << uint32(overrideId);
+		target->GetSession()->SendPacket(&data);
+	}
+	else
+	{
+		target->RemoveTemporarySpell(overrideId);
+		WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
+		data << uint32(overrideId);
+		data << uint32(affSpell); // here should be affected spell - not really necessary, after casting the real spell again, it auto-fixes
+		target->GetSession()->SendPacket(&data);
+	}
 }
 
 void AuraEffect::HandlePreventResurrection(AuraApplication const* aurApp, uint8 mode, bool apply) const
