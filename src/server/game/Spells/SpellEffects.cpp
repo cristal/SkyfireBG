@@ -538,7 +538,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     if (pct > 0) 
                         damage += int32(CalculatePctN(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
                 } 
-				else if(m_spellInfo->Id == 6544)
+				else if(m_spellInfo->Id == 52174) // heroic leap
 				{
 					damage = uint32(1 + (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) * 0.5);
 				}

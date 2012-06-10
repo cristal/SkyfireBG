@@ -1626,6 +1626,18 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
             Battleground* bg = player->GetBattleground();
             return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
+	    case 6544: // Heroic Leap
+        {
+            if (!player)
+                return SPELL_FAILED_REQUIRES_AREA;
+
+            MapEntry const *mapEntry = sMapStore.LookupEntry(map_id);
+            if (!mapEntry)
+                return SPELL_FAILED_INCORRECT_AREA;
+
+            Battleground *bg = player->GetBattleground();
+            return (bg && bg->GetStatus() == STATUS_WAIT_JOIN) ? SPELL_FAILED_NOT_HERE : SPELL_CAST_OK;
+        }
     }
 
     // aura limitations

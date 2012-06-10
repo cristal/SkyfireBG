@@ -663,16 +663,13 @@ class spell_warr_heroic_leap : public SpellScriptLoader
 
                 return true;
             }
-
             SpellCastResult CheckElevation()
             {
-                Unit* caster = GetCaster();
-
+				Unit* caster = GetCaster();
 				WorldLocation const* const dest = GetExplTargetDest();
 
                 if (dest->GetPositionZ() > caster->GetPositionZ() + 5.0f) // Cant jump to higher ground
                     return SPELL_FAILED_NOPATH;
-
                 return SPELL_CAST_OK;
             }
 
