@@ -3446,6 +3446,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_SWAP_SPELLS;
                 spellInfo->Effects[0].BasePoints = 93402;
                 break;
+			case 82928: // Aimed shot! should be instant
+				spellInfo->CastTimeEntry = 0;
+                break;
             case 70728: // Exploit Weakness (needs target selection script)
             case 70840: // Devious Minds (needs target selection script)
                 spellInfo->Effects[0].TargetA = TARGET_UNIT_CASTER;
