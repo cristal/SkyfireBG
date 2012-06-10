@@ -678,20 +678,26 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 // Evangelism: Rank 1
                 if (Aura* evan1 = m_caster->GetAura(81659))
                 {
-                    m_caster->CastSpell(m_caster, 81660, true);
-                    // Trigger to activate archangel
-                    m_caster->CastSpell(m_caster, 87154, true);
-                    m_caster->RemoveAurasDueToSpell(87118);
-                    m_caster->RemoveAurasDueToSpell(87117);
+					if(m_spellInfo->Id == 585)
+					{
+						m_caster->CastSpell(m_caster, 81660, true);
+						// Trigger to activate archangel
+						m_caster->CastSpell(m_caster, 87154, true);
+						m_caster->RemoveAurasDueToSpell(87118);
+						m_caster->RemoveAurasDueToSpell(87117);
+					}
                 }
                 // Evangelism: Rank 2
                 if (Aura* evan2 = m_caster->GetAura(81662))
                 {
-                    m_caster->CastSpell(m_caster, 81661, true);
-                    // Trigger to activate archangel
-                    m_caster->CastSpell(m_caster, 87154, true);
-                    m_caster->RemoveAurasDueToSpell(87118);
-                    m_caster->RemoveAurasDueToSpell(87117);
+					if(m_spellInfo->Id == 585)
+					{
+						m_caster->CastSpell(m_caster, 81661, true);
+						// Trigger to activate archangel
+						m_caster->CastSpell(m_caster, 87154, true);
+						m_caster->RemoveAurasDueToSpell(87118);
+						m_caster->RemoveAurasDueToSpell(87117);
+					}
                 }
                 break;
             }
@@ -6139,29 +6145,29 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 		 }
         case SPELLFAMILY_PRIEST:
         {
-			if (m_spellInfo->Id == 87151)
-            {
-                if (m_caster->HasAura(81661)||m_caster->HasAura(81660))
+				// Archangel(87151)
+                if (m_spellInfo->Id == 87151)
                 {
-                    if (Aura* evangelism = m_caster->GetAura(81661))
+                    // holy
+                    if (Aura* holy = m_caster->GetAura(81661))
                     {
-                        int32 bp = 1 * evangelism->GetStackAmount();
-                        m_caster->CastCustomSpell(m_caster, 87152, &bp, NULL, NULL, true, 0, 0, m_caster->GetGUID());
-                        bp = 3 * evangelism->GetStackAmount();
-                        m_caster->CastCustomSpell(m_caster, 81700, &bp, NULL, NULL, true, 0, 0, m_caster->GetGUID());
+                        int32 bp = holy->GetStackAmount() * 3;
+                        //Give mana
+                        m_caster->CastSpell(m_caster,87152,true);
+                        //Cast visual & mod healing
+                        m_caster->CastCustomSpell(m_caster, 81700,&bp,NULL,NULL, true);
                         m_caster->RemoveAurasDueToSpell(81661);
                     }
-                    else if (Aura* darkEvangelism = m_caster->GetAura(87118)) // dark
+                    // dark
+                    if (Aura* shadow = m_caster->GetAura(87118))
                     {
-                        int32 bp = 5 * darkEvangelism->GetStackAmount();
-                        m_caster->CastCustomSpell(m_caster, 87152, &bp, NULL, NULL, true, 0, 0, m_caster->GetGUID());
-                        bp = 4 * darkEvangelism->GetStackAmount();
-                        m_caster->CastCustomSpell(m_caster, 87153, &bp, &bp, NULL, true, 0, 0, m_caster->GetGUID());
+                        int32 bp = shadow->GetStackAmount() * 4;
+                        int32 bp_ = 5;
+                        m_caster->CastCustomSpell(m_caster, 87152, &bp_, NULL,NULL, true);
+                        m_caster->CastCustomSpell(m_caster, 87153,&bp,&bp,NULL, true);
                         m_caster->RemoveAurasDueToSpell(87118);
                     }
-                    m_caster->RemoveAurasDueToSpell(87154);
                 }
-            }
            if (m_spellInfo->Id == 89490) // Strength of Soul
            {
                if (unitTarget->HasAura(6788))
