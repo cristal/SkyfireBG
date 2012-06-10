@@ -3861,10 +3861,22 @@ bool ChatHandler::HandleCastCommand(const char *args)
         if (strncmp(trig_str, "triggered", l) != 0)
             return false;
     }
+	char* ba0 = strtok(NULL, " ");
+	char* ba1 = strtok(NULL, " ");
+	char* ba2 = strtok(NULL, " ");
+		int32 basepoints0 = 0;
+		int32 basepoints1 = 0;
+		int32 basepoints2 = 0; 
+	if(ba0)
+		basepoints0 = (int32)atof(ba0);
+    if(ba1)
+		basepoints1 = (int32)atof(ba1);
+	if(ba2)
+		basepoints2 = (int32)atof(ba2);
 
     bool triggered = (trig_str != NULL);
 
-    m_session->GetPlayer()->CastSpell(target, spell, triggered);
+	m_session->GetPlayer()->CastCustomSpell(target, spell,&basepoints0,&basepoints1,&basepoints2, triggered,NULL,NULL,NULL);
 
     return true;
 }
