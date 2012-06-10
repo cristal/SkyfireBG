@@ -2601,15 +2601,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex) {
 			}
 			// Chakra: Sanctuary is now applied on caster if he casts Prayer of Mending and has Aura Chakra
             if (m_caster->HasAura(14751 /*Chakra*/) && m_spellInfo->Id == 41635 /*Prayer of Mending */)
-				m_caster->CastSpell(m_caster, 81206, true); // Chakra: Sanctuary   
-     // Priest: Handles the refresh of renew if the caster casts a direct Heal and has Chakra: Serenity    
-     if (m_caster->HasAura(81208) /*Chakra: Serenity*/)    
-     {    
-       if(unitTarget->HasAura(139 /*(Renew)*/) && (m_spellInfo->Id == 2050 /*(Heal)*/ || m_spellInfo->Id == 2060 /*(Greater Heal)*/ ||     
-         m_spellInfo->Id == 2061 /*(Flash Heal)*/ || m_spellInfo->Id == 32546 /*(Binding Heal)*/))    
-       unitTarget->GetAura(139)->RefreshDuration(); // Refresh Renew on Target        
-     }      
-    }    
+				m_caster->CastSpell(m_caster, 81206, true); // Chakra: Sanctuary 
 			break;
         }
     }
