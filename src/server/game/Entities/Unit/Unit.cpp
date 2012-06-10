@@ -8019,14 +8019,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (!procSpell || procSpell->PowerType != POWER_MANA || (procSpell->ManaCost == 0 && procSpell->ManaCostPercentage == 0 && procSpell->ManaCostPerlevel == 0))
                     return false;
 
-                Unit* caster = triggeredByAura->GetCaster();
+                Unit* caster = triggeredByAura->GetBase()->GetCaster();
 
                 if (!caster)
                     return false;
 
                 triggered_spell_id = 77616;
                 basepoints0 = procSpell->Id;
-                target = this;
+                target = caster;
             }
             break;
         }
