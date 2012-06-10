@@ -1644,8 +1644,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 {
                     // Juggernaut CD part
                     if (m_caster->HasAura(64976))
-                        m_caster->ToPlayer()->AddSpellCooldown(100, 0, time(NULL) + 13); // 15 - 2 from Juggernaut
-                    return;
+					{
+						m_caster->CastSpell(m_caster, 96216, false);
+                        m_caster->ToPlayer()->AddSpellCooldown(20252, 0, time(NULL) + 30);
+					}
+					return;
                 }
             }
             break;
