@@ -8026,7 +8026,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                 triggered_spell_id = 77616;
                 basepoints0 = procSpell->Id;
-                target = caster;
+                target = this;
             }
             break;
         }
