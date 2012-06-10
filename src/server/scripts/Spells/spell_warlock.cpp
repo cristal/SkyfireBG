@@ -35,6 +35,38 @@ enum WarlockSpells
     WARLOCK_DEMONIC_EMPOWERMENT_IMP         = 54444,
     WARLOCK_HEALTHSTONE_CREATE              = 34130,
     WARLOCK_HEALTHSTONE_HEAL                = 6262,
+	WARLOCK_DARK_INTENT_EFFECT              = 85767,
+};
+
+//80398 Dark Intent
+class spell_warl_dark_intent: public SpellScriptLoader
+{
+public:
+	spell_warl_dark_intent() : SpellScriptLoader("spell_warl_dark_intent") {
+	  }
+
+	  class spell_warl_dark_intent_SpellScript: public SpellScript {
+		  PrepareSpellScript(spell_warl_dark_intent_SpellScript)
+
+			  void HandleScriptEffect(SpellEffIndex effIndex) {
+				  Unit* caster = GetCaster();
+				  Unit* target = GetHitUnit();
+
+				  if (!caster || !target)
+					  return;
+
+				  caster->CastSpell(target, WARLOCK_DARK_INTENT_EFFECT, true);
+				  target->CastSpell(caster, WARLOCK_DARK_INTENT_EFFECT, true);
+		  }
+
+		  void Register() {
+			  OnEffectHit += SpellEffectFn(spell_warl_dark_intent_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_TRIGGER_SPELL);
+		  }
+	  };
+	  
+	  SpellScript* GetSpellScript() const {
+		  return new spell_warl_dark_intent_SpellScript();
+	  }
 };
 
 class spell_warl_banish : public SpellScriptLoader
@@ -453,4 +485,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_fear();
     new spell_warl_drain_life();
     new spell_warl_fel_flame();
+    new spell_warl_dark_intent();
 }

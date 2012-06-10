@@ -6283,7 +6283,28 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
         return;
 
     uint32 aura = spellOverride->aura;
-    uint32 affSpell = spellOverride->affSpell;
+	uint32 affSpell = 77606; //Default: Dark Simulacrum since it can copy all kind of spells - DO NOT USE: Cause learning spells, BIG BUG
+    if(spellOverride->affSpell)
+		affSpell = spellOverride->affSpell;
+
+	if(overrideId == 93402) // Sunfire
+    {
+        if(target->HasAura(48517)) // Sunfire talent
+            affSpell = 8921; // Moonfire
+        else
+            return;
+    }
+
+    if(overrideId == 91711)
+    {
+        if(target->HasAura(91713)) //The nether ward talent
+            affSpell = 6229;
+        else
+            return;
+    }
+	if(overrideId == 92283) // Frostfire Orb Override
+        affSpell = 82731;
+
 
     //Check Aura
     if(aura > 0 && !target->HasAura(aura))
