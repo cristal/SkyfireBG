@@ -1321,7 +1321,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit* caster) const
 				else if (caster->HasAura(81662)) // Rank 2
 					caster->CastSpell(caster, 87118, true);
 
-				m_caster->CastSpell(m_caster, 87154, true);
+				caster->CastSpell(caster, 87154, true);
 			}
             HandlePeriodicDamageAurasTick(target, caster);
             break;

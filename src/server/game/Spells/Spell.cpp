@@ -3701,6 +3701,10 @@ void Spell::finish(bool ok)
 
      // TODO: Kill these hacks
     switch (m_spellInfo->Id) {
+        case 586: // Fade
+             if (m_caster->HasAura(47570) || (m_caster->HasAura(47569) && roll_chance_i(50))) // Phantasm
+                    m_caster->RemoveMovementImpairingAuras();
+                break;
         case 30455: // Ice Lance
         case 44572: // Deep Freeze
             if (m_caster->HasAura(44544)) // Fingers of Frost
