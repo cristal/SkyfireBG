@@ -3175,7 +3175,7 @@ void SpellMgr::LoadSpellCustomAttr()
             case 29213: // Curse of the Plaguebringer - Noth
             case 28542: // Life Drain - Sapphiron
             case 66588: // Flaming Spear
-            case 54171: case 54172: // Divine Storm (Heal)
+            case 54171: // Divine Storm (Heal)
                 spellInfo->MaxAffectedTargets = 3;                
                 break;
             case 53385: // Divine Storm (Damage)

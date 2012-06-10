@@ -1747,11 +1747,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     templist.clear();
             }
                         m_caster->CastSpell(unitTarget, 79061, true); // Mark of the Wild (Caster)
+				break;
                 }
-                break;
-            }
-            break;
-        }
         case SPELLFAMILY_PALADIN:
         {
             switch (m_spellInfo->Id)
