@@ -668,7 +668,7 @@ class spell_warr_heroic_leap : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
 
-                WorldLocation* dest = GetTargetDest();
+				WorldLocation const* const dest = GetExplTargetDest();
 
                 if (dest->GetPositionZ() > caster->GetPositionZ() + 5.0f) // Cant jump to higher ground
                     return SPELL_FAILED_NOPATH;
