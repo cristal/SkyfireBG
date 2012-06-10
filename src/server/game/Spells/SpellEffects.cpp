@@ -542,6 +542,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 				{
 					damage = uint32(1 + (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) * 0.5);
 				}
+				else if(m_spellInfo->Id == 57755) // heroic throw
+				{
+					damage = uint32(12 + (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) * 0.5);
+				}
 				else if(m_spellInfo->Id == 12809) // Concussion Blow
 				{
 					damage = uint32(75 / ((m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) * 100));
