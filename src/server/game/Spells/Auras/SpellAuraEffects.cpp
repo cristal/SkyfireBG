@@ -1317,10 +1317,17 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit* caster) const
 			if (target->HasAura(15407)) // Mind Flay
 			{
 				if (caster->HasAura(81659)) // Rank 1
+				{
 					caster->CastSpell(caster, 87117, true);
+					caster->RemoveAurasDueToSpell(81660);
+					caster->RemoveAurasDueToSpell(81661);
+				}
 				else if (caster->HasAura(81662)) // Rank 2
+				{
 					caster->CastSpell(caster, 87118, true);
-
+					caster->RemoveAurasDueToSpell(81660);
+					caster->RemoveAurasDueToSpell(81661);
+				}
 				caster->CastSpell(caster, 87154, true);
 			}
             HandlePeriodicDamageAurasTick(target, caster);
