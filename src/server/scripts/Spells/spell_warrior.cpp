@@ -27,6 +27,7 @@
 enum WarriorSpells
 {
     WARRIOR_SPELL_LAST_STAND_TRIGGERED           = 12976,
+	WARRIOR_SPELL_HEROIC_LEAP                    = 6544,
 };
 
 class spell_warr_last_stand : public SpellScriptLoader
@@ -638,6 +639,55 @@ public:
     }
 };
 
+// Heroic leap 6544
+class spell_warr_heroic_leap : public SpellScriptLoader
+{
+    public:
+        spell_warr_heroic_leap() : SpellScriptLoader("spell_warr_heroic_leap") { }
+
+        class spell_warr_heroic_leap_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_heroic_leap_SpellScript)
+
+            bool Validate(SpellEntry const * /*spellEntry*/)
+            {
+                if (!sSpellStore.LookupEntry(WARRIOR_SPELL_HEROIC_LEAP))
+                    return false;
+                return true;
+            }
+
+            bool Load()
+            {
+                if (!GetCaster())
+                    return false;
+
+                return true;
+            }
+
+            SpellCastResult CheckElevation()
+            {
+                Unit* caster = GetCaster();
+
+                WorldLocation* dest = GetTargetDest();
+
+                if (dest->GetPositionZ() > caster->GetPositionZ() + 5.0f) // Cant jump to higher ground
+                    return SPELL_FAILED_NOPATH;
+
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_warr_heroic_leap_SpellScript::CheckElevation);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_warr_heroic_leap_SpellScript();
+        }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_last_stand();
@@ -654,4 +704,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_vigilance();
     new spell_warr_charge();
     new spell_warr_slam();
+	new spell_warr_heroic_leap();
 }
