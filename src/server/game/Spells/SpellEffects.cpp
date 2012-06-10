@@ -538,6 +538,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     if (pct > 0) 
                         damage += int32(CalculatePctN(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
                 } 
+				else if(m_spellInfo->Id == 6544)
+				{
+					damage = uint32(1 + (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) * 0.5);
+				}
                 else if (m_spellInfo->Id == 6343)
                 {
                     uint32 trig_spell;
