@@ -4459,6 +4459,29 @@ uint32 Unit::GetDoTsByCaster(uint64 casterGUID) const
     return dots;
 }
 
+std::list<AuraEffect const*> Unit::GetAuraDoTsByCaster(uint64 casterGUID)
+{
+    static const AuraType diseaseAuraTypes[] =
+    {
+        SPELL_AURA_PERIODIC_DAMAGE,
+        SPELL_AURA_PERIODIC_DAMAGE_PERCENT,
+        SPELL_AURA_NONE
+    };
+
+    std::list<AuraEffect const*> dotList;
+    for (AuraType const* itr = &diseaseAuraTypes[0]; itr && itr[0] != SPELL_AURA_NONE; ++itr)
+    {
+        Unit::AuraEffectList const& auras = GetAuraEffectsByType(*itr);
+        for (AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
+        {
+            // Get auras by caster
+            if ((*i)->GetCasterGUID() == casterGUID)
+                dotList.push_back((*i));
+        }
+    }
+    return dotList;
+}
+
 int32 Unit::GetTotalAuraModifier(AuraType auratype) const
 {
     int32 modifier = 0;
