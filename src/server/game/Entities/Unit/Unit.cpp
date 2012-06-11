@@ -9119,13 +9119,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             basepoints0 = int32(CalculatePctN(ap, 280));
             break;
         }
-        // Improved Hamstring
-        case 12289:
-        case 12668:
-        {
-            if (!victim->HasAura(1715)) return false;
-            break;
-        }
         // Greater Heal Refund (Avatar Raiment set)
         case 37594:
         {
@@ -11710,6 +11703,11 @@ uint32 Unit::SpellHealingBonus(Unit* victim, SpellInfo const* spellProto, uint32
             case 3736: // Hateful Totem of the Third Wind / Increased Lesser Healing Wave / LK Arena (4/5/6) Totem of the Third Wind / Savage Totem of the Third Wind
                 DoneTotal += (*i)->GetAmount();
                 break;
+            case 7997: // Renewed Hope
+            case 7998:
+                if (victim->HasAura(6788))
+                    AddPctN(DoneTotalMod, (*i)->GetAmount());
+                break;
             case   21: // Test of Faith
             case 6935:
             case 6918:
@@ -11795,6 +11793,7 @@ uint32 Unit::SpellHealingBonus(Unit* victim, SpellInfo const* spellProto, uint32
     }
     else
     {
+
         // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
         if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
             return healamount;

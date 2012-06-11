@@ -1155,6 +1155,41 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				break;
 			}
 			break;
+		case SPELLFAMILY_WARRIOR:
+			if(GetId() == 1715) // Hamstring
+			{
+				if(caster->HasAura(12668)) // Improved Hamstring rank 2
+				{
+					if(target->HasAura(1715)) // If he already has hamstring
+					{
+						caster->CastSpell(target,23694,false); // Not triggered
+						if(!caster->ToPlayer()->HasSpellCooldown(23694))
+							caster->ToPlayer()->AddSpellCooldown(23694,0,uint32(time(NULL) + 30000)); // Add 30 seconds cooldown
+					}
+				}
+				if(caster->HasAura(12289)) // Improved Hamstring rank 1
+				{
+					if(target->HasAura(1715)) // If he already has hamstring
+					{
+						caster->CastSpell(target,23694,false); // Not triggered
+						if(!caster->ToPlayer()->HasSpellCooldown(23694))
+							caster->ToPlayer()->AddSpellCooldown(23694,0,uint32(time(NULL) + 60000)); // Add 60 seconds cooldown
+					}
+				}
+			}
+			if (!caster)
+				break;
+
+			switch (GetId())
+			{
+			case 50227: // Warrior - Sword and Board
+				{
+					// Reset cooldown on shield slam if needed
+					caster->ToPlayer()->RemoveSpellCooldown(23922, true);
+					break;
+				}
+			}
+			break;
 		case SPELLFAMILY_DRUID:
 			if (!caster)
 				break;
@@ -1233,20 +1268,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				break;
 			}
 			break;
-		case SPELLFAMILY_WARRIOR:
-			if (!caster)
-				break;
-
-			switch (GetId())
-			{
-			case 50227: // Warrior - Sword and Board
-				{
-					// Reset cooldown on shield slam if needed
-					caster->ToPlayer()->RemoveSpellCooldown(23922, true);
-					break;
-				}
-			}
-			break;
 		case SPELLFAMILY_WARLOCK:
 			switch (GetId())
 			{
@@ -1265,10 +1286,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				if (target->GetTypeId() == TYPEID_PLAYER)
 					if (GameObject* obj = target->GetGameObject(48018))
 					{
-						target->NearTeleportTo(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
-						target->RemoveMovementImpairingAuras();
+						target->ToPlayer()->TeleportTo(obj->GetMapId(),obj->GetPositionX(),obj->GetPositionY(),obj->GetPositionZ(),obj->GetOrientation());
+						target->ToPlayer()->RemoveMovementImpairingAuras();
+						if(target->isSoulBurnActive())
+						{
+							target->CastSpell(target,79438,true);
+							caster->RemoveAurasDueToSpell(74434);
+						}
 					}
 					break;
+			case 89603: // Cremation - refresh immolate
+				if (target->HasAura(348))
+					target->GetAura(348)->RefreshDuration();
 			}
 			if(GetId() == 80240) // Bane of Havoc
 			{
@@ -1277,11 +1306,39 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				else
 					caster->SetHavocTarget(NULL);
 			}
+			if(GetId() == 687 || GetId() == 28176) // Fel / Demon Armor
+			{
+				if(caster->HasAura(91713)) // Nether ward talent
+					GetEffect(2)->SetAmount(91711);
+			}
 			if(GetId() == 27243) // Seed of Corruption
 			{
 				if(apply)
 					if(caster->isSoulBurnActive())
 						caster->MarkSoulBurn(true);
+			}
+			if(GetId() == 17877 || GetId() == 6353 || GetId() == 50796) // Shadowburn, Soul Fire, Chaos Bolt
+			{
+				if(caster->HasAura(30293)) // Soul Leech 1
+				{
+					caster->CastSpell(caster,57669,true);
+					caster->CastSpell(caster,59117,true);
+					caster->CastSpell(caster,59118,true);
+				}
+				if(caster->HasAura(30295)) // Soul Leech 2
+				{
+					int32 bp0 = 4;
+					caster->CastSpell(caster,57669,true);
+					caster->CastCustomSpell(caster, 59117, &bp0, NULL, NULL, true);
+					caster->CastCustomSpell(caster, 59118, &bp0, NULL, NULL, true);
+				}
+			}
+			if(GetId() == 1490) // Curse of elements
+			{
+				if(caster->HasAura(18179)) // Jinx rank 1
+					caster->CastSpell(target,85547,true);
+				if(caster->HasAura(85479)) // Jinxs rank 2
+					caster->CastSpell(target,86105,true);
 			}
 			if(GetId() == 702) // Curse of weakness
 			{
@@ -1364,6 +1421,22 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 					break;
 				}
 			}
+			// Serpent Sting
+			if (GetSpellInfo()->Id == 1978)
+			{
+				// Improved Serpent Sting rank 1
+				if (AuraEffect const * aurEff = caster->GetAuraEffect(19464,0))
+				{
+					int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * caster->SpellDamageBonus(target, GetSpellInfo(), GetEffect(0)->GetAmount(), DOT) / 100;
+					caster->CastCustomSpell(target, 83077, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
+				}
+				// Improved Serpent Sting rank 2
+				if (AuraEffect const * aurEff = caster->GetAuraEffect(82834,0))
+				{
+					int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * caster->SpellDamageBonus(target, GetSpellInfo(), GetEffect(0)->GetAmount(), DOT) / 100;
+					caster->CastCustomSpell(target, 83077, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
+				}
+			}
 			break;
 		case SPELLFAMILY_PRIEST:
 			if (!caster)
@@ -1377,6 +1450,19 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 					int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * caster->SpellDamageBonus(target, GetSpellInfo(), GetEffect(0)->GetAmount(), DOT) / 100;
 					caster->CastCustomSpell(target, 63675, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
 				}
+			}
+			if(GetId() == 91342){    // Dark transformation - shadow infusion
+				if(GetStackAmount() >= 5)
+				{
+					caster->CastSpell(caster,93426,true);
+					target->RemoveAurasDueToSpell(91342); //Remove all shadow infusions
+					target->ApplySpellImmune(GetId(),IMMUNITY_ID,91342,apply);
+				}
+			}
+			if(GetId() == 63560) //Dark transformation, on cast remove the aura
+			{
+				if(target->ToCreature()->isPet())
+					target->ToCreature()->GetOwner()->RemoveAurasDueToSpell(93426);
 			}
 			// Mind fly
 			else if (GetId() == 15407) 
@@ -1401,27 +1487,61 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				}
 			}
 			// Renew
-			else if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00000040 && GetEffect(0))
+			else if (GetSpellInfo()->Id == 139)
 			{
-				// Empowered Renew
-				if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 3021, 1))
+				//Divine Touch rank 2
+				if (caster->HasAura(63542))
 				{
-					int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * caster->SpellHealingBonus(target, GetSpellInfo(), GetEffect(0)->GetAmount(), HEAL) / 100;
-					caster->CastCustomSpell(target, 63544, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
+					// 10% rank 2
+					int32 basepoints0 = (GetEffect(0)->GetAmount() * GetEffect(0)->GetTotalTicks()) * 0.1f;
+					basepoints0 = int32(caster->SpellHealingBonus(target, GetSpellInfo(), uint32(basepoints0), HEAL,0));
+					caster->CastCustomSpell(target, 63544, &basepoints0, NULL, NULL, true);
+				}
+				//Divine Touch rank 1
+				else if (caster->HasAura(63534))
+				{
+					// 5% rank 1
+					int32 basepoints0 = (GetEffect(0)->GetAmount() * GetEffect(0)->GetTotalTicks()) * 0.05f;
+					basepoints0 = int32(caster->SpellHealingBonus(target, GetSpellInfo(), uint32(basepoints0), HEAL,0));
+					caster->CastCustomSpell(target, 63544, &basepoints0, NULL, NULL, true);
 				}
 			}
-			// Power Word: Shield
-			else if (m_spellInfo->SpellFamilyFlags[0] & 0x1 && m_spellInfo->SpellFamilyFlags[2] & 0x400 && GetEffect(0))
-			{
-				// Glyph of Power Word: Shield
-				if (AuraEffect* glyph = caster->GetAuraEffect(55672, 0))
-				{
-					// instantly heal m_amount% of the absorb-value
-					int32 heal = glyph->GetAmount() * GetEffect(0)->GetAmount()/100;
-					caster->CastCustomSpell(GetUnitOwner(), 56160, &heal, NULL, NULL, true, 0, GetEffect(0));
-				}
-			}
-			break;
+                // Power Word: Shield
+                else if (m_spellInfo->Id == 17)
+                {
+                    //Body and Soul rank 2
+                    if(caster->HasAura(64129))
+                        caster->CastSpell(target,65081,true);
+                    //Body and Soul rank 1
+                    if(caster->HasAura(64127))
+                        caster->CastSpell(target,64128,true);
+                    // Glyph of Power Word: Shield
+                    if (AuraEffect* glyph = caster->GetAuraEffect(55672,0))
+                    {
+                        // instantly heal m_amount% of the absorb-value
+                        int32 heal = glyph->GetAmount() * GetEffect(0)->GetAmount()/100;
+                        caster->CastCustomSpell(GetUnitOwner(), 56160, &heal, NULL, NULL, true, 0, GetEffect(0));
+                    }
+
+                    if(caster->HasAura(14768)) // Improved PW:Shield rank 2
+                        GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() + CalculatePctN(GetEffect(0)->GetAmount(),20));
+                    if(caster->HasAura(14748)) // Improved PW:Shield rank 1
+                        GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() + CalculatePctN(GetEffect(0)->GetAmount(),10));
+                    if(caster->HasAura(77484)) // Shield Discipline
+                    {
+                        float mastery = caster->GetFloatValue(PLAYER_MASTERY);
+                        GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() + int32(GetEffect(0)->GetAmount() * (float(mastery * 2.5f) / 100)));
+                    }
+                }
+                else if(m_spellInfo->Id == 47753) // Divine Aegis
+                {
+                    if(caster->HasAura(77484)) // Shield Discipline
+                    {
+                        float mastery = caster->GetFloatValue(PLAYER_MASTERY);
+                        GetEffect(0)->SetAmount(GetEffect(0)->GetAmount() + int32(GetEffect(0)->GetAmount() * (float(mastery * 2.5f) / 100)));
+                    }
+                }
+                break;
 		case SPELLFAMILY_ROGUE:
 			// Sprint (skip non player casted spells by category)
 			if (GetSpellInfo()->SpellFamilyFlags[0] & 0x40 && GetSpellInfo()->Category == 44)

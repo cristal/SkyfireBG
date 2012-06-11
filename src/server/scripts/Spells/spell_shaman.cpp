@@ -54,6 +54,87 @@ enum ShamanSpells
     SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN       = 77505,
     SHAMAN_SPELL_SEARING_FLAMES = 77661,
 };
+class spell_sha_unleash_elements : public SpellScriptLoader
+{
+public:
+    spell_sha_unleash_elements() : SpellScriptLoader("spell_sha_unleash_elements") { }
+
+    class spell_sha_unleash_elements_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_unleash_elements_SpellScript)
+        bool Validate(SpellEntry const * spellEntry)
+        {
+            if (!sSpellStore.LookupEntry(SHAMAN_SPELL_UNLEASH_ELEMENTS))
+                return false;
+           return true;
+        }
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if(!caster)
+                return;
+            Player* plr = caster->ToPlayer();
+            if(!plr)
+                return;
+
+			if(!GetExplTargetUnit())
+               return;
+
+            Item *weapons[2];
+            weapons[0] = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            weapons[1] = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            for(int i = 0; i < 2; i++)
+            {
+                if(!weapons[i])
+                    continue;
+
+                uint32 unleashSpell = 0;
+				Unit *target = GetExplTargetUnit();
+                bool hostileTarget = plr->IsHostileTo(target);
+                bool hostileSpell = true;
+
+                switch (weapons[i]->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
+                {
+                    case 3345: // Earthliving Weapon
+                        unleashSpell = 73685; //Unleash Life
+                        hostileSpell = false;
+                        break;
+                    case 5: // Flametongue Weapon
+                        unleashSpell = 73683; // Unleash Flame
+                        break;
+                    case 2: // Frostbrand Weapon
+                        unleashSpell = 73682; // Unleash Frost
+                        break;
+                    case 3021: // Rockbiter Weapon
+                        unleashSpell = 73684; // Unleash Earth
+                        break;
+                    case 283: // Windfury Weapon
+                        unleashSpell = 73681; // Unleash Wind
+                        break;
+                }
+                if(hostileSpell && !hostileTarget)
+                    return; // don't allow to attack non-hostile targets. TODO: check this before cast
+
+                if(!hostileSpell && hostileTarget)
+                    target = plr;   // heal ourselves instead of the enemy
+
+                if(unleashSpell)
+                {
+                    plr->CastSpell(target, unleashSpell, true);
+                }
+            }
+        }
+
+        void Register()
+        {
+			OnEffectHit += SpellEffectFn(spell_sha_unleash_elements_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sha_unleash_elements_SpellScript();
+    }
+};
 
 // 77478 - Earthquake
 class spell_sha_earthquake : public SpellScriptLoader
@@ -88,7 +169,7 @@ class spell_sha_earthquake : public SpellScriptLoader
 
            void Register()
            {
-               //OnEffectHitTarget += SpellEffectFn(spell_sha_earthquake_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+			   //OnEffectHitTarget += SpellEffectFn(spell_sha_earthquake_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
            }
        };
        
@@ -360,4 +441,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_heroism();
     new spell_sha_healing_rain();
     new spell_sha_earthquake();
+	new spell_sha_unleash_elements();
 }
