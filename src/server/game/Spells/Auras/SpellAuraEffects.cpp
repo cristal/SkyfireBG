@@ -5315,9 +5315,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             {
                 int32 spell_rpc_id = target->getLastSpellCasted();
                 SpellEntry const * spell = sSpellStore.LookupEntry(spell_rpc_id);
-                if(!spell || spell->powerType != POWER_MANA || target->GetTypeId() != TYPEID_PLAYER || 
-					(spell->SchoolMask != SPELL_EFFECT_SCHOOL_DAMAGE || spell->SchoolMask != SPELL_EFFECT_SCHOOL_DAMAGE 
-					|| spell->SchoolMask != SPELL_EFFECT_SCHOOL_DAMAGE))
+                if(!spell || spell->powerType != POWER_MANA || target->GetTypeId() != TYPEID_PLAYER)
                     return;
                 caster->CastCustomSpell(caster,77616,&spell_rpc_id,NULL,NULL,NULL);
             }
