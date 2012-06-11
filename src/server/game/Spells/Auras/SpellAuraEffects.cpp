@@ -550,6 +550,35 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 amount = caster->ApplyEffectModifiers(GetSpellInfo(), m_effIndex, float(amount));
                 amount = amount * 0.8;
             }
+       // Power Word: Shield
+                    if (GetSpellInfo()->Id == 17)
+                    {
+                        // +87% from sp bonus (+ special multiplier)
+                        float bonus = 1.14f;
+						DoneActualBenefit += caster->SpellBaseHealingBonus(SpellSchoolMask(GetSpellInfo()->SchoolMask)) * bonus;
+                        // Improved PW: Shield: its weird having a SPELLMOD_ALL_EFFECTS here but its blizzards doing :)
+                        // Improved PW: Shield is only applied at the spell healing bonus because it was already applied to the base value in CalculateSpellDamage
+                        DoneActualBenefit = caster->ApplyEffectModifiers(GetSpellInfo(), m_effIndex, DoneActualBenefit);
+                        DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellInfo());
+                        DoneActualBenefit += caster->CalculateLevelPenalty(GetSpellInfo());
+
+                        amount += int32(DoneActualBenefit);
+
+                        // Twin Disciplines
+                        if (AuraEffect const* pAurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_PRIEST, 0x400000, 0, 0, caster->GetGUID()))
+                            AddPctN(amount, pAurEff->GetAmount());
+
+                        // Spiritual Healing
+                        if (AuraEffect const* pAurEff = caster->GetAuraEffect(87336,0))
+                            AddPctN(amount, pAurEff->GetAmount());
+
+                        // Focused Power
+                        // Reuse variable, not sure if this code below can be moved before Twin Disciplines
+                        DoneActualBenefit = float(amount);
+                        DoneActualBenefit *= caster->GetTotalAuraMultiplier(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
+                        amount = int32(DoneActualBenefit);
+
+                    }
             break;
         case SPELL_AURA_PERIODIC_DAMAGE:
             if (!caster)

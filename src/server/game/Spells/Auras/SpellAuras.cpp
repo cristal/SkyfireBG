@@ -1830,6 +1830,36 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 			}
 			switch (GetId())
 			{
+				if (!caster)
+					break;
+				// Power word: shield
+				else if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL && GetSpellInfo()->Id == 17)
+				{
+					// Rapture
+					if (Aura const * aura = caster->GetAuraOfRankedSpell(47535))
+					{
+						// check cooldown
+						if (caster->GetTypeId() == TYPEID_PLAYER)
+						{
+							if (caster->ToPlayer()->HasSpellCooldown(aura->GetId()))
+								break;
+							// and add if needed
+							caster->ToPlayer()->AddSpellCooldown(aura->GetId(), 0, uint32(time(NULL) + 12));
+						}
+						// effect on caster
+						if (AuraEffect const * aurEff = aura->GetEffect(0))
+						{
+							float multiplier = (float)aurEff->GetAmount();
+							if (aurEff->GetId() == 47535)
+								multiplier -= 0.5f;
+							else if (aurEff->GetId() == 47537)
+								multiplier += 0.5f;
+
+							int32 basepoints0 = int32(CalculatePctF(caster->GetMaxPower(POWER_MANA), multiplier));
+							caster->CastCustomSpell(caster, 47755, &basepoints0, NULL, NULL, true);
+						}
+					}
+				}
 			case 47788: // Guardian Spirit
 				if (removeMode != AURA_REMOVE_BY_EXPIRE)
 					break;
