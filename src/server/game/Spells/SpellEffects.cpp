@@ -1074,10 +1074,15 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     float average = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE)) / float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
                     int32 count = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_2);
                     damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
-                    break;
-                }
-                break;
-            }
+					break;
+				}
+				if(m_spellInfo->Id == 31803) // Seal of Truth - Inquiry of Faith
+				{
+					if (AuraEffect * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_PALADIN, 3025, 0))
+						damage += damage * (aurEff->GetAmount() / 100);
+				}
+				break;
+			}
             case SPELLFAMILY_DEATHKNIGHT:
             {
                 // Blood Boil - bonus for diseased targets
@@ -1091,6 +1096,31 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 }
                 break;
             }
+           case SPELLFAMILY_SHAMAN:
+                // Searing Bolt
+                if (m_spellInfo->Id == 3606)
+                {
+                    if (m_caster->GetOwner()->ToPlayer()->HasAura(77655))
+                        if (roll_chance_i(33))
+                            m_caster->CastSpell(unitTarget, 77661, true);
+                    if (m_caster->GetOwner()->ToPlayer()->HasAura(77656))
+                        if (roll_chance_i(67))
+                            m_caster->CastSpell(unitTarget, 77661, true);
+                    if (m_caster->GetOwner()->ToPlayer()->HasAura(77657))
+                        m_caster->CastSpell(unitTarget, 77661, true);
+                }
+                // Frost Shock
+                if(m_spellInfo->Id == 8056)
+                {
+                    if(m_caster->HasAura(63374)) // Frozen Power rank 2
+                        if(!m_caster->IsWithinDistInMap(unitTarget,15.0f)) // If is more than 15 yards
+                            m_caster->CastSpell(unitTarget,63685,true);
+                    if(m_caster->HasAura(63373)) // Frozen Power rank 1
+                        if(roll_chance_i(50))
+                            if(!m_caster->IsWithinDistInMap(unitTarget,15.0f)) // If is more than 15 yards
+                                m_caster->CastSpell(unitTarget,63685,true);
+                }
+                break;
             case SPELLFAMILY_MAGE:
             {
                 // Deep Freeze should deal damage to permanently stun-immune targets.
@@ -1854,51 +1884,51 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 					}
 					return;
                 }
-            }
-            break;
-        case SPELLFAMILY_DRUID:
-        {
-             if(m_spellInfo->Id == 80964)  // Skull Bash (bear) 
-                 {
-                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
-                    {
-                        switch(aurEff->GetId())
-                        {
-                            case 16940: // Brutal Impact (Rank 1)
-                            {
-                                m_caster->CastSpell(unitTarget, 82364 ,true);
-                                break;
-                            }
-                           case 16941: // Brutal Impact (Rank 2)
-                            {
-                                m_caster->CastSpell(unitTarget, 82365 ,true);
-                                break;
-                            }
-                        }
-                    }
-                    m_caster->CastSpell(unitTarget,93983,true);  
-                 }
-                 if(m_spellInfo->Id == 80965)  // Skull Bash(cat) 
-                 { 
-                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
-                    {
-                        switch(aurEff->GetId())
-                        {
-                            case 16940: // Brutal Impact (Rank 1)
-                            {
-                                m_caster->CastSpell(unitTarget, 82364 ,true);
-                                break;
-                            }
-                           case 16941: // Brutal Impact (Rank 2)
-                            {
-                                m_caster->CastSpell(unitTarget, 82365 ,true);
-                                break;
-                            }
-                        }
-                    }
-                    m_caster->CastSpell(unitTarget,93983,true); 
-                 }
-            // Starfall
+			}
+			break;
+	case SPELLFAMILY_DRUID:
+		{
+			if(m_spellInfo->Id == 80964)  // Skull Bash (bear) 
+			{
+				if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
+				{
+					switch(aurEff->GetId())
+					{
+					case 16940: // Brutal Impact (Rank 1)
+						{
+							m_caster->CastSpell(unitTarget, 82364 ,true);
+							break;
+						}
+					case 16941: // Brutal Impact (Rank 2)
+						{
+							m_caster->CastSpell(unitTarget, 82365 ,true);
+							break;
+						}
+					}
+				}
+				m_caster->CastSpell(unitTarget,93983,true);  
+			}
+			if(m_spellInfo->Id == 80965)  // Skull Bash(cat) 
+			{ 
+				if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DRUID, 473, 1))
+				{
+					switch(aurEff->GetId())
+					{
+					case 16940: // Brutal Impact (Rank 1)
+						{
+							m_caster->CastSpell(unitTarget, 82364 ,true);
+							break;
+						}
+					case 16941: // Brutal Impact (Rank 2)
+						{
+							m_caster->CastSpell(unitTarget, 82365 ,true);
+							break;
+						}
+					}
+				}
+				m_caster->CastSpell(unitTarget,93983,true); 
+			}
+			// Starfall
             if (m_spellInfo->SpellFamilyFlags[2] & SPELLFAMILYFLAG2_DRUID_STARFALL)
             {
                 // Shapeshifting into an animal form or mounting cancels the effect.
@@ -2999,23 +3029,89 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         int32 addhealth = damage;
 
-        // Vessel of the Naaru (Vial of the Sunwell trinket)
-        if (m_spellInfo->Id == 45064)
-        {
-            // Amount of heal - depends from stacked Holy Energy
-            int damageAmount = 0;
-            if (AuraEffect const* aurEff = m_caster->GetAuraEffect(45062, 0))
-            {
-                damageAmount+= aurEff->GetAmount();
-                m_caster->RemoveAurasDueToSpell(45062);
-            }
-        }
+		// Vessel of the Naaru (Vial of the Sunwell trinket)
+		if (m_spellInfo->Id == 45064)
+		{
+			// Amount of heal - depends from stacked Holy Energy
+			int damageAmount = 0;
+			if (AuraEffect const* aurEff = m_caster->GetAuraEffect(45062, 0))
+			{
+				damageAmount+= aurEff->GetAmount();
+				m_caster->RemoveAurasDueToSpell(45062);
+			}
+		}
+		else if (m_spellInfo->Id == 85673)
+		{
+			// +1 because takepower() function already took 1 holy power charge
+			uint32 holyp = m_caster->GetPower(POWER_HOLY_POWER) + 1;
+			addhealth += (0.198f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) * holyp;
 
-        // Runic Healing Injector (heal increased by 25% for engineers - 3.2.0 patch change)
-        else if (m_spellInfo->Id == 67489)
-        {
-            if (Player* player = m_caster->ToPlayer())
-                if (player->HasSkill(SKILL_ENGINEERING))
+			// Eternal Glory Rank 1
+			if(caster->HasAura(87163))
+			{
+				if(AuraEffect const * aurEff = caster->GetAuraEffect(87163,0))
+				{
+					if(!roll_chance_i(aurEff->GetAmount()))
+					{
+						caster->SetPower(POWER_HOLY_POWER,0);
+					}
+					else
+					{
+						int32 bp = 1;
+						caster->CastCustomSpell(caster,88676,&bp,NULL,NULL,true); // Refund holy charge
+					}
+				}
+			}
+
+
+			// Eternal Glory Rank 2
+			if(caster->HasAura(87164))
+			{
+				if(AuraEffect const * aurEff = caster->GetAuraEffect(87164,0))
+				{
+					if(!roll_chance_i(aurEff->GetAmount()))
+					{
+						caster->SetPower(POWER_HOLY_POWER,0);
+					}
+					else
+					{
+						int32 bp = 1;
+						caster->CastCustomSpell(caster,88676,&bp,NULL,NULL,true); // Refund holy charge
+					}
+				}
+			}
+
+			// Without Eternal Glory
+			if(!caster->HasAura(87163) && !caster->HasAura(87164))
+				caster->SetPower(POWER_HOLY_POWER,0);
+
+			//Selfless healer Rank 1
+			if(caster->HasAura(85803))
+				if(unitTarget != caster) //Only on others
+				{
+					//Increase heal done
+					addhealth += addhealth * 0.25f;
+					int32 mod = 2;
+					caster->CastCustomSpell(caster,90811,&mod,NULL,NULL,true);
+				}
+				//Selfless healer Rank 2
+				if(caster->HasAura(85804))
+					if(unitTarget != caster) //Only on others
+					{
+						//Increase heal done
+						addhealth += addhealth * 0.5f;
+						int32 mod = 4;
+						caster->CastCustomSpell(caster,90811,&mod,NULL,NULL,true);
+					}
+					if(caster->HasAura(20925)) // Holy Shield
+						if(caster->HasAura(85639) || caster->HasAura(85646)) // Guarded By The Light
+							caster->CastSpell(caster,87342,true);
+		}
+		// Runic Healing Injector (heal increased by 25% for engineers - 3.2.0 patch change)
+		else if (m_spellInfo->Id == 67489)
+		{
+			if (Player* player = m_caster->ToPlayer())
+				if (player->HasSkill(SKILL_ENGINEERING))
                     AddPctN(addhealth, 25);
         }
         // Swiftmend - consumes Regrowth or Rejuvenation

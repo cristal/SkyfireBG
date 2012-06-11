@@ -2172,24 +2172,22 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 		}
 		break;
 	case SPELLFAMILY_WARLOCK:
-		// Drain Soul - If the target is at or below 25% health, Drain Soul causes four times the normal damage
-		if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00004000)
-		{
-			if (!caster)
-				break;
-			if (apply)
-			{
-				if (target != caster && !target->HealthAbovePct(25))
-					caster->CastSpell(caster, 100001, true);
-			}
-			else
-			{
-				if (target != caster)
-					caster->RemoveAurasDueToSpell(GetId());
-				else
-					caster->RemoveAurasDueToSpell(100001);
-			}
-		}
+	   if(GetId() == 1120) // Drain soul
+        {
+            if(caster->HasAura(85099)) // Pandemic rank 1
+            {
+                if(target->HealthBelowPct(25))
+                    if(roll_chance_i(50))
+                        if(Aura* uaff = target->GetAura(30108))
+                            uaff->RefreshDuration();
+            }
+            if(caster->HasAura(85100)) // Pandemic rank 2
+            {
+                if(target->HealthBelowPct(25))
+                    if(Aura* uaff = target->GetAura(30108))
+                        uaff->RefreshDuration();
+            }
+        }
 		break;
 	}
 }
