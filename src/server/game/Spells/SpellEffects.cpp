@@ -1656,17 +1656,51 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             break;
         }
         case SPELLFAMILY_PRIEST:
+        {
+            //Leap of faith
+            if(m_spellInfo->Id == 73325)
             {
-                switch (m_spellInfo->Id)
+                //Jump!
+                unitTarget->CastSpell(m_caster,92832,true);
+
+                //Body and Soul Rank 2
+                if(m_caster->HasAura(64129))
                 {
-                    case 73325: // Leap of faith
-                    {
-                        unitTarget->CastSpell(m_caster, 92832, false);
-                        break;
-                    }
+                    m_caster->CastSpell(unitTarget,65081,true);
+                }
+                //Body and Soul Rank 1
+                if(m_caster->HasAura(64127))
+                {
+                    m_caster->CastSpell(unitTarget,64128,true);
+                }
+            }
+            if(m_spellInfo->Id == 21562) // Power Word : Fortitude
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    std::list<Unit*> PartyMembers;
+                    m_caster->GetPartyMembers(PartyMembers);
+                    if(PartyMembers.size() > 1)
+                        m_caster->CastSpell(unitTarget, 79105, true); // Power Word : Fortitude (Raid)
+                    else
+                        m_caster->CastSpell(unitTarget, 79104, true); // Power Word : Fortitude (Caster)
                 }
                 break;
             }
+            if(m_spellInfo->Id == 27683) // Shadow Protection
+            {
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    std::list<Unit*> PartyMembers;
+                    m_caster->GetPartyMembers(PartyMembers);
+                    if(PartyMembers.size() > 1)
+                        m_caster->CastSpell(unitTarget, 79107, true); // Shadow Protection (For all)
+                    else
+                        m_caster->CastSpell(unitTarget, 79106, true); // Shadow Protection (Only for caster)
+                }
+                break;
+            }
+        }
         case SPELLFAMILY_MAGE:
             {
                 // Cone of Cold
@@ -1701,6 +1735,19 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         }
                         break;
                     }
+                case 61316: // Dalaran Brilliance
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        std::list<Unit*> PartyMembers;
+                        m_caster->GetPartyMembers(PartyMembers);
+                        if(PartyMembers.size() > 1)
+                            m_caster->CastSpell(unitTarget, 79039, true); // Dalaran Brilliance (For all)
+                        else
+                            m_caster->CastSpell(unitTarget, 79038, true); // Dalaran Brilliance (Only for caster)
+                    }
+                    break;
+                }
                 case 42955: // Conjure Refreshment
                     {
                         if (m_caster->getLevel() > 33 && m_caster->getLevel() < 44)
@@ -1723,14 +1770,20 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
                         if (m_caster->getLevel() == 85)
                             m_caster->CastSpell(m_caster, 92727, true);
-                        break;
-                    }
-                case 82731: // Flame Orb
-                    {
-                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                            m_caster->CastSpell(m_caster, 84765, true); // Summon Flame Orb
-                        break;
-                    }
+						break;
+					}
+				case 82731: // Flame Orb
+					{
+						if (m_caster->GetTypeId() == TYPEID_PLAYER)
+							m_caster->CastSpell(m_caster, 84765, true); // Summon Flame Orb
+						break;
+					}
+				case 92283: // Frostfire Orb
+					{
+						if (m_caster->GetTypeId() == TYPEID_PLAYER)
+							m_caster->CastSpell(m_caster, 84714, true); // Summon Frostfire Orb
+						break;
+					}
                 case 43987: // Ritual of Refreshment
                     {
                         if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1750,10 +1803,38 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         }
                         break;
                     }
-                }
-                break;
-            }
-        case SPELLFAMILY_WARRIOR:
+				}
+				break;
+			}
+    case SPELLFAMILY_HUNTER:
+		// steady shot focus effect (it has its own skill for this)
+		if (m_spellInfo->SpellFamilyFlags[1] & 0x1)
+		{
+			if(m_caster->HasAura(83490)) // Termination rank 2
+			{
+				if(unitTarget->HealthBelowPct(25))
+				{
+					int32 bp = 9+6;
+					m_caster->CastCustomSpell(m_caster,77443,&bp,NULL,NULL,true);
+				}
+			}
+			else if(m_caster->HasAura(83489)) // Termination rank 1
+			{
+				if(unitTarget->HealthBelowPct(25))
+				{
+					int32 bp = 9+3;
+					m_caster->CastCustomSpell(m_caster,77443,&bp,NULL,NULL,true);
+				}
+			}
+			else
+				m_caster->CastSpell(m_caster,77443,true);
+		}
+		if (m_spellInfo->Id == 77767)
+			m_caster->CastSpell(m_caster,91954,true);
+		if (m_spellInfo->SpellFamilyFlags[2] & 0x20)
+			m_caster->CastSpell(m_caster,51755,true);
+		break;
+	case SPELLFAMILY_WARRIOR:
             // Concussion Blow
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARRIOR_CONCUSSION_BLOW)
             {
@@ -2084,8 +2165,44 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 m_caster->ToPlayer()->RemoveSpellCooldown(46585, true);
                 break;
             }
-            break;
-            case SPELLFAMILY_WARLOCK:
+			break;
+		case SPELLFAMILY_WARLOCK:
+			// Life Tap
+			if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARLOCK_LIFETAP)
+			{
+				int32 damage = m_caster->GetMaxHealth() * 0.15f;
+				int32 mana = damage * 1.20f;
+
+				if (unitTarget && (int32(unitTarget->GetHealth()) > damage))
+				{
+					// Shouldn't Appear in Combat Log
+					unitTarget->ModifyHealth(-damage);
+
+					// Improved Life Tap mod
+					if (AuraEffect const * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 208, 0))
+						AddPctN(mana, aurEff->GetAmount());
+
+					m_caster->CastCustomSpell(unitTarget, 31818, &mana, NULL, NULL, true);
+
+					// Mana Feed
+					int32 manaFeedVal = 0;
+					if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 1982, 0))
+						manaFeedVal = aurEff->GetAmount();
+
+					if (manaFeedVal > 0)
+					{
+						ApplyPctN(manaFeedVal, mana);
+						m_caster->CastCustomSpell(m_caster, 32553, &manaFeedVal, NULL, NULL, true, NULL);
+					}
+				}
+				else
+					SendCastResult(SPELL_FAILED_FIZZLE);
+				return;
+			}
+			// Shadow Burn should give 3 soul shards
+			if(m_spellInfo->Id == 29341)
+				m_caster->CastSpell(m_caster, 79264, false);
+
            switch (m_spellInfo->Id)
            {
                case 19028: // Soul Link
@@ -2094,6 +2211,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                        pet->AddAura(25228, pet);
                    break;
                }
+
            }
            break;
     }
