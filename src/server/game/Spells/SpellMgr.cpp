@@ -3446,6 +3446,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_SWAP_SPELLS;
                 spellInfo->Effects[0].BasePoints = 93402;
                 break;
+           case 22842: //Frenzied regeneration
+                spellInfo->Effects[1].Effect = SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT;
+                break;
 			case 82928: // Aimed shot! should be instant
 				spellInfo->CastTimeEntry = 0;
                 break;

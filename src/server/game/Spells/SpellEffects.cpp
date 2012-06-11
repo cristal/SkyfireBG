@@ -783,21 +783,22 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         // Chakra: Chastise
                         if (m_caster->HasAura(14751)) 
                             m_caster->CastSpell(m_caster, 81209, true); 
-                        break;
-                    default:
-                        break;
-                }
-                // Shadow Apparition
-                if (m_spellInfo->Id == 87532)
-                 {
-                    if (Unit* owner = m_caster->GetOwner())
-                    {
-                        apply_direct_bonus = false;
-                        damage += 0.6f * owner->SpellBaseDamageBonus(m_spellSchoolMask);
-                    }
-                // Evangelism: Rank 1
-                if (Aura* evan1 = m_caster->GetAura(81659))
-                {
+						break;
+					default:
+						break;
+				}
+				// Shadow Apparition
+				if (m_spellInfo->Id == 87532)
+				{
+					if (Unit* owner = m_caster->GetOwner())
+					{
+						apply_direct_bonus = false;
+						damage += 0.6f * owner->SpellBaseDamageBonus(m_spellSchoolMask);
+					}
+				}
+				// Evangelism: Rank 1
+				if (Aura* evan1 = m_caster->GetAura(81659))
+				{
 					if(m_spellInfo->Id == 585)
 					{
 						m_caster->CastSpell(m_caster, 81660, true);

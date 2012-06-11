@@ -6583,15 +6583,21 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
         case SPELLFAMILY_SHAMAN:
             if (GetId() == 52179) // Astral Shift
             {
-                // Periodic need for remove visual on stun/fear/silence lost
-                if (!(target->GetUInt32Value(UNIT_FIELD_FLAGS)&(UNIT_FLAG_STUNNED|UNIT_FLAG_FLEEING|UNIT_FLAG_SILENCED)))
-                    target->RemoveAurasDueToSpell(52179);
-                break;
-            }
-            break;
-        case SPELLFAMILY_DEATHKNIGHT:
-            switch (GetId())
-            {
+				// Periodic need for remove visual on stun/fear/silence lost
+				if (!(target->GetUInt32Value(UNIT_FIELD_FLAGS)&(UNIT_FLAG_STUNNED|UNIT_FLAG_FLEEING|UNIT_FLAG_SILENCED)))
+					target->RemoveAurasDueToSpell(52179);
+				break;
+			}
+			break;
+		case SPELLFAMILY_PRIEST:
+			{
+				if(GetId() == 88685 && GetEffIndex() == 0) //Holy word: Sanctuary
+					caster->CastSpell(target->GetPositionX(),target->GetPositionY(),target->GetPositionZ(),88686,true);
+				break;
+			}
+		case SPELLFAMILY_DEATHKNIGHT:
+			switch (GetId())
+			{
                 case 49016: // Hysteria
                     if (target->GetTypeId() != TYPEID_PLAYER)
                     return;
