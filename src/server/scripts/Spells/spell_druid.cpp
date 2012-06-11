@@ -529,7 +529,7 @@ public:
                     if (Continue == true)
                         caster->CastSpell(GetHitUnit(), 79061, true); // Mark of the Wild (Raid)
                     else
-                        caster->CastSpell(GetHitUnit(), 79061, true); // Mark of the Wild (Caster)
+                        caster->CastSpell(GetHitUnit(), 79060, true); // Mark of the Wild (Caster)
                 }
             }
         }
