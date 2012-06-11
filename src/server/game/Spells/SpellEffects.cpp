@@ -787,6 +787,14 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     default:
                         break;
                 }
+                // Shadow Apparition
+                if (m_spellInfo->Id == 87532)
+                 {
+                    if (Unit* owner = m_caster->GetOwner())
+                    {
+                        apply_direct_bonus = false;
+                        damage += 0.6f * owner->SpellBaseDamageBonus(m_spellSchoolMask);
+                    }
                 // Evangelism: Rank 1
                 if (Aura* evan1 = m_caster->GetAura(81659))
                 {

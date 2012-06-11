@@ -3435,6 +3435,63 @@ class npc_mushroom : public CreatureScript
     }
 };
 
+class npc_shadowy_apparition : public CreatureScript
+{
+public:
+    npc_shadowy_apparition() : CreatureScript("npc_shadowy_apparition") { }
+
+	CreatureAI *GetAI(Creature* pCreature) const
+    {
+        return new npc_shadowy_apparitionAI(pCreature);
+	}
+
+    struct npc_shadowy_apparitionAI : public ScriptedAI
+    {
+        npc_shadowy_apparitionAI(Creature* pCreature) : ScriptedAI(pCreature) 
+		{
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_FEAR, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_FREEZE, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_POLYMORPH, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_HORROR, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SAPPED, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_CHARM, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_DISORIENTED, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CONFUSE, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
+            me->SetSpeed(MOVE_RUN, 0.3f);
+        }
+
+        bool bCast;
+
+        void Reset()
+        {
+            bCast = false;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (!me->getVictim() || me->getVictim()->isDead())
+                me->DespawnOrUnsummon();
+
+            if (!bCast && me->GetDistance(me->getVictim()) < 1.0f)
+            {
+                bCast = true;
+                DoCast(me->getVictim(), 87532, true);
+                me->DespawnOrUnsummon(500);
+            }
+        }
+    };
+};
+
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -3472,4 +3529,5 @@ void AddSC_npcs_special()
     new npc_frostfire_orb;
     new npc_power_word_barrier;
     new npc_mushroom;
+	new npc_shadowy_apparition();
 }
