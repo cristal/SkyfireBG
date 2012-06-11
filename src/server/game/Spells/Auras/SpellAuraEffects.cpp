@@ -1263,11 +1263,16 @@ bool AuraEffect::IsPeriodicTickCrit(Unit* target, Unit const* caster) const
 
 bool AuraEffect::IsAffectedOnSpell(SpellInfo const* spell) const
 {
-    if (!spell)
-        return false;
-    // Check family name
-    if (spell->SpellFamilyName != m_spellInfo->SpellFamilyName)
-        return false;
+	if (!spell)
+		return false;
+
+	if(m_spellInfo->Id == 86914) //Firestarter - before all the checks to ensure it returns true!
+		if(spell->Id == 2948) //Scorch
+			return true;
+
+	// Check family name
+	if (spell->SpellFamilyName != m_spellInfo->SpellFamilyName)
+		return false;
 
     // Check EffectClassMask
     if (m_spellInfo->Effects[m_effIndex].SpellClassMask & spell->SpellFamilyFlags)

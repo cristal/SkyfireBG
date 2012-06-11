@@ -1863,6 +1863,16 @@ class Unit : public WorldObject
         uint32 GetDiseasesByCaster(uint64 casterGUID, bool remove = false);
         uint32 GetDoTsByCaster(uint64 casterGUID) const;
 
+		std::list<uint32> m_soulswapdots; //Used by Soul Swap
+        Unit* m_havocTarget;
+        bool m_sburnMarked;
+        void MarkSoulBurn(bool apply) { m_sburnMarked = apply;}
+        std::list<AuraEffect const*> GetAuraDoTsByCaster(uint64 casterGUID); // Used by Soul Swap
+        inline void StoreSoulSwapDoTs(std::list<uint32> list){ m_soulswapdots = list; }; //Used by Soul Swap
+        inline std::list<uint32> GetSoulSwapDots() { return m_soulswapdots; } // Used by Soul Swap
+        void SetHavocTarget(Unit* target) { m_havocTarget = target; }
+		bool isSoulBurnActive() { return HasAuraEffect(74434, 1); }
+
         int32 GetTotalAuraModifier(AuraType auratype) const;
         float GetTotalAuraMultiplier(AuraType auratype) const;
         int32 GetMaxPositiveAuraModifier(AuraType auratype);
