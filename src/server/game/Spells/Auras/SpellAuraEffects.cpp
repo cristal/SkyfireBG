@@ -5806,29 +5806,28 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         target->CastSpell(target, spellId, true, NULL, NULL, GetCasterGUID());
                         break;
                     }
-                    target->RemoveAurasDueToSpell(spellId);
-                    break;
-                }
-                case 61336:                                 // Survival Instincts
-                {
-                    if (!(mode & AURA_EFFECT_HANDLE_REAL))
-                        break;
+					target->RemoveAurasDueToSpell(spellId);
+					break;
+				}
+				case 61336:                                 // Survival Instincts
+					{
+						if (!(mode & AURA_EFFECT_HANDLE_REAL))
+							break;
 
-                    if (apply)
-                    {
-                        if (!target->IsInShapeshiftForm())
-                            break;
+						if (apply)
+						{
+							if (!target->IsInShapeshiftForm())
+								break;
 
-                        int32 bp0 = int32(target->CountPctFromMaxHealth(GetAmount()));
-                        target->CastCustomSpell(target, 50322, &bp0, NULL, NULL, true);
-                    }
-                    else
-                        target->RemoveAurasDueToSpell(50322);
-                    break;
-                }
-            }
-            // Predatory Strikes
-            if (target->GetTypeId() == TYPEID_PLAYER && GetSpellInfo()->SpellIconID == 1563)
+							target->CastSpell(target, 50322, true);
+						}
+						else
+							target-> RemoveAurasDueToSpell(50322);
+						break;
+					}
+			}
+			// Predatory Strikes
+			if (target->GetTypeId() == TYPEID_PLAYER && GetSpellInfo()->SpellIconID == 1563)
             {
                 target->ToPlayer()->UpdateAttackPowerAndDamage();
             }
@@ -5860,14 +5859,29 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             // if (!(mode & AURA_EFFECT_HANDLE_REAL))
             //    break;
             break;
-        case SPELLFAMILY_DEATHKNIGHT:
-        {
-            if (!(mode & AURA_EFFECT_HANDLE_REAL))
-                break;
-            // Improved Frost Presence
-            else if (m_spellInfo->SpellIconID == 2636)
-            {
-                if (apply)
+		case SPELLFAMILY_DEATHKNIGHT:
+			{
+				if (!(mode & AURA_EFFECT_HANDLE_REAL))
+					break;
+				// Improved Unholy Presence
+				if (m_spellInfo->Id == 2633)
+				{
+					if (apply)
+					{
+						if (target->HasAura(48265) && !target->HasAura(63622))
+						{
+							// Not listed as any effect, only base points set
+							int32 basePoints0 = 5;
+							target->CastCustomSpell(target, 63622, &basePoints0 , &basePoints0, &basePoints0, true, 0, this);
+						}
+					}
+					else
+						target->RemoveAurasDueToSpell(63622);
+				}
+				// Improved Frost Presence
+				else if (m_spellInfo->SpellIconID == 2636)
+				{
+					if (apply)
                 {
                     if (!target->HasAura(48266) && !target->HasAura(63611))
                         target->CastSpell(target, 63611, true);
