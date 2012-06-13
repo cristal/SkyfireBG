@@ -8416,15 +8416,12 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     *handled = true;
                 break;
             }
-            // Judgments of the Just
+            // Judgements of the Just
             else if (dummySpell->SpellIconID == 3015)
             {
                 *handled = true;
-                if (procSpell->Category == SPELLCATEGORY_JUDGEMENT)
-                {
-                    CastSpell(victim, 68055, true);
-                    return true;
-                }
+                CastSpell(victim, 68055, true);
+                return true;
             }
             // Glyph of Divinity
             else if (dummySpell->Id == 54939)
