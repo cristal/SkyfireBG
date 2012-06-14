@@ -3217,6 +3217,22 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         m_damage -= addhealth;
     }
+
+       else if (m_spellInfo->Id == 52042) // Healing Stream
+       {
+               Unit *caster = m_originalCasterGUID ? m_originalCaster : m_caster;
+              
+               if (!caster)
+            return;
+
+               if (caster->GetTypeId() != TYPEID_PLAYER)
+                       return;
+
+               if (caster->HasAura(16187)) //Soothing Rains (Rank 1)
+                       m_healing = 1.25*m_healing;
+               else if (caster->HasAura(16205)) //Soothing Rains (Rank 2)
+                       m_healing = 1.50*m_healing;
+       }
 }
 
 void Spell::EffectHealPct(SpellEffIndex /*effIndex*/)
