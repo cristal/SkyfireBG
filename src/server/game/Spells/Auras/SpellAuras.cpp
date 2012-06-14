@@ -2014,21 +2014,27 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 			// Master of subtlety
 			if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpell(31223, 0))
 			{
-				if (!apply)
-					caster->GetAura(31665)->SetDuration(6000, true);
-				else
+				if(caster)
 				{
-					int32 basepoints0 = aurEff->GetAmount();
-					caster->CastCustomSpell(target, 31665, &basepoints0, NULL, NULL, true);
+					if (!apply)
+						caster->GetAura(31665)->SetDuration(6000, true);
+					else
+					{
+						int32 basepoints0 = aurEff->GetAmount();
+						caster->CastCustomSpell(target, 31665, &basepoints0, NULL, NULL, true);
+					}
 				}
 			}
 			// Overkill
 			if (target->HasAura(58426))
 			{
-				if (!apply)
-					caster->GetAura(58427)->SetDuration(20000, true);
-				else
-					caster->CastSpell(target, 58427, true);
+				if(caster)
+				{
+					if (!apply)
+						caster->GetAura(58427)->SetDuration(20000, true);
+					else
+						caster->CastSpell(target, 58427, true);
+				}
 			}
 			break;
 		}
