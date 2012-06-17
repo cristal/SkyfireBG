@@ -7107,7 +7107,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     target = this;
                     triggered_spell_id = 31930;
                     basepoints0 = int32(target->GetCreateMana() * 0.030);
-       target->CastCustomSpell(target, 31930, &basepoints0, 0, 0, true, 0, triggeredByAura);
+                    target->CastCustomSpell(target, 31930, &basepoints0, 0, 0, true, 0, triggeredByAura);
                     break;
                 }
                 // Selfless Healer

@@ -3460,6 +3460,12 @@ void SpellMgr::LoadSpellCustomAttr()
            case 22842: //Frenzied regeneration
                 spellInfo->Effects[1].Effect = SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT;
                 break;
+           case 93974: // Aura of Foreboding
+           case 93975:
+           case 93986:
+           case 93987:
+                spellInfo->Effects[0].RadiusEntry = 26;
+                break;
 			case 82928: // Aimed shot! should be instant
 				spellInfo->CastTimeEntry = 0;
                 break;
