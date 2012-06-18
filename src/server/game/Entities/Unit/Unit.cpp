@@ -6535,6 +6535,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 54846;
                     break;
                 }
+                // Glyph of Healing Touch
+				case 54825:
+					triggered_spell_id = 54825;
+					break;
+                }
                 // Glyph of Shred
                 case 54815:
                 {
