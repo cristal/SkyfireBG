@@ -3260,7 +3260,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->ProcCharges = 1;
                 break;
             case 46915: // Bloodsurge
-                spellInfo->ProcCharges = 1;
+                spellInfo->ProcCharges = 30;
                 break;
            case 12295: // Tactical Mastery (Rank 1)
            case 12676: // Tactical Mastery (Rank 2)
