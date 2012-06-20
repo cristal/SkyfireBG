@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
@@ -494,16 +494,20 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARRIOR: {
                 // Bloodthirst
-            if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
-                            {
-                              damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.8);
-                            }
+				if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
+				{
+					damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.8);
+				}
                 // Victory Rush
                 else if (m_spellInfo->SpellFamilyFlags[1] & 0x100)
                 {
                     damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45); // wowwiki formula
                     m_caster->RemoveAurasDueToSpell(32216); // Victorious
                 }
+				// Meat Cleaver
+				else if (m_spellInfo->Id == 1680)
+					if (m_caster->HasAura(12950)) // Ak má talent Meat Cleaver
+                    damage = uint32(1+ m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.10); // tak mu to na wrihlind zvýši damage o 10%
                 // Cleave
                 else if (m_spellInfo->Id == 845) 
                     damage = uint32(6 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45);
@@ -6535,12 +6539,12 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         }
           case SPELLFAMILY_MAGE:
          {
-            if (m_spellInfo->Id == 11129) //Combustion id�ko
+            if (m_spellInfo->Id == 11129) //Combustion idиko
             {
                 //ziadne dotky on target
                 int32 bp = 0;
                 Unit::AuraEffectList const &mPeriodic =    unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-                //periodick� dmg
+                //periodickэ dmg
                 for (Unit::AuraEffectList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)                 
                     if ((*i)->GetCasterGUID() == m_caster->GetGUID())
                         bp += (*i)->GetAmount();             
