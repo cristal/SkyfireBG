@@ -3464,7 +3464,7 @@ void SpellMgr::LoadSpellCustomAttr()
            case 93975:
            case 93986:
            case 93987:
-                spellInfo->Effects[0].RadiusEntry = 26;
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(26);
                 break;
 			case 82928: // Aimed shot! should be instant
 				spellInfo->CastTimeEntry = 0;
