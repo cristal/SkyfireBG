@@ -2991,6 +2991,9 @@ void SpellMgr::LoadSpellCustomAttr()
 
         switch (spellInfo->Id)
         {
+            case 17: // Power Word: Shield manacost, 4.0.6 hotfix
+                spellInfo->ManaCostPercentage = 34;
+                break;
             case 79638: // Enhanced Strength
             case 79640: // Enhanced Intellect
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(367); // 2 hours instead of 1
