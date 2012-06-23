@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
@@ -310,6 +310,23 @@ void Unit::Update(uint32 p_time)
         return;
 
     _UpdateSpells(p_time);
+
+    // This is required for GetHealingDoneInPastSecs(), GetDamageDoneInPastSecs() and GetDamageTakenInPastSecs()!
+    DmgandHealDoneTimer -= p_time;
+    if (DmgandHealDoneTimer <= 0)
+    {
+        for (uint32 i = 119; i > 0; i--)
+            m_damage_done[i] = m_damage_done[i-1];
+        m_damage_done[0] = 0;
+        for (uint32 i = 119; i > 0; i--)
+            m_heal_done[i] = m_heal_done[i-1];
+        m_heal_done[0] = 0;
+        for (uint32 i = 119; i > 0; i--)
+            m_damage_taken[i] = m_damage_taken[i-1];
+        m_damage_taken[0] = 0;
+        DmgandHealDoneTimer = 1000;
+    }
+
 
     // If this is set during update SetSpellModTakingSpell call is missing somewhere in the code
     // Having this would prevent more aura charges to be dropped, so let's crash
@@ -17780,7 +17797,7 @@ void Unit::ExitVehicle(Position const* exitPosition)
     //! to specify exit coordinates and either store those per passenger, or we need to
     //! init spline movement based on those coordinates in unapply handlers, and
     //! relocate exiting passengers based on Unit::moveSpline data. Either way,
-    //! Coming Soon�
+    //! Coming Soon™
 }
 
 void Unit::_ExitVehicle(Position const* exitPosition)

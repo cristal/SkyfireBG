@@ -1867,9 +1867,13 @@ void Player::setDeathState(DeathState s)
     if (s == JUST_DIED && cur && ressSpellId)
         SetUInt32Value(PLAYER_SELF_RES_SPELL, ressSpellId);
 
-    if (isAlive() && !cur)
-        //clear aura case after resurrection by another way (spells will be applied before next death)
-        SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+	if (isAlive() && !cur)
+	{
+		//clear aura case after resurrection by another way (spells will be applied before next death)
+		SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+		if (getClass() == CLASS_WARRIOR)
+			CastSpell(this, 2457, true);
+	}
 }
 
 bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
