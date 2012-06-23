@@ -7725,6 +7725,8 @@ uint32 Player::GetLevelFromDB(uint64 guid)
 
 void Player::UpdateArea(uint32 newArea)
 {
+	if(!this)
+		return;
     // FFA_PVP flags are area and not zone id dependent
     // so apply them accordingly
     _areaUpdateId    = newArea;
