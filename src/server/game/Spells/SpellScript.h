@@ -253,6 +253,7 @@ class SpellScript : public _SpellScript
 
         // example: OnEffect**** += SpellEffectFn(class::function, EffectIndexSpecifier, EffectNameSpecifier);
         // where function is void function(SpellEffIndex effIndex)
+		HookList<EffectHandler> OnEffect;
         HookList<EffectHandler> OnEffectLaunch;
         HookList<EffectHandler> OnEffectLaunchTarget;
         HookList<EffectHandler> OnEffectHit;

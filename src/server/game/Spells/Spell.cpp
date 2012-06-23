@@ -4912,11 +4912,17 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_spellInfo->Id == 51582)          // Rocket Boots Engaged
                 {
                     if (m_caster->IsInWater())
-                        return SPELL_FAILED_ONLY_ABOVEWATER;
-                }
-                else if (m_spellInfo->SpellIconID == 156)    // Holy Shock
-                {
-                    // spell different for friends and enemies
+						return SPELL_FAILED_ONLY_ABOVEWATER;
+				}
+				// Skull Bash (Bear & Cat)
+				else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellFamilyFlags[2] & 0x10000000 && m_caster->HasUnitState(UNIT_STATE_ROOT) && !m_caster->IsWithinDistInMap(m_targets.GetUnitTarget(), 5))
+					return SPELL_FAILED_ROOTED;
+				// Heroic Leap, Feral Charge (cat), Disengage
+				else if ((m_spellInfo->Id == 6544 || m_spellInfo->Id == 49376 || m_spellInfo->Id == 781) && m_caster->HasUnitState(UNIT_STATE_ROOT))
+					return SPELL_FAILED_ROOTED;
+				else if (m_spellInfo->SpellIconID == 156)    // Holy Shock
+				{
+					// spell different for friends and enemies
                     // hurt version required facing
                     if (m_targets.GetUnitTarget() && !m_caster->IsFriendlyTo(m_targets.GetUnitTarget()) && !m_caster->HasInArc(static_cast<float>(M_PI), m_targets.GetUnitTarget()))
                         return SPELL_FAILED_UNIT_NOT_INFRONT;

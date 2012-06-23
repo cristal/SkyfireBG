@@ -9047,6 +9047,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
+        // Seals of Command
+        case 85126:
+        {
+            if (!this->HasAura(31801) && !this->HasAura(20154) && !this->HasAura(20164))
+                return false;
+            break;
+        }
         // Deep Wounds
         case 12834:
         case 12849:

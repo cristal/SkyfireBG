@@ -53,6 +53,15 @@ enum ShamanSpells
 
     SHAMAN_SPELL_EARTHQUAKE_KNOCKDOWN       = 77505,
     SHAMAN_SPELL_SEARING_FLAMES = 77661,
+
+
+    SHAMAN_SPELL_CLEANSING_WATERS       = 86962,
+    SHAMAN_SPELL_IMPROVED_CLEANSE_SPIRIT = 77130,
+    SHAMAN_SPELL_EARTH_SHIELD           = 974,
+    SHAMAN_SPELL_GLYPH_OF_EARTH_SHIELD  = 64261,
+    SHAMAN_SPELL_NATURES_BLESSING       = 30869,
+    SHAMAN_SPELL_IMPROVED_SHIELDS       = 51881,
+
 };
 class spell_sha_unleash_elements : public SpellScriptLoader
 {
@@ -518,6 +527,91 @@ class spell_sha_healing_rain : public SpellScriptLoader
         }
 };
 
+// 974 Earth Shield
+class spell_sha_earth_shield : public SpellScriptLoader
+{
+public:
+    spell_sha_earth_shield() : SpellScriptLoader("spell_sha_earth_shield") {}
+        
+    class spell_sha_earth_shield_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_earth_shield_SpellScript)
+        bool Validate(SpellEntry const* /*spellEntry*/)
+        {
+            if (!sSpellStore.LookupEntry(SHAMAN_SPELL_GLYPH_OF_EARTH_SHIELD))
+            return false;
+
+            if (!sSpellStore.LookupEntry(SHAMAN_SPELL_NATURES_BLESSING))
+            return false;
+
+            if (!sSpellStore.LookupEntry(SHAMAN_SPELL_IMPROVED_SHIELDS))
+            return false;
+
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            Unit* Target = GetHitUnit();
+            if (!Target || !Target->isAlive())
+                return;
+
+            uint8 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_sha_earth_shield_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_sha_earth_shield_SpellScript;
+    }
+};
+
+class spell_sha_cleansing_waters : public SpellScriptLoader
+{
+public:
+     spell_sha_cleansing_waters() : SpellScriptLoader("spell_sha_cleansing_waters") {}      
+
+     class spell_sha_cleansing_waters_SpellScript : public SpellScript
+     {
+          PrepareSpellScript(spell_sha_cleansing_waters_SpellScript)
+
+          bool Validate(SpellEntry const* /*spellEntry*/)
+          {
+              if (!sSpellStore.LookupEntry(SHAMAN_SPELL_IMPROVED_CLEANSE_SPIRIT))
+              return false;
+          }
+
+          void HandleDummy(SpellEffIndex /*effIndex*/)
+          {
+              Unit* caster = GetCaster();
+              if (caster->GetTypeId() != TYPEID_PLAYER)
+              return;       
+
+              if(Unit* target = GetHitUnit())
+              GetCaster()->CastSpell(target, SHAMAN_SPELL_CLEANSING_WATERS, true);
+          }             
+     
+          void Register()
+          {
+              OnEffect += SpellEffectFn(spell_sha_cleansing_waters_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+          }        
+};
+
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_sha_cleansing_waters_SpellScript();
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_mana_tide();
@@ -529,4 +623,6 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_healing_rain();
     new spell_sha_earthquake();
 	new spell_sha_unleash_elements();
+    new spell_sha_cleansing_waters();
+    new spell_sha_earth_shield();
 }
