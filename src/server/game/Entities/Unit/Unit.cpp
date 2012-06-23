@@ -9265,8 +9265,11 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
 
             // Select chance based on weapon speed
-            float speed = ToPlayer()->GetWeaponForAttack(BASE_ATTACK)->GetTemplate()->Delay / 1000;
-
+			Item* item = NULL;
+			float speed = 0;
+			item = ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+			if(item)
+				speed = item->GetTemplate()->Delay / 1000;
             int32 modifier = 1;
 
             if (auraSpellInfo->Id == 49530) // Rank 3
