@@ -150,45 +150,6 @@ public:
     }
 };
 
-class spell_mage_summon_water_elemental : public SpellScriptLoader
-{
-public:
-    spell_mage_summon_water_elemental() : SpellScriptLoader("spell_mage_summon_water_elemental") { }
-
-    class spell_mage_summon_water_elemental_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_mage_summon_water_elemental_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellEntry*/)
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_ETERNAL_WATER) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT))
-                return false;
-            return true;
-        }
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            Unit* caster = GetCaster();
-            // Glyph of Eternal Water
-            if (caster->HasAura(SPELL_MAGE_GLYPH_OF_ETERNAL_WATER))
-                caster->CastSpell(caster, SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT, true);
-            else
-                caster->CastSpell(caster, SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY, true);
-        }
-
-        void Register()
-        {
-            // add dummy effect spell handler to Summon Water Elemental
-            OnEffectHit += SpellEffectFn(spell_mage_summon_water_elemental_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_mage_summon_water_elemental_SpellScript();
-    }
-};
-
 // Frost Warding
 class spell_mage_frost_warding_trigger : public SpellScriptLoader
 {
@@ -260,8 +221,27 @@ public:
 
         if (AuraEffect* talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_INCANTERS_ABSORBTION_R1, EFFECT_0))
         {
+
+            // Store the normal spellpower to prevent the nonstop aura stacking
             int32 bp = CalculatePctN(absorbAmount, talentAurEff->GetAmount());
-            target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+            
+            // If we dont get just the intellect spellpower, the aura will stack forever
+            uint32 baseSpellPower = target->ToPlayer()->GetBaseSpellPower();
+
+            if (AuraEffect* incanterTriggered = target->GetAuraEffect(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, 0, target->GetGUID()))
+            {
+                // The aura will stack up to a value of 20% of the mage's spell power
+                incanterTriggered->ChangeAmount(std::min<int32>(incanterTriggered->GetAmount() + bp, CalculatePctN(baseSpellPower, 20)));
+                
+                // Refresh and return to prevent replacing the aura
+                incanterTriggered->GetBase()->RefreshDuration();
+
+                return;
+            }
+            else // No incanters absorption aura
+            {
+                target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
+            }
         }
     }
 };
@@ -481,7 +461,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_frost_warding_trigger();
     new spell_mage_incanters_absorbtion_absorb();
     new spell_mage_incanters_absorbtion_manashield();
-    new spell_mage_summon_water_elemental;
     new spell_mage_ice_barrier;
     new spell_mage_cauterize();
 }

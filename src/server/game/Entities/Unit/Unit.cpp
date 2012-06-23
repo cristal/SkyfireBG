@@ -6103,11 +6103,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // Remove aura (before cast for prevent infinite loop handlers)
                     RemoveAurasDueToSpell(triggeredByAura->GetId());
 
-                    uint32 spell = sSpellMgr->GetSpellWithRank(27285, dummySpell->GetRank());
+                    uint32 explosionSpell = 27285;
 
                     // Cast finish spell (triggeredByAura already not exist!)
                     if (Unit* caster = GetUnit(*this, casterGuid))
-                        caster->CastSpell(this, spell, true, castItem);
+                        caster->CastSpell(this, explosionSpell, true, castItem);
                     return true;                            // no hidden cooldown
                 }
 
@@ -6762,11 +6762,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         {
             switch (dummySpell->Id)
             {
-                case 56800: // Glyph of Backstab
-                {
-                    triggered_spell_id = 63975;
-                    break;
-                }
                 case 32748: // Deadly Throw Interrupt
                 {
                     // Prevent cast Deadly Throw Interrupt on self from last effect (apply dummy) of Deadly Throw
@@ -6777,37 +6772,37 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     break;
                 }
                 case 56807: // Glyph of hemorrhage
-                    {
-                        if(procSpell->Id != 16511)
-	                        return false;
-                        basepoints0 = int32(0.40f * damage);
-                        triggered_spell_id = 89775;
-                        break;
-                    }
-                break;
-                // Venomeous wounds
+                {
+                    basepoints0 = int32(0.40f * damage);
+                    triggered_spell_id = 89775;
+                    break;
+                }
+                // Venomeous wounds rank 1 & 2
                 case 79133:
                 case 79134:
-                    float chance;
-                    if(dummySpell->Id == 79133)
-                        chance = 30.0f;
-                    else
-                        chance = 60.0f;
+                {
+                    if(effIndex != 0)
+                        return false;
 
-                    // Check if target is poisoned
                     bool poisoned = false;
-                    // fast check
-                    if (target->HasAuraState(AURA_STATE_DEADLY_POISON, dummySpell, this))
-                        poisoned = true;
-                    // full aura scan
-                    else
+                    Unit::AuraApplicationMap const& auras = target->GetAppliedAuras();
+
+                    for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                     {
-                        Unit::AuraApplicationMap const& auras = target->GetAppliedAuras();
-                        for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                        if (itr->second->GetBase()->GetSpellInfo()->Dispel == DISPEL_POISON)
                         {
-                            if (itr->second->GetBase()->GetSpellInfo()->Dispel == DISPEL_POISON)
-                            {
-                                poisoned = true;
+                            poisoned = true;
+                            break;
+                        }
+                    }
+                    if (!poisoned)
+                        return false;
+
+                    basepoints0 = triggerAmount;
+                    this->CastCustomSpell(this, 51637, &basepoints0, NULL, NULL, true);
+                    triggered_spell_id = 79136;
+                    break;
+                }
                                 break;
                             }
                         }
@@ -7543,9 +7538,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 case 51563:
                 case 51564:
                 {
-                    int32 bp0 = -(dummySpell->Effects->BasePoints);
-                    int32 bp1 = dummySpell->Effects->BasePoints;
-                    CastCustomSpell(this, 53390, &bp0, &bp1, NULL, true, 0, 0, GetGUID());
+                    CustomSpellValues values;
+                    values.AddSpellMod(SPELLVALUE_BASE_POINT0, -(dummySpell->Effects[0].BasePoints));
+                    values.AddSpellMod(SPELLVALUE_BASE_POINT1, dummySpell->Effects[0].BasePoints);
+                    CastCustomSpell(53390, values, this);
                     break;
                 }
                 // Windfury Weapon (Passive) 1-5 Ranks
@@ -8293,6 +8289,9 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 {
                     *handled = true;
 
+                    if (!procSpell)
+                        return false;
+
                     // Need stun, root, or fear mechanic
                     if (!(procSpell->GetAllEffectsMechanicMask() & ((1<<MECHANIC_ROOT)|(1<<MECHANIC_STUN)|(1<<MECHANIC_FEAR))))
                         return false;
@@ -8612,18 +8611,18 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             break;
         }
         case SPELLFAMILY_ROGUE:
-        {
-            // Gouge
-            if (dummySpell->Id == 1776)
+            switch(dummySpell->Id)
             {
-                // Prevent drop aura from itself 
-                if (procSpell && procSpell->Id == 1776)
-                {
+                // Gouge
+                case 1776:
                     *handled = true;
-                    return false;
-                    break;
-                }
+                    // Check so gouge spell effect [1] (SPELL_EFFECT_SCHOOL_DAMAGE) cannot cancel stun effect
+                    if(procSpell && procSpell->Id == 1776)
+                        return false;
+                    return true;
+                break;
             }
+            break;
         }
         case SPELLFAMILY_WARRIOR:
         {
@@ -8636,16 +8635,24 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     CastCustomSpell(this, 70845, &basepoints0, NULL, NULL, true);
                     break;
                 }
-				// Recklessness
-                case 1719:
+                // Juggernaut
+                case 64976:
                 {
-                    //! Possible hack alert
-                    //! Don't drop charges on proc, they will be dropped on SpellMod removal
-                    //! Before this change, it was dropping two charges per attack, one in ProcDamageAndSpellFor, and one in RemoveSpellMods.
-                    //! The reason of this behaviour is Recklessness having three auras, 2 of them can not proc (isTriggeredAura array) but the other one can, making the whole spell proc.
                     *handled = true;
+                    CastSpell(this,65156,true);
                     break;
-				}
+                }
+                // Juggernaut buff
+                case 65156:
+                {
+                    *handled = true;
+
+                    // Proc only on Slam's damage spell (not the dummy cast one) and mortal strike
+                    if (procSpell->Id != 50783 && procSpell->Id != 12294)
+                        return false;
+
+                    return true;
+                }
                 default:
                     break;
             }
@@ -8783,6 +8790,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     RemoveAuraFromStack(auraSpellInfo->Id);
                     return false;
                 }
+                // Vigilance
                 if (auraSpellInfo->Id == 50720)
                 {
                     target = triggeredByAura->GetCaster();
@@ -11232,8 +11240,14 @@ int32 Unit::SpellBaseDamageBonus(SpellSchoolMask schoolMask)
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        // Base value
-        DoneAdvertisedBenefit += ToPlayer()->GetBaseSpellPowerBonus();
+        uint32 spellPower = ToPlayer()->GetSpellPowerBonus();
+        // Spell power from SPELL_AURA_MOD_SPELL_POWER_PCT
+        AuraEffectList const& mSpellPowerPct = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_PCT);
+        for (AuraEffectList::const_iterator i = mSpellPowerPct.begin(); i != mSpellPowerPct.end(); ++i)
+        {
+            AddPctN(spellPower, (*i)->GetAmount());
+        }
+        DoneAdvertisedBenefit += spellPower;
 
         // Damage bonus from stats
         AuraEffectList const& mDamageDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
@@ -11246,6 +11260,7 @@ int32 Unit::SpellBaseDamageBonus(SpellSchoolMask schoolMask)
                 DoneAdvertisedBenefit += int32(CalculatePctN(GetStat(usedStat), (*i)->GetAmount()));
             }
         }
+
         // ... and attack power
         AuraEffectList const& mDamageDonebyAP = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER);
         for (AuraEffectList::const_iterator i =mDamageDonebyAP.begin(); i != mDamageDonebyAP.end(); ++i)
@@ -11961,8 +11976,14 @@ int32 Unit::SpellBaseHealingBonus(SpellSchoolMask schoolMask)
     // Healing bonus of spirit, intellect and strength
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        // Base value
-        AdvertisedBenefit += ToPlayer()->GetBaseSpellPowerBonus();
+        uint32 spellPower = ToPlayer()->GetSpellPowerBonus();
+        // Spell power from SPELL_AURA_MOD_SPELL_POWER_PCT
+        AuraEffectList const& mSpellPowerPct = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_PCT);
+        for (AuraEffectList::const_iterator i = mSpellPowerPct.begin(); i != mSpellPowerPct.end(); ++i)
+        {
+            AddPctN(spellPower, (*i)->GetAmount());
+        }
+        AdvertisedBenefit += spellPower;
 
         // Healing bonus from stats
         AuraEffectList const& mHealingDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT);

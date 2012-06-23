@@ -5775,17 +5775,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     m_caster->MonsterTextEmote(buf, 0);
                     break;
                 }
-                // Vigilance
-                case 50725:
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Remove Taunt cooldown
-                    unitTarget->ToPlayer()->RemoveSpellCooldown(355, true);
-
-                    return;
-                }
                 // Death Knight Initiate Visual
                 case 51519:
                 {
@@ -6626,6 +6615,9 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
         return;
     
     if(this->effectHandleMode ==  SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
+        return;
+
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
     Player* player = m_caster->_movedPlayer;
