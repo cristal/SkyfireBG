@@ -8713,23 +8713,37 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         if (GetStat(STAT_STRENGTH) > stat) { trigger_spell_id = 60229; stat = GetStat(STAT_STRENGTH); }
                         // agility
                         if (GetStat(STAT_AGILITY)  > stat) { trigger_spell_id = 60233; stat = GetStat(STAT_AGILITY); }
-                        // intellect
-                        if (GetStat(STAT_INTELLECT) > stat) { trigger_spell_id = 60234; stat = GetStat(STAT_INTELLECT);}
-                        // spirit
-                        if (GetStat(STAT_SPIRIT)   > stat) { trigger_spell_id = 60235;                               }
-                        break;
-                    }
-                    case 64568:             // Blood Reserve
-                    {
-                        if (HealthBelowPctDamaged(35, damage))
-                        {
-                            CastCustomSpell(this, 64569, &triggerAmount, NULL, NULL, true);
-                            RemoveAura(64568);
-                        }
-                        return false;
-                    }
-                    case 67702:             // Death's Choice, Item - Coliseum 25 Normal Melee Trinket
-                    {
+						// intellect
+						if (GetStat(STAT_INTELLECT) > stat) { trigger_spell_id = 60234; stat = GetStat(STAT_INTELLECT);}
+						// spirit
+						if (GetStat(STAT_SPIRIT)   > stat) { trigger_spell_id = 60235;                               }
+						break;
+					}
+					// Reactive Barrier
+					case 86303: // Rank 1
+						trigger_spell_id = 11426;
+						if (!HealthBelowPctDamaged(50, damage))
+							return false;
+						CastSpell(this, trigger_spell_id, true);
+						break;
+					case 86304: // Rank 2
+						trigger_spell_id = 86347;
+						if (!HealthBelowPctDamaged(50, damage))
+							return false;
+						CastSpell(this, trigger_spell_id, true);
+						break;
+					case 64568:             // Blood Reserve
+						{
+							if (HealthBelowPctDamaged(35, damage))
+							{
+								CastCustomSpell(this, 64569, &triggerAmount, NULL, NULL, true);
+								RemoveAura(64568);
+							}
+							return false;
+						break;
+						}
+					case 67702:             // Death's Choice, Item - Coliseum 25 Normal Melee Trinket
+						{
                         float stat = 0.0f;
                         // strength
                         if (GetStat(STAT_STRENGTH) > stat) { trigger_spell_id = 67708;stat = GetStat(STAT_STRENGTH); }

@@ -329,6 +329,30 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    uint32 newSpellId = 0;
+	if (_player->HasAuraType(SPELL_AURA_SWAP_SPELLS))
+    {
+        if (spellId == 8921)
+            newSpellId = 93402;
+        else if (spellId == 6229)
+        {
+            if(_player->HasAura(91713) && (_player->HasAura(687) || _player->HasAura(28176)))
+                newSpellId = 91711;
+        }
+        else if (_player->HasAura(74434))
+        {
+            if (spellId == 689)
+                newSpellId = 89420;
+            else if (spellId == 6262 || spellId == 23468 || spellId == 23469 || spellId == 56289)
+                _player->CastSpell(_player, 79437, true);
+            else if (spellId == 48020)
+                _player->CastSpell(_player, 79438, true);
+            else if (spellId == 5676)
+                _player->CastSpell(_player, 79440, true);
+        }
+        spellId = newSpellId ? newSpellId : spellId;
+    }
+
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
 
     if (!spellInfo)
