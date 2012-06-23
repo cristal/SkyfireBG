@@ -5455,18 +5455,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                             caster->CastSpell(target, GetAmount(), true);
                     }
                     break;
-					// Firestarter
-                    if (!(mode & AURA_EFFECT_HANDLE_REAL))
-						return;
-					if (apply)
-					{
-						target->CastSpell(target, 86914, true);
-					}
-					else if (!(target->ToPlayer()->CanCastWhileWalking(86914)))
-					{
-						target->RemoveAurasDueToSpell(GetId());
-					}
-					break;
                 case SPELLFAMILY_PRIEST:
                 // Vampiric Touch
                 if (m_spellInfo->SpellFamilyFlags[1] & 0x0400 && aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL && GetEffIndex() == 0)
