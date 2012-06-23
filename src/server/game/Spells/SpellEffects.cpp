@@ -2166,17 +2166,32 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                    // Blood Presence
                    if (m_caster->HasAura(48263))
                    {
-                       int32 shield = CalculatePctN(bp, int32(aurEff->GetAmount() * m_caster->ToPlayer()->GetMasteryPoints()));
+                       int32 shield = int32(bp * (50.0f + (6.25f * m_caster->ToPlayer()->GetMasteryPoints())) / 100.0f);
                        m_caster->CastCustomSpell(m_caster, 77535, &shield, NULL, NULL, false);
                    }
                }
 
                 m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, false);
                 return;
-            }
-            switch (m_spellInfo->Id)
-            {
-            case 49020: // Obliterate
+			}
+			// Death Coil
+			if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_COIL)
+			{
+				if (m_caster->IsFriendlyTo(unitTarget))
+				{
+					int32 bp = (985 + damage) * 3.5;
+					m_caster->CastCustomSpell(unitTarget, 47633, &bp, NULL, NULL, true);
+				}
+				else
+				{
+					int32 bp = 985 + damage;
+					m_caster->CastCustomSpell(unitTarget, 47632, &bp, NULL, NULL, true);
+				}
+				return;
+			}
+			switch (m_spellInfo->Id)
+			{
+			case 49020: // Obliterate
             case 66198: // Obliterate Off-Hand
                 {
                     uint32 count = unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
