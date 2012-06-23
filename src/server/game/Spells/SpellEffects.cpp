@@ -2146,7 +2146,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE)
             {
                // if ((m_caster->CountPctFromMaxHealth(7)) > (20 * m_caster->GetDamageTakenInPastSecs(5) / 100))
-                    bp = m_caster->CountPctFromMaxHealth(7);
+                    bp = int32(m_caster->CountPctFromMaxHealth(urand(7, 9)));
              //   else
               //      bp = (20 * m_caster->GetDamageTakenInPastSecs(5) / 100);
 
