@@ -6537,6 +6537,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 }
                 // Glyph of Healing Touch
 				case 54825:
+				{
 					triggered_spell_id = 54825;
 					break;
                 }
@@ -6803,21 +6804,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 79136;
                     break;
                 }
-                                break;
-                            }
-                        }
-                    }
-
-                    // Only if: poisoned, proc chance, garrote or rupture
-                    if(!poisoned || !roll_chance_f(chance) || (procSpell->Id != 1943 && procSpell->Id != 703))
-                        return false;
-
-                    this->EnergizeBySpell(this, dummySpell->Id, 10, POWER_ENERGY); // Hacky, isn't it ?
-                    triggered_spell_id = 79136;
-                    break;
             }
 
-            switch (dummySpell->SpellIconID)
+			switch (dummySpell->SpellIconID)
             {
                 case 2116: // Quick Recovery
                 {
@@ -8623,7 +8612,6 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                 break;
             }
             break;
-        }
         case SPELLFAMILY_WARRIOR:
         {
             switch (dummySpell->Id)

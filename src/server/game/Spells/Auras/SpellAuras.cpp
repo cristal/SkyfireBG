@@ -1971,9 +1971,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 	switch (GetSpellInfo()->SpellFamilyName)
 	{
 	case SPELLFAMILY_GENERIC:
-		switch (GetId())
-		{
-		}
+
 		break;
 	case SPELLFAMILY_DRUID:
 		// Enrage
