@@ -3093,6 +3093,13 @@ void SpellMgr::LoadSpellCustomAttr()
             case 82661: // Aspect of the Fox
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL;
                 break;
+            case 73920: // Healing rain targets fix
+            case 81262: // Efflorescence
+            case 88685: // Holy word: Sanctuary
+				spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
+				spellInfo->Effects[0].TargetB = TARGET_DEST_DYNOBJ_ALLY;
+				spellInfo->Effects[0].Amplitude = 2000; // Interval
+                break;
             case 87934: // Serpent Spread
             case 87935:
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;

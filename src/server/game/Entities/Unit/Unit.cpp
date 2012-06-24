@@ -9579,27 +9579,98 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 62606:
         {
             basepoints0 = CalculatePctF(triggerAmount, GetTotalAttackPowerValue(BASE_ATTACK));
-            break;
-        }
-        // Body and Soul
-        case 64128:
-        case 65081:
-        {
-            // Proc only from PW:S cast
-            if (!(procSpell->SpellFamilyFlags[0] & 0x00000001))
-                return false;
-            break;
-        }
-        // Culling the Herd
-        case 70893:
-        {
-            // check if we're doing a critical hit
-            if (!(procSpell->SpellFamilyFlags[1] & 0x10000000) && (procEx != PROC_EX_CRITICAL_HIT) )
-                return false;
-            // check if we're procced by Claw, Bite or Smack (need to use the spell icon ID to detect it)
-            if (!(procSpell->SpellIconID == 262 || procSpell->SpellIconID == 1680 || procSpell->SpellIconID == 473 ))
-                return false;
-            break;
+			break;
+		}
+		// Body and Soul
+		case 64128:
+		case 65081:
+			{
+				// Proc only from PW:S cast
+				if (!(procSpell->SpellFamilyFlags[0] & 0x00000001))
+					return false;
+				break;
+			}
+			// Efflorescence
+		case 34151:
+		case 81274:
+		case 81275:
+			{
+				basepoints0 = CalculatePctN(int32(damage), triggerAmount);
+				break;
+			}
+		case 81162: //Will of the necropolis - proc only if 30% health
+			{
+				if(GetHealth() - damage > CountPctFromMaxHealth(30))
+					return false;
+				break;
+			}
+		case 89007: // Masochism
+			{
+				if(!(damage > CountPctFromMaxHealth(10) || (procSpell && procSpell->Id == 32409))) // Proc only if the damage is equal or more than 10% of the total health
+					return false;
+				break;
+			}
+		case 84584: // Slaughter rank 1
+		case 84585: // Slaughter rank 2
+		case 84586: // Slaughter rank 3
+			if(procSpell->Id != 12294) // Proc only from mortal strike
+				return false;
+			break;
+		case 85416:
+			if(procSpell->Id != 35395 && procSpell->Id != 53595) // Proc only from crusader strike and Hammer of the Righteous
+				return false;
+			break;
+		case 82925: // Master marksman
+			if(procSpell->Id != 56641) // Proc only from steady shot
+				return false;
+			break;
+			//Mind Melt
+		case 87160:
+		case 81292:
+			{
+				//Proc only from mind spike
+				if(procSpell->Id != 73510)
+					return false;
+				break;
+			}
+		case 87098: // Invocation
+			if(procSpell->Id != 2139) // Proc only from counterspell
+				return false;
+			break;
+			//Shadow Infusion
+		case 91342:
+			{
+				if(procSpell->Id != 47632 && procSpell->Id != 47633)
+					return false;
+				break;
+			}
+			//Entrapment
+		case 19185:
+		case 64803:
+			{
+				if(procSpell->Id != 13809 || procSpell->Id != 82941 || procSpell->Id != 34600 || procSpell->Id != 82948) // Ice Trap & Snake Trap
+					return false;
+				break;
+			}
+		case 80396: // Potion of Illusion
+			{
+				if (victim->GetTypeId() != TYPEID_UNIT)
+					return false;
+				// critters are not allowed
+				if (victim->GetCreatureType() == CREATURE_TYPE_CRITTER)
+					return false;
+				break;
+			}
+			// Culling the Herd
+		case 70893:
+			{
+				// check if we're doing a critical hit
+				if (!(procSpell->SpellFamilyFlags[1] & 0x10000000) && (procEx != PROC_EX_CRITICAL_HIT) )
+					return false;
+				// check if we're procced by Claw, Bite or Smack (need to use the spell icon ID to detect it)
+				if (!(procSpell->SpellIconID == 262 || procSpell->SpellIconID == 1680 || procSpell->SpellIconID == 473 ))
+					return false;
+				break;
         }
         // Shadow's Fate (Shadowmourne questline)
         case 71169:
