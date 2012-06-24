@@ -5324,6 +5324,7 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
 			}
 		}
 	}
+}
 
 void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
 {
