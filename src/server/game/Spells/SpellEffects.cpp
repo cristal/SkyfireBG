@@ -5301,17 +5301,29 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                 && ((i == CURRENT_GENERIC_SPELL && curSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT)
                 || (i == CURRENT_CHANNELED_SPELL && curSpellInfo->ChannelInterruptFlags & CHANNEL_INTERRUPT_FLAG_INTERRUPT)))
             {
-                if (m_originalCaster)
-                {
-                    int32 duration = m_originalCaster->ModSpellDuration(m_spellInfo, unitTarget, m_originalCaster->CalcSpellDuration(m_spellInfo), false, 1 << effIndex);
-                    unitTarget->ProhibitSpellSchool(curSpellInfo->GetSchoolMask(), duration/*GetSpellDuration(m_spellInfo)*/);
-                }
-                ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
-                unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
-            }
-        }
-    }
-}
+				if (m_originalCaster)
+				{
+					int32 duration = m_originalCaster->ModSpellDuration(m_spellInfo, unitTarget, m_originalCaster->CalcSpellDuration(m_spellInfo), false, 1 << effIndex);
+					unitTarget->ProhibitSpellSchool(curSpellInfo->GetSchoolMask(), duration/*GetSpellDuration(m_spellInfo)*/);
+				}
+				ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
+				unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
+				if(m_spellInfo->Id == 2139) // Counterspell
+				{
+					if(m_caster->HasAura(84722)) // Invocation rank 1
+					{
+						int32 bp = 5;
+						m_caster->CastCustomSpell(m_caster,87098,&bp,NULL,NULL,true);
+					}
+					if(m_caster->HasAura(84723)) // Invocation rank 2
+					{
+						int32 bp = 10;
+						m_caster->CastCustomSpell(m_caster,87098,&bp,NULL,NULL,true);
+					} 
+				}
+			}
+		}
+	}
 
 void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
 {
