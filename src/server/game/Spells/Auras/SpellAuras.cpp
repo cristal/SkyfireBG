@@ -1657,6 +1657,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 		case SPELLFAMILY_MAGE:
 			switch (GetId())
 			{
+			// Molten Armor and Firestarter
+			case 30482:
+			case 86914:
+				{
+					if (apply && caster->HasAura(86914) && caster->HasAura(30482))
+						caster->CastSpell(caster, 86941, true);
+					else
+						caster->RemoveAurasDueToSpell(86941);
+				}
 			case 66: // Invisibility
 				if (removeMode != AURA_REMOVE_BY_EXPIRE)
 					break;
