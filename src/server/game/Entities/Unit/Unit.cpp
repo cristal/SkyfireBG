@@ -8959,7 +8959,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 					break;
 				}
 				break;
-			}
 			// Item - Hunter T9 4P Bonus
 			if (auraSpellInfo->Id == 67151)
 			{
