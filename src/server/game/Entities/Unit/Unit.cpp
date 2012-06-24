@@ -8931,13 +8931,38 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     if (!TriggerPS)
                         return false;
 
-                    basepoints0 = CalculatePctN(int32(damage), triggerAmount) / (TriggerPS->GetMaxDuration() / TriggerPS->Effects[0].Amplitude);
-                    basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), trigger_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
-                    break;
-                }
-                // Item - Hunter T9 4P Bonus
-                if (auraSpellInfo->Id == 67151)
-                {
+					basepoints0 = CalculatePctN(int32(damage), triggerAmount) / (TriggerPS->GetMaxDuration() / TriggerPS->Effects[0].Amplitude);
+					basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), trigger_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
+					break;
+				}
+				if (auraSpellInfo->SpellIconID == 2225)     // Serpent Spread 1,2
+				{
+					if ( !(auraSpellInfo->ProcFlags == 0x1140) )
+						return false;
+
+					switch (auraSpellInfo->Id)
+					{
+					case 87934:     trigger_spell_id = 88453; break;
+					case 87935:     trigger_spell_id = 88466; break;
+					default:
+						return false;
+					}
+					break;
+				}
+				if (auraSpellInfo->Id == 82661)       // Aspect of the Fox: Focus bonus
+				{
+					if ( !((auraSpellInfo->ProcFlags & PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK) || (auraSpellInfo->ProcFlags & PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS)) )
+						return false;
+					target = this;
+					basepoints0 = auraSpellInfo->Effects[0].BasePoints;
+					trigger_spell_id = 82716;
+					break;
+				}
+				break;
+			}
+			// Item - Hunter T9 4P Bonus
+			if (auraSpellInfo->Id == 67151)
+			{
                     trigger_spell_id = 68130;
                     target = this;
                     break;
