@@ -3135,6 +3135,18 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 						if(caster->HasAura(85639) || caster->HasAura(85646)) // Guarded By The Light
 							caster->CastSpell(caster,87342,true);
 		}
+       if (caster->HasAura(76669)) // Illuminated Healing
+        {
+            if(caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                float mastery = caster->ToPlayer()->GetFloatValue(PLAYER_MASTERY);
+                int32 bp0 = int32(caster->ToPlayer()->GetHealingDoneInPastSecs(15) * ((1.5f * mastery) /100));
+                caster->ResetHealingDoneInPastSecs(120);
+                caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
+            }
+
+        m_damage -= addhealth;
+	   }
 		// Runic Healing Injector (heal increased by 25% for engineers - 3.2.0 patch change)
 		else if (m_spellInfo->Id == 67489)
 		{
