@@ -6846,8 +6846,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 					{
 						int32 combo = ToPlayer()->GetComboPoints();
 						sLog->outString("Improved Expose Armor with %u combo points",combo);
-						for(int32 i = 0; i < combo; ++i)
-							CastSpell(victim,79128,true);
+						ToPlayer()->AddComboPoints(victim,combo,NULL);
 						break;
 					}
 					break;
