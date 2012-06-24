@@ -7956,8 +7956,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                 if (pet && pet->getVictim() && damage && procSpell)
                 {
-                    pet->CastSpell(pet->getVictim(), procSpell->Id, true);
-                    return true;
+                    uint32 procDmg = damage / 2;
+					pet->SendSpellNonMeleeDamageLog(pet->getVictim(),procSpell->Id,procDmg,procSpell->GetSchoolMask(),0,0,false,0,false);
+                    pet->DealDamage(pet->getVictim(),procDmg,NULL,SPELL_DIRECT_DAMAGE,procSpell->GetSchoolMask(),procSpell,true);
+                    break;
                 }
                 else
                     return false;
