@@ -9041,16 +9041,30 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         break;
                     }
                 }
-                break;
-            }
-            case SPELLFAMILY_SHAMAN:
-            {
-                switch (auraSpellInfo->Id)
-                {
-                    // Lightning Shield (The Ten Storms set)
-                    case 23551:
-                    {
-                        trigger_spell_id = 23552;
+				break;
+			}
+			case SPELLFAMILY_SHAMAN:
+				{
+					switch (auraSpellInfo->Id)
+					{
+						// Rolling Thunder
+					case 88765:
+						{
+							if (Aura * lightningShield = GetAura(324))
+							{
+								uint8 lsCharges = lightningShield->GetCharges();
+								if(lsCharges < 9)
+								{
+									lightningShield->SetCharges(lsCharges + 1);
+								}
+							}
+							break;
+						}
+
+						// Lightning Shield (The Ten Storms set)
+					case 23551:
+						{
+							trigger_spell_id = 23552;
                         target = victim;
                         break;
                     }
