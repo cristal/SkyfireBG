@@ -5880,6 +5880,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 triggered_spell_id = 37436;
                 break;
             }
+            // Nether Vortex
+            if(dummySpell->SpellIconID == 2294)
+            {
+                triggered_spell_id = 31589;
+            }
             switch (dummySpell->Id)
             {
                 case 79683: // Arcane Missiles!
