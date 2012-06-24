@@ -9204,7 +9204,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
-
+        // Improved Hamstring
+        case 12289:
+        case 12668:
+            if (!victim->HasAura(1715))
+                return false;
+            break;
         // Cheat Death
         case 28845:
         {
@@ -9259,6 +9264,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 63158:
             // Can proc only if target has hp below 35%
             if (!victim || !victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, procSpell, this))
+                return false;
+            break;
+       case 47422: // Everlasting afflictions
+            if(procSpell->Id != 48181 && procSpell->Id != 689 && procSpell->Id != 1120)
                 return false;
             break;
         // Deathbringer Saurfang - Blood Beast's Blood Link

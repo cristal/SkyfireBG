@@ -949,9 +949,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     if (m_caster->HasAura(16913)) // Moonfury
                     {
                         int32 eclipse = 0;
-                        if (m_caster->GetPower(POWER_ECLIPSE) < 0)
+                        if (m_caster->GetPower(POWER_ECLIPSE) < 100)
                             eclipse = -15;
-                        else if (m_caster->GetPower(POWER_ECLIPSE) > 0)
+                        else
                             eclipse = 15;
 
                         m_caster->SetEclipsePower(int32(m_caster->GetEclipsePower() + eclipse));
