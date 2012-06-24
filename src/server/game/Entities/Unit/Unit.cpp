@@ -6838,11 +6838,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         return false;
 
                     target = this;
-                    triggered_spell_id = 31663;
-                    break;
-                }
-                case 2909: // Cut to the Chase
-                {
+					triggered_spell_id = 31663;
+					break;
+				}
+				// Improved Expose Armor
+				case 563:
+					{
+						int32 combo = ToPlayer()->GetComboPoints();
+						sLog->outString("Improved Expose Armor with %u combo points",combo);
+						for(int32 i = 0; i < combo; ++i)
+							CastSpell(victim,79128,true);
+						break;
+					}
+					break;
+				case 2909: // Cut to the Chase
+					{
                     // "refresh your Slice and Dice duration to its 5 combo point maximum"
                     // lookup Slice and Dice
                     if (AuraEffect const* aur = GetAuraEffect(SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_ROGUE, 0x40000, 0, 0)) 
