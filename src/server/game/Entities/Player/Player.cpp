@@ -5599,7 +5599,7 @@ void Player::RepopAtGraveyard()
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
     if ((!isAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || GetTransport() || GetPositionZ() < -500.0f)
     {
-        ResurrectPlayer(0.5f);
+        ResurrectPlayer(1.0f);
         SpawnCorpseBones();
     }
 
@@ -5612,11 +5612,9 @@ void Player::RepopAtGraveyard()
     {
         if (sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId()))
             ClosestGrave = sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId())->GetClosestGraveYard(this);
-        else
-            ClosestGrave = sObjectMgr->GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
     }
-
-    // stop countdown until repop
+    
+	// stop countdown until repop
     _deathTimer = 0;
 
     // if no grave found, stay at the current location
@@ -7739,7 +7737,7 @@ void Player::UpdateArea(uint32 newArea)
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
     pvpInfo.inNoPvPArea = false;
-    if ((area && area->IsSanctuary()) || area->ID == 4821 || area->ID == 4824)    // in sanctuary
+	if ((area && area->IsSanctuary()) || area->ID == 4821 || area->ID == 4824 || area->zone == 5034)    // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.inNoPvPArea = true;

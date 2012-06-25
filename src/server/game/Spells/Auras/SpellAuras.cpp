@@ -1258,6 +1258,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 					else
 						target->AddAura(74396, target);
 				}
+			case 79683: //Arcane Missile!
+				{
+					if (caster->HasAura(44445) || // Hot Streak
+						caster->HasAura(44546) || caster->HasAura(44548) || caster->HasAura(44549)) // Brain Freeze
+					{
+						caster->RemoveAurasDueToSpell(79683);
+						break;
+					}
+				}
 			case 83301: // Improved Cone of Cold r1 freeze
 				if (!caster->HasAura(11190)) // r1 talent
 					target->RemoveAura(83301);
