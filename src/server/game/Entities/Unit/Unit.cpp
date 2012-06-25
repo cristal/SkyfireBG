@@ -6812,6 +6812,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                             data << int32(cooldown);                // Cooldown mod in milliseconds
                             ToPlayer()->GetSession()->SendPacket(&data);
                         }
+					}
+				}
                 case 32748: // Deadly Throw Interrupt
                 {
                     // Prevent cast Deadly Throw Interrupt on self from last effect (apply dummy) of Deadly Throw
