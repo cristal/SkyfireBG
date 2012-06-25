@@ -6474,8 +6474,8 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
 				case 81262: // Efflorescence
 					if(GetEffIndex() == 0)
 					{
-						int32 bp = GetAmount();
-						caster->CastCustomSpell(target,73921,&bp,NULL,NULL,true);
+						//int32 bp = GetAmount();
+						//caster->CastCustomSpell(target,73921,&bp,NULL,NULL,true);
 					}
 					break; 
 			}
