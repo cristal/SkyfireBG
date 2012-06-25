@@ -250,7 +250,7 @@ bool BattlegroundSA::ResetObjs()
     UpdateWorldState(BG_SA_ANCIENT_GATEWS, 1);
 
     for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-        if (Player *plr = ObjectAccessor::FindPlayer(itr->first))
+        if (Player* plr = ObjectAccessor::FindPlayer(itr->first))
             SendTransportsRemove(plr);
 
     TeleportPlayers();
