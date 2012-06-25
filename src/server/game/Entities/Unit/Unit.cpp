@@ -6787,6 +6787,31 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         {
             switch (dummySpell->Id)
             {
+                // Restless Blades
+                case 79095:
+                case 79096:
+                {
+                    // Rupture & Eviscerate.
+                    if(procSpell->SpellFamilyFlags[0] & 0x120000)
+                    {
+                        // Adrenaline Rush.
+                        if (ToPlayer()->HasSpellCooldown(13750))
+                        {
+                            int32 cooldown = (triggeredByAura->GetAmount() * ToPlayer()->GetComboPoints()) * -1;
+                            uint32 newCooldownDelay = ToPlayer()->GetSpellCooldownDelay(13750);
+
+                            if (newCooldownDelay < uint32(cooldown / -1000) + 1)
+                                newCooldownDelay = 0;
+                            else
+                                newCooldownDelay += cooldown / 1000;
+                            ToPlayer()->AddSpellCooldown(13750,0, uint32(time(NULL) + newCooldownDelay));
+
+                            WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
+                            data << uint32(13750);                  // Spell ID
+                            data << uint64(GetGUID());              // Player GUID
+                            data << int32(cooldown);                // Cooldown mod in milliseconds
+                            ToPlayer()->GetSession()->SendPacket(&data);
+                        }
                 case 32748: // Deadly Throw Interrupt
                 {
                     // Prevent cast Deadly Throw Interrupt on self from last effect (apply dummy) of Deadly Throw
@@ -6859,7 +6884,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 					{
                     // "refresh your Slice and Dice duration to its 5 combo point maximum"
                     // lookup Slice and Dice
-                    if (AuraEffect const* aur = GetAuraEffect(SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_ROGUE, 0x40000, 0, 0)) 
+                    if (AuraEffect const* aur = GetAuraEffect(5171, 0))
                     {
                         aur->GetBase()->SetDuration(aur->GetSpellInfo()->GetMaxDuration(), true);
                         return true;
