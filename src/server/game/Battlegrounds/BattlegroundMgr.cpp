@@ -295,7 +295,8 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
     }
     // last check on 4.0.6
     data->Initialize(MSG_PVP_LOG_DATA, (1+1+4+40*bg->GetPlayerScoresSize()));
-    *data << uint8(type);                              // type (battleground=0/arena=1)
+ 
+	*data << uint8(type);                              // type (battleground=0/arena=1)
 
     if ((type & 64) != 0)                              // arena
     {
@@ -307,7 +308,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                 *data << uint8(0);
         }
     }
-    if (type)                                                // arena
+    if((type & 128) != 0)
     {
         // it seems this must be according to BG_WINNER_A/H and _NOT_ BG_TEAM_A/H
         for (int8 i = 1; i >= 0; --i)
@@ -321,16 +322,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
             *data << uint32(pointsLost);                    // Rating Lost
             *data << uint32(pointsGained);                  // Rating gained
             *data << uint32(MatchmakerRating);              // Matchmaking Value
-            *data << uint32(0);
-            *data << uint32(0);
             sLog->outDebug(LOG_FILTER_BATTLEGROUND, "rating change: %d", rating_change);
-        }
-        for (int8 i = 1; i >= 0; --i)
-        {
-            if (ArenaTeam* at = sArenaTeamMgr->GetArenaTeamById(bg->GetArenaTeamIdByIndex(i)))
-                *data << at->GetName();
-            else
-                *data << uint8(0);
         }
     }
 
