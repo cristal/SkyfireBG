@@ -5597,7 +5597,7 @@ void Player::RepopAtGraveyard()
     AreaTableEntry const *zone = GetAreaEntryByAreaID(GetAreaId());
 
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
-    if ((!isAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || GetTransport() || GetPositionZ() < -500.0f || zone->ID == 5034)
+    if ((!isAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || GetTransport() || GetPositionZ() < -500.0f)
     {
         ResurrectPlayer(1.0f);
         SpawnCorpseBones();
@@ -5612,12 +5612,7 @@ void Player::RepopAtGraveyard()
     {
         if (sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId()))
             ClosestGrave = sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId())->GetClosestGraveYard(this);
-        else
-            ClosestGrave = sObjectMgr->GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
     }
-
-	if(zone && zone->ID == 5034)
-		ClosestGrave == NULL;
     
 	// stop countdown until repop
     _deathTimer = 0;
