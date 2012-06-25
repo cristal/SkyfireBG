@@ -5616,7 +5616,10 @@ void Player::RepopAtGraveyard()
             ClosestGrave = sObjectMgr->GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
     }
 
-    // stop countdown until repop
+	if(zone && zone->ID == 5034)
+		ClosestGrave == NULL;
+    
+	// stop countdown until repop
     _deathTimer = 0;
 
     // if no grave found, stay at the current location
