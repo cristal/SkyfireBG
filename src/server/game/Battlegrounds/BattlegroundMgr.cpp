@@ -321,6 +321,8 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
             *data << uint32(pointsLost);                    // Rating Lost
             *data << uint32(pointsGained);                  // Rating gained
             *data << uint32(MatchmakerRating);              // Matchmaking Value
+            *data << uint32(0);
+            *data << uint32(0);
             sLog->outDebug(LOG_FILTER_BATTLEGROUND, "rating change: %d", rating_change);
         }
         for (int8 i = 1; i >= 0; --i)
