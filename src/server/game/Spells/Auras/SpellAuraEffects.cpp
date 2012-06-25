@@ -2908,6 +2908,7 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
         case 55164: // Spectral Gryphon
             spellId = 86460;
             break;
+	    case 30174: // Riding Turtle
         case 64731: // Sea Turtle
             spellId = 86496;
             break;
@@ -5788,7 +5789,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 break;
             switch (GetId())
             {
-                case 52610:                                 // Savage Roar
+                case 52610: // Savage Roar
                 {
                     uint32 spellId = 62071;
                     if (apply)
@@ -5802,7 +5803,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
 					target->RemoveAurasDueToSpell(spellId);
 					break;
 				}
-				case 61336:                                 // Survival Instincts
+				case 61336: // Survival Instincts
 					{
 						if (!(mode & AURA_EFFECT_HANDLE_REAL))
 							break;

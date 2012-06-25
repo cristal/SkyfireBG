@@ -1708,23 +1708,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				if (target->HasAura(70752)) // Item - Mage T10 2P Bonus
 					target->CastSpell(target, 70753, true);
 				break;
-			default:
+			case 11426: // Ice Barrier
+                    {
+                        if (!caster)
+                            break;
+                        if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL)
+                            if (caster->HasAura(44745)) // Shattered Barrier, Rank 1
+                                caster->CastSpell(caster, 55080, true, NULL, GetEffect(0), GetCasterGUID());
+                            else if (caster->HasAura(54787)) // Shattered Barrier, Rank 2
+                                caster->CastSpell(caster, 83073, true, NULL, GetEffect(0), GetCasterGUID());
+                        break;
+                    }
+
+            default:
 				break;
 			}
-			if (!caster)
-				break;
-			// Ice barrier - dispel/absorb remove
-			if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL
-				&& GetSpellInfo()->SpellFamilyFlags[1] & 0x1) {
-					// Shattered Barrier
-					if (target->HasAura(44745)) {
-						caster->CastSpell(target, 55080, true);
-					}
-					if (target->HasAura(54787)) {
-						caster->CastSpell(target, 83073, true);
-					}
-			}
-			break;
 		case SPELLFAMILY_WARRIOR:
 			if (!caster)
 				break;
