@@ -894,8 +894,6 @@ void Battleground::EndBattleground(uint32 winner)
             if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
                 UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loser_kills));
         }
-		// Reward Marks
-        RewardItem(player, team, winner);
 
         player->ResetAllPowers();
         player->CombatStopWithPets(true);

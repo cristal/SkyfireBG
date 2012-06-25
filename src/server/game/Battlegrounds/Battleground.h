@@ -56,8 +56,8 @@ enum BattlegroundQuests
 
 enum BattlegroundMarks
 {
-    ITEM_ARENA_MARK                 = 0,
-    ITEM_BATTLEGROUND_MARK          = 1
+    ITEM_ARENA_MARK                 = 43686,
+    ITEM_BATTLEGROUND_MARK          = 45978
 };
 
 enum BattlegroundMarksCount
@@ -65,7 +65,6 @@ enum BattlegroundMarksCount
     ITEM_WINNER_COUNT               = 3,
     ITEM_LOSER_COUNT                = 1
 };
-const float ITEM_RANDOM_MULTIPLIER = 1.5;
 
 enum BattlegroundCreatures
 {
@@ -569,8 +568,6 @@ class Battleground
 
         void RewardXPAtKill(Player* killer, Player* victim);
         bool CanAwardArenaPoints() const { return _LevelMin >= BG_AWARD_ARENA_POINTS_MIN_LEVEL; }
-		void RewardItem(Player* player, uint32 team, uint32 winner);
-        void RewardQuestComplete(Player* player);
 
         virtual uint64 GetFlagPickerGUID(int32 /*team*/ = -1) const { return 0; }
     protected:
