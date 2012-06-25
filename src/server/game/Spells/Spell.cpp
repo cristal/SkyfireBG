@@ -2992,7 +2992,12 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
 
     // don't allow channeled spells / spells with cast time to be casted while moving
     // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
-    if ((m_spellInfo->IsChanneled() || m_casttime) && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->isMoving() && m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT && !m_caster->CanCastWhileWalking(m_spellInfo->Id))
+    // also check if that spell can be casted while moving (e.g. Scorch /w Firestarter)
+   if ((m_spellInfo->IsChanneled() || m_casttime) && 
+       m_caster->GetTypeId() == TYPEID_PLAYER && 
+       m_caster->isMoving() && 
+       m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT &&
+       !m_caster->CanCastWhileWalking(m_spellInfo->Id))
     {
         SendCastResult(SPELL_FAILED_MOVING);
         finish(false);
@@ -4709,8 +4714,9 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->isMoving())
     {
         // skip stuck spell to allow use it in falling case and apply spell limitations at movement
-        if ((!m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) || m_spellInfo->Effects[0].Effect != SPELL_EFFECT_STUCK) &&
-            ((IsAutoRepeat() && m_spellInfo->Id != 75) || (m_spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0) && !m_caster->CanCastWhileWalking(m_spellInfo->Id))
+        if ((!m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) || 
+           m_spellInfo->Effects[0].Effect != SPELL_EFFECT_STUCK) && ((IsAutoRepeat() && m_spellInfo->Id != 75) || 
+           (m_spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0) && !m_caster->CanCastWhileWalking(m_spellInfo->Id))
             return SPELL_FAILED_MOVING;
     }
 
