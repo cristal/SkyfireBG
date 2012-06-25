@@ -1964,12 +1964,10 @@ void Battleground::RewardItem(Player* player, uint32 team, uint32 winner)
 
 {
 	uint32 RewardCount = 0,
-		RewardItem = 0;
+	RewardItem = 0;
 	RewardItem = isArena() ? ITEM_ARENA_MARK : ITEM_BATTLEGROUND_MARK;
 	RewardCount = team == winner ? ITEM_WINNER_COUNT : ITEM_LOSER_COUNT;
 	ItemPosCountVec dest;
-	if(team == winner)
-		RewardQuestComplete(player);
 	if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, RewardItem, RewardCount) == EQUIP_ERR_OK)
 	{
 		Item* item = player->StoreNewItem(dest, RewardItem, true, Item::GenerateItemRandomPropertyId(RewardItem));
