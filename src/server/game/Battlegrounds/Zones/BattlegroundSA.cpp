@@ -249,10 +249,9 @@ bool BattlegroundSA::ResetObjs()
     UpdateWorldState(BG_SA_YELLOW_GATEWS, 1);
     UpdateWorldState(BG_SA_ANCIENT_GATEWS, 1);
 
-    for (int i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; i++)
-        for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-            if (Player* player = ObjectAccessor::FindPlayer(itr->first))
-                SendTransportInit(player);
+    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+        if (Player* plr = ObjectAccessor::FindPlayer(itr->first))
+            SendTransportsRemove(plr);
 
     TeleportPlayers();
     return true;
@@ -534,16 +533,16 @@ void BattlegroundSA::EventPlayerDamagedGO(Player* /*player*/, GameObject* go, ui
 
     if (eventType == go->GetGOInfo()->building.damagedEvent)
     {
-        uint32 i = GetGateIDFromDestroyEventID(eventType);
+        uint32 i = getGateIdFromDamagedOrDestroyEventId(eventType);
         GateStatus[i] = BG_SA_GATE_DAMAGED;
-        uint32 uws = GetWorldStateFromGateID(i);
+        uint32 uws = getWorldStateFromGateId(i);
         if (uws)
             UpdateWorldState(uws, GateStatus[i]);
     }
 
     if (eventType == go->GetGOInfo()->building.destroyedEvent)
     {
-        if (go->GetGOInfo()->building.destroyedEvent == 19837)
+        if (go->GetGOInfo()->building.destroyedEvent == BG_SA_EVENT_ANCIENT_GATE_DESTROYED)
             SendWarningToAll(LANG_BG_SA_CHAMBER_BREACHED);
         else
             SendWarningToAll(LANG_BG_SA_WAS_DESTROYED, go->GetGOInfo()->name.c_str());
@@ -603,7 +602,7 @@ void BattlegroundSA::DemolisherStartState(bool start)
 
 void BattlegroundSA::DestroyGate(Player* player, GameObject* go)
 {
-    uint32 i = GetGateIDFromDestroyEventID(go->GetGOInfo()->building.destroyedEvent);
+    uint32 i = getGateIdFromDamagedOrDestroyEventId(go->GetGOInfo()->building.destroyedEvent);
     if (!GateStatus[i])
         return;
 
@@ -612,7 +611,7 @@ void BattlegroundSA::DestroyGate(Player* player, GameObject* go)
         if (g->GetGOValue()->Building.Health == 0)
         {
             GateStatus[i] = BG_SA_GATE_DESTROYED;
-            uint32 uws = GetWorldStateFromGateID(i);
+            uint32 uws = getWorldStateFromGateId(i);
             if (uws)
                 UpdateWorldState(uws, GateStatus[i]);
             bool rewardHonor = true;

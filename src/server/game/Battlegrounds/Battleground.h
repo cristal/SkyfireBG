@@ -56,19 +56,8 @@ enum BattlegroundQuests
 
 enum BattlegroundMarks
 {
-    SPELL_WS_MARK_LOSER             = 24950,
-    SPELL_WS_MARK_WINNER            = 24951,
-    SPELL_AB_MARK_LOSER             = 24952,
-    SPELL_AB_MARK_WINNER            = 24953,
-    SPELL_AV_MARK_LOSER             = 24954,
-    SPELL_AV_MARK_WINNER            = 24955,
-    SPELL_SA_MARK_WINNER            = 61160,
-    SPELL_SA_MARK_LOSER             = 61159,
-    ITEM_AV_MARK_OF_HONOR           = 20560,
-    ITEM_WS_MARK_OF_HONOR           = 20558,
-    ITEM_AB_MARK_OF_HONOR           = 20559,
-    ITEM_EY_MARK_OF_HONOR           = 29024,
-    ITEM_SA_MARK_OF_HONOR           = 42425
+    ITEM_ARENA_MARK                 = 43686,
+    ITEM_BATTLEGROUND_MARK          = 45978
 };
 
 enum BattlegroundMarksCount
@@ -579,6 +568,8 @@ class Battleground
 
         void RewardXPAtKill(Player* killer, Player* victim);
         bool CanAwardArenaPoints() const { return _LevelMin >= BG_AWARD_ARENA_POINTS_MIN_LEVEL; }
+		void RewardItem(Player* player, uint32 team, uint32 winner);
+        void RewardQuestComplete(Player* player);
 
         virtual uint64 GetFlagPickerGUID(int32 /*team*/ = -1) const { return 0; }
     protected:
