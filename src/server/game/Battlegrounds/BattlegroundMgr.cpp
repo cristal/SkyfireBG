@@ -314,7 +314,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
         {
             int32 rating_change = bg->GetArenaTeamRatingChangeByIndex(i);
 
-            uint32 pointsLost = rating_change < 0 ? -rating_change : 0;
+            uint32 pointsLost = rating_change < 0 ? abs(rating_change) : 0;
             uint32 pointsGained = rating_change > 0 ? rating_change : 0;
             uint32 MatchmakerRating = bg->GetArenaMatchmakerRatingByIndex(i);
 
