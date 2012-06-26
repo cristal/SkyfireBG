@@ -5249,6 +5249,8 @@ void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)
     {
         if (m_caster->GetGUID() == unitTarget->GetGUID())
             m_caster->CastSpell(m_caster, 25771, true); // Forbearance
+            m_caster->CastSpell(m_caster, 61988, true); // Immune shield marker (serverside)
+            m_caster->CastSpell(m_caster, 61987, true); // Avenging Wrath marker
     }
 
     // damage == 0 - heal for caster max health

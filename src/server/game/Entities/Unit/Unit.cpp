@@ -9267,6 +9267,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             basepoints0 = int32(CalculatePctN(ap, 280));
             break;
         }
+		case 1022: // Hand of Protection
+		case 633:  // Lay on Hands
+		case 642:  // Divine Shield
+			if (HasAura(25771)) // Forbearance
+				return false;
+			break;
+
         // Greater Heal Refund (Avatar Raiment set)
         case 37594:
         {
