@@ -4814,17 +4814,34 @@ SpellCastResult Spell::CheckCast(bool strict)
     //Check for line of sight for spells with dest
     if (m_targets.HasDst())
     {
-        float x, y, z;
-        m_targets.GetDstPos()->GetPosition(x, y, z);
+		float x, y, z;
+		m_targets.GetDstPos()->GetPosition(x, y, z);
 
-        if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOS(x, y, z))
-            return SPELL_FAILED_LINE_OF_SIGHT;
-    }
-
-    // check pet presence
-    for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
-    {
-        if (m_spellInfo->Effects[j].TargetA.GetTarget() == TARGET_UNIT_PET)
+		if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOS(x, y, z))
+			return SPELL_FAILED_LINE_OF_SIGHT;
+	}
+	if (m_caster->GetTypeId() == TYPEID_PLAYER)
+	{
+		Unit* target = m_targets.GetUnitTarget();
+		//// Hand of Protection / Lay on Hands / Divine Shield
+		if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
+			(633==m_spellInfo->Id || 642==m_spellInfo->Id || 1022==m_spellInfo->Id))
+		{
+			if (target->HasAura(25771))                        // Forbearance
+				return SPELL_FAILED_TARGET_AURASTATE;
+		}
+		if(m_caster == target)
+		{
+			// Lay on Hands - cannot be self-cast on paladin with Forbearance or after using Avenging Wrath
+			if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN
+				&& m_spellInfo->SpellFamilyFlags[0] & 0x0008000) if (target->HasAura(61988)) // Immunity shield marker
+				return SPELL_FAILED_TARGET_AURASTATE;
+		}
+	}
+	// check pet presence
+	for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
+	{
+		if (m_spellInfo->Effects[j].TargetA.GetTarget() == TARGET_UNIT_PET)
         {
             if (!m_caster->GetGuardianPet())
             {

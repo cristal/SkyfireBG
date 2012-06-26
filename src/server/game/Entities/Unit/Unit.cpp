@@ -5852,23 +5852,23 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     case 31572: triggered_spell_id = 57531; break;
                     default:
                         sLog->outError("Unit::HandleDummyAuraProc: non handled spell id: %u", dummySpell->Id);
-                        return false;
-                }
-                break;
-            }
+						return false;
+				}
+				break;
+			}
 	        // Permafrost
 	        if (dummySpell->SpellIconID == 143)
 
 	            if (!procSpell)
 	                return false;
 
-	            basepoints0 = damage * triggerAmount / 100;
-				triggered_spell_id = 91394;
+	            basepoints0 = damage * triggerAmount / 100;				triggered_spell_id = 91394;
 				break;
-            // Burnout
-            if (dummySpell->SpellIconID == 2998)
-            {
-                if (!procSpell)
+			}
+			// Burnout
+			if (dummySpell->SpellIconID == 2998)
+			{
+				if (!procSpell)
                     return false;
 
                 int32 cost = int32(procSpell->ManaCost + CalculatePctU(GetCreateMana(), procSpell->ManaCostPercentage));
@@ -8456,6 +8456,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     }
                 }
                 break;
+
             }
         }
         case SPELLFAMILY_PALADIN:
@@ -11577,12 +11578,18 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             break;
                     }
                 }
-                // Custom crit by class
-                switch (spellProto->SpellFamilyName)
-                {
-                    case SPELLFAMILY_MAGE:
-                        // Glyph of Fire Blast
-                        if (spellProto->SpellFamilyFlags[0] == 0x2 && spellProto->SpellIconID == 12)
+				// Custom crit by class
+				switch (spellProto->SpellFamilyName)
+				{
+				case SPELLFAMILY_PRIEST:
+					// Mind Spike
+					if (spellProto->SpellFamilyFlags[0] & 0x2000 && spellProto->SpellIconID == 95)
+						if (AuraEffect const* aurEff = victim->GetAuraEffect(87178, 0, GetGUID()))
+							crit_chance += aurEff->GetAmount();
+					break;
+				case SPELLFAMILY_MAGE:
+					// Glyph of Fire Blast
+					if (spellProto->SpellFamilyFlags[0] == 0x2 && spellProto->SpellIconID == 12)
                             if (victim->HasAuraWithMechanic((1<<MECHANIC_STUN) | (1<<MECHANIC_KNOCKOUT)))
                                 if (AuraEffect const* aurEff = GetAuraEffect(56369, EFFECT_0))
                                     crit_chance += aurEff->GetAmount();
@@ -11667,10 +11674,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             break;
                         }
                         break;
-                    case SPELLFAMILY_PRIEST:
-                        {
-                            break;
-                        }
                     case SPELLFAMILY_WARLOCK:
                         // Improved searing pain
                         if (spellProto->Id == 5676)
