@@ -11676,10 +11676,6 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             break;
                         }
                         break;
-                    case SPELLFAMILY_PRIEST:
-                        {
-                            break;
-                        }
                     case SPELLFAMILY_WARLOCK:
                         // Improved searing pain
                         if (spellProto->Id == 5676)
