@@ -5856,6 +5856,15 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 }
                 break;
             }
+	        // Permafrost
+	        if (dummySpell->SpellIconID == 143)
+
+	            if (!procSpell)
+	                return false;
+
+	            basepoints0 = damage * triggerAmount / 100;
+				triggered_spell_id = 91394;
+				break;
             // Burnout
             if (dummySpell->SpellIconID == 2998)
             {
