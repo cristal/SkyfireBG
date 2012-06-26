@@ -2025,8 +2025,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				if(caster)
 				{
 					if (!apply)
+						if(caster->HasAura(31665) && caster)
 						caster->GetAura(31665)->SetDuration(6000, true);
-					else
+					else if(target && caster)
 					{
 						int32 basepoints0 = aurEff->GetAmount();
 						caster->CastCustomSpell(target, 31665, &basepoints0, NULL, NULL, true);
@@ -2039,8 +2040,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				if(caster)
 				{
 					if (!apply)
-						caster->GetAura(58427)->SetDuration(20000, true);
-					else
+						if(caster && caster->HasAura(58427))
+							caster->GetAura(58427)->SetDuration(20000, true);
+					else if(target && caster)
 						caster->CastSpell(target, 58427, true);
 				}
 			}
