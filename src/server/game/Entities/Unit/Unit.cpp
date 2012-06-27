@@ -852,7 +852,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     }
 
     sLog->outStaticDebug("DealDamageEnd returned %d damage", damage);
-  if(victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098)) //Vengeance
+  if(victim && victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098)) //Vengeance
     {
         int32 atkpwr = damage * 0.05f;
         
@@ -863,7 +863,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         victim->RemoveAurasDueToSpell(76691);
         victim->CastCustomSpell(victim, 76691, &atkpwr, &atkpwr, NULL, true);
     }
-    if(victim->HasAura(84840) && victim->HasAura(5487)) // Vengeance Feral
+    if(victim && victim->HasAura(84840) && victim->HasAura(5487)) // Vengeance Feral
     {
         if(victim->GetShapeshiftForm() == FORM_BEAR)
         {
@@ -886,26 +886,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     
     if(HasAura(84590)) // Deadly Momentum
         RemoveAurasDueToSpell(84590);
-    
-    if (spellProto && (spellProto->SpellFamilyFlags[0] & 0x01000000 || spellProto->SpellFamilyFlags[2] & 0xA40000)) // If its a finishing move
-    {
-        if(HasAura(79095)) // Restless Blades rank 1
-        {
-            uint32 combo = ToPlayer()->GetComboPoints();
-            ToPlayer()->UpdateSpellCooldown(1000*combo,13750);
-            ToPlayer()->UpdateSpellCooldown(51690,-1000*combo);
-            ToPlayer()->UpdateSpellCooldown(73981,-1000*combo);
-            ToPlayer()->UpdateSpellCooldown(2983,-1000*combo);
-        }
-        if(HasAura(79095)) // Restless Blades rank 2
-        {
-            uint32 combo = ToPlayer()->GetComboPoints();
-            ToPlayer()->UpdateSpellCooldown(13750,-2000*combo);
-            ToPlayer()->UpdateSpellCooldown(51690,-2000*combo);
-            ToPlayer()->UpdateSpellCooldown(73981,-2000*combo);
-            ToPlayer()->UpdateSpellCooldown(2983,-2000*combo);
-        }
-    }
     return damage;
 }
 

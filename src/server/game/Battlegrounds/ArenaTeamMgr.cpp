@@ -142,7 +142,6 @@ void ArenaTeamMgr::DistributeArenaPoints()
 {
     // Used to distribute arena points based on last week's stats
     sWorld->SendWorldText(LANG_DIST_ARENA_POINTS_START);
-
     sWorld->SendWorldText(LANG_DIST_ARENA_POINTS_ONLINE_START);
 
     // Temporary structure for storing maximum points to add values for all players
