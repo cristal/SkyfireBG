@@ -669,69 +669,6 @@ public:
     }
 };
 
-
-					  return false;
-
-				  if (!sSpellStore.LookupEntry(SHAMAN_SPELL_FULMINATION_INFO))
-					  return false;
-
-				  return true;
-		  }
-
-		  void HandleFulmination(SpellEffIndex effIndex) {
-			  //make caster cast a spell on a unit target of effect
-
-			  Unit *target = GetHitUnit();
-
-			  Unit *caster = GetCaster();
-
-			  if (!target || !caster)
-				  return;
-
-			  AuraEffect *fulminationAura = caster->GetDummyAuraEffect(
-				  SPELLFAMILY_SHAMAN, 2010, 0);
-
-			  if (!fulminationAura)
-				  return;
-
-			  Aura * lightningShield = caster->GetAura(324);
-
-			  if (!lightningShield)
-				  return;
-			  uint32 IsCharges = lightningShield->GetCharges();
-
-			  if (IsCharges <= 3)
-				  return;
-			  uint8 usedCharges = IsCharges - 3;
-
-			  SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(
-				  SHAMAN_SPELL_LIGHTNING_SHIELD_PROC);
-	
-			  int32 basePoints = caster->CalculateSpellDamage(target, spellInfo, 0);
-
-			  uint32 damage = usedCharges
-				  * caster->SpellDamageBonus(target, spellInfo,
-				  basePoints, SPELL_DIRECT_DAMAGE,effIndex);
-			  caster->CastCustomSpell(SHAMAN_SPELL_FULMINATION_TRIGGERED,
-				  SPELLVALUE_BASE_POINT0, damage, target, true, NULL,
-				  fulminationAura);
-			  lightningShield->SetCharges(IsCharges - usedCharges);
-		  }
-
-		  //register functions used in spell script - names of these functions do not matter
-		  void Register() {
-			  OnEffect +=
-				  SpellEffectFn(spell_sha_fulminationSpellScript::HandleFulmination,EFFECT_FIRST_FOUND, SPELL_EFFECT_ANY);
-		  }
-	  };
-
-	  //function which creates SpellScript
-	  SpellScript *GetSpellScript() const {
-		  return new spell_sha_fulminationSpellScript();
-	  }
-};
-
-
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_mana_tide();
