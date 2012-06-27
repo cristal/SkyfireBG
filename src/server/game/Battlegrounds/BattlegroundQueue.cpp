@@ -732,6 +732,36 @@ void BattlegroundQueue::UpdateEvents(uint32 diff)
     m_events.Update(diff);
 }
 
+void BattlegroundQueue::BattleGroundDuelQueueUpdate(GroupQueueInfo* group1, GroupQueueInfo* group2)
+{
+    BattlegroundBracketId bracket_id = BattlegroundBracketId(14);
+    Battleground* bg_template = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA);
+    if (!bg_template)
+    {
+        sLog->outError("Battleground: Update: bg template not found for custom duel arena", BATTLEGROUND_AA);
+        return;
+    }
+
+    PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketById(bg_template->GetMapId(), bracket_id);
+    if (!bracketEntry)
+    {
+        sLog->outError("Battleground: Update: bg bracket entry not found for map %u bracket id %u", bg_template->GetMapId(), bracket_id);
+        return;
+    }
+
+    Battleground* bg2 = sBattlegroundMgr->CreateNewBattleground(BATTLEGROUND_AA, bracketEntry, 2, false);
+    if (!bg2)
+    {
+        sLog->outError("BattlegroundQueue::Update - Cannot create custom duel battleground");
+            return;
+    }
+
+    InviteGroupToBG(group1, bg2, ALLIANCE);
+    InviteGroupToBG(group2, bg2, HORDE);
+    // start bg
+    bg2->StartBattleground();
+}
+
 /*
 this method is called when group is inserted, or player / group is removed from BG Queue - there is only one player's status changed, so we don't use while (true) cycles to invite whole queue
 it must be called after fully adding the members of a group to ensure group joining
@@ -841,7 +871,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
         if (CheckPremadeMatch(bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam))
         {
             // create new battleground
-            Battleground * bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, 0, false);
+			Battleground * bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, 1, false);
             if (!bg2)
             {
                 sLog->outError("BattlegroundQueue::Update - Cannot create battleground: %u", bgTypeId);

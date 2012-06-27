@@ -113,7 +113,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         // join to bg case
         else if (Battleground* bg = _player->GetBattleground())
         {
-            if (_player->IsInvitedForBattlegroundInstance(_player->GetBattlegroundId()))
+            if (_player->IsInvitedForBattlegroundInstance(_player->GetBattlegroundId()) || _player->getDuelState() == true)
                 bg->AddPlayer(_player);
         }
     }

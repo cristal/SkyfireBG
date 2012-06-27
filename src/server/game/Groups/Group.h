@@ -317,7 +317,7 @@ class Group
     protected:
         bool _setMembersGroup(uint64 guid, uint8 group);
         void _homebindIfInstance(Player* player);
-
+		bool _duelStatus;
         void _initRaidSubGroupsCounter();
         member_citerator _getMemberCSlot(uint64 Guid) const;
         member_witerator _getMemberWSlot(uint64 Guid);

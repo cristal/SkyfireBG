@@ -2187,6 +2187,15 @@ class Player : public Unit, public GridObject<Player>
         uint32 _regenTimerCount;
         uint32 _holyPowerRegenTimerCount; // Holy power updates ticks at every 10secs.
 
+		/*********************************************************/
+        /***               DUEL BATTLEGROUND SYSTEM            ***/
+        /*********************************************************/
+
+        void setDuelState(bool state) { _duelState = state; }
+        bool getDuelState() { return _duelState; }
+
+        /*********************************************************/
+
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
@@ -2444,6 +2453,7 @@ class Player : public Unit, public GridObject<Player>
 
         uint32 _HomebindTimer;
         bool _InstanceValid;
+		bool _duelState;
         // permanent binds and solo binds by difficulty
         BoundInstancesMap _boundInstances[MAX_DIFFICULTY];
         InstancePlayerBind* GetBoundInstance(uint32 mapid, Difficulty difficulty);
