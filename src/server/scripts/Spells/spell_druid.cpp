@@ -440,13 +440,12 @@ class spell_dru_ferocious_bite : public SpellScriptLoader
                 {
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                         return;
-
-                    int32 damage = GetHitDamage();
+					int32 damage = GetHitDamage();
+					int32 numcombos = caster->ToPlayer()->GetComboPoints();
                     float ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    float multiple = ap / 410 + GetSpellInfo()->Effects[EFFECT_1].CalcValue();
-                    int32 energy = -(caster->ModifyPower(POWER_ENERGY, -30));
-                    damage += int32(energy * multiple);
-                    damage += int32(CalculatePctN(caster->ToPlayer()->GetComboPoints() * ap, 7));
+                    int32 energy = -(caster->ModifyPower(POWER_ENERGY, -35));
+					damage = int32(300 + 445 * numcombos  + ap * 0.11 * numcombos);
+					damage *= (100+(energy*100/35))/100;
                     SetHitDamage(damage);
                 }
             }
