@@ -590,7 +590,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->Id == 6229)
             {
 				// +80.68% from sp bonus
-				DoneActualBenefit += caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellInfo)) * 0.8068f;
+				DoneActualBenefit += caster->SpellBaseDamageBonus(m_spellInfo->GetSchoolMask()) * 0.8068f;
             }
             // Rend
             else if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_WARRIOR && GetSpellInfo()->SpellFamilyFlags[0] & 0x20)
