@@ -1033,7 +1033,7 @@ public:
                 return;
 
             uint32 spellId = uint32(GetSpellInfo()->Effects[EFFECT_0].CalcValue());
-            caster->CastSpell(caster, spellId, true);
+            caster->CastSpell(target, spellId, true);
 
             if (target->GetTypeId() == TYPEID_PLAYER)
                 return;
