@@ -2741,6 +2741,19 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint8 effMask)
     // TODO: move this code to scripts
     if (m_preCastSpell)
     {
+        // Paladin immunity shields
+        if (m_preCastSpell == 61988)
+        {
+            // Cast Forbearance
+            m_caster->CastSpell(unit, 25771, true);
+            // Cast Avenging Wrath Marker
+            unit->CastSpell(unit, 61987, true);
+        }
+
+        // Avenging Wrath
+        if (m_preCastSpell == 61987)
+            // Cast the serverside immunity shield marker
+            m_caster->CastSpell(unit, 61988, true);
         if (sSpellMgr->GetSpellInfo(m_preCastSpell))
             // Blizz seems to just apply aura without bothering to cast
             m_caster->AddAura(m_preCastSpell, unit);
@@ -4820,24 +4833,6 @@ SpellCastResult Spell::CheckCast(bool strict)
 		if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOS(x, y, z))
 			return SPELL_FAILED_LINE_OF_SIGHT;
 	}
-	if (m_caster->GetTypeId() == TYPEID_PLAYER)
-	{
-		Unit* target = m_targets.GetUnitTarget();
-		//// Hand of Protection / Lay on Hands / Divine Shield
-		if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-			(633==m_spellInfo->Id || 642==m_spellInfo->Id || 1022==m_spellInfo->Id))
-		{
-			if (target->HasAura(25771))                        // Forbearance
-				return SPELL_FAILED_TARGET_AURASTATE;
-		}
-		if(m_caster == target)
-		{
-			// Lay on Hands - cannot be self-cast on paladin with Forbearance or after using Avenging Wrath
-			if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN
-				&& m_spellInfo->SpellFamilyFlags[0] & 0x0008000) if (target->HasAura(61988)) // Immunity shield marker
-				return SPELL_FAILED_TARGET_AURASTATE;
-		}
-	}
 	// check pet presence
 	for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
 	{
@@ -4937,6 +4932,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (m_caster->IsInWater())
 						return SPELL_FAILED_ONLY_ABOVEWATER;
 				}
+                // Lay on Hands - cannot be self-cast on paladin with Forbearance or after using Avenging Wrath
+                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN
+                        && m_spellInfo->SpellFamilyFlags[0] & 0x0008000) if (m_targets.GetUnitTarget()->HasAura(61988)) // Immunity shield marker
+                return SPELL_FAILED_TARGET_AURASTATE;
 				// Skull Bash (Bear & Cat)
 				else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellFamilyFlags[2] & 0x10000000 && m_caster->HasUnitState(UNIT_STATE_ROOT) && !m_caster->IsWithinDistInMap(m_targets.GetUnitTarget(), 5))
 					return SPELL_FAILED_ROOTED;

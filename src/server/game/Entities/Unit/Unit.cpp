@@ -9092,20 +9092,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 				{
 					switch (auraSpellInfo->Id)
 					{
-						// Rolling Thunder
-					case 88765:
-						{
-							if (Aura * lightningShield = GetAura(324))
-							{
-								uint8 lsCharges = lightningShield->GetCharges();
-								if(lsCharges < 9)
-								{
-									lightningShield->SetCharges(lsCharges + 1);
-								}
-							}
-							break;
-						}
-
 						// Lightning Shield (The Ten Storms set)
 					case 23551:
 						{
@@ -9266,6 +9252,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             basepoints0 = int32(CalculatePctN(ap, 280));
             break;
         }
+		case 1022: // Hand of Protection
+		case 633:  // Lay on Hands
+		case 642:  // Divine Shield
+			if (HasAura(25771)) // Forbearance
+				return false;
+			break;
+
         // Greater Heal Refund (Avatar Raiment set)
         case 37594:
         {
@@ -9577,6 +9570,19 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+			// Rolling Thunder
+		case 88765:
+		{
+			if (Aura * lightningShield = GetAura(324))
+			{
+				uint8 lsCharges = lightningShield->GetCharges();
+				if (lsCharges < 9)
+				{
+					lightningShield->SetCharges(lsCharges + 1);
+				}
+			}
+			break;
+		}
         case 52179: // Astral Shift
         {
 			if(!procSpell)

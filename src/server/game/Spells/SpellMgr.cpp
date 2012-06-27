@@ -3147,6 +3147,9 @@ void SpellMgr::LoadSpellCustomAttr()
             // Entries were not updated after spell effect change, we have to do that manually :/
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED;
                 break;
+           case 25771: // Forbearance - wrong mechanic immunity in DBC since 3.0.x
+			   spellInfo->Effects[0].MiscValue = MECHANIC_IMMUNE_SHIELD;
+                break;
             case 59725: // Improved Spell Reflection - aoe aura
                 // Target entry seems to be wrong for this spell :/
                 spellInfo->Effects[0].TargetA = TARGET_UNIT_CASTER_AREA_PARTY;
