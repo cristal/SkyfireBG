@@ -24291,7 +24291,8 @@ void Player::RemoveRunesBySpell(uint32 spell_id)
 void Player::RestoreBaseRune(uint8 index)
 {
     uint32 spell_id = _runes->runes[index].spell_id;
-    SetRuneConvertSpell(index, 0);
+	ConvertRune(index, GetBaseRune(index));
+    SetRuneConvertSpell(index, NULL);
     // Only Blood Tap can be removed
     if (spell_id == 45529)
         RemoveAura(45529);
