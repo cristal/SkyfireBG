@@ -396,7 +396,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
         *data << uint32(0);                                         // count of extra fields
         // next 3 fields enabled by flag
         *data << uint32(itr2->second->HonorableKills);
-        *data << uint32(itr2->second->BonusHonor);
+        *data << uint32(itr2->second->BonusHonor / 100);
         *data << uint32(itr2->second->Deaths);
 
         *data << uint64(itr2->first);
