@@ -6535,21 +6535,31 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         m_caster->RemoveAurasDueToSpell(87118);
                     }
                 }
-           if (m_spellInfo->Id == 89490) // Strength of Soul
-           {
-               if (unitTarget->HasAura(6788))
-               {
-                   uint32 newCooldownDelay = unitTarget->GetAura(6788)->GetDuration();
-                   if (newCooldownDelay <= uint32(damage*1000))
-                       newCooldownDelay = 0;
-                   else
-                       newCooldownDelay -= uint32(damage*1000);
-
-                   unitTarget->GetAura(6788)->SetDuration(newCooldownDelay, true);
-               }
-           }
-           break;
-        }
+				if(m_spellInfo->Id == 89490) // Strenght of Soul
+				{
+					if(m_caster->HasAura(89488)) // Strenght of Soul rank 1
+					{
+						if(Aura* aur = unitTarget->GetAura(6788))
+						{
+							if(aur->GetDuration() >= 3000)
+								aur->SetDuration(aur->GetDuration() - 2000,true);
+							else
+								unitTarget->RemoveAurasDueToSpell(6788);
+						}
+					}
+					if(m_caster->HasAura(89489)) // Strenght of Soul rank 2
+					{
+						if(Aura* aur = unitTarget->GetAura(6788))
+						{
+							if(aur->GetDuration() >= 5000)
+								aur->SetDuration(aur->GetDuration() - 4000,true);
+							else
+								unitTarget->RemoveAurasDueToSpell(6788);
+						}
+					}
+				}
+		   } 
+		break;
           case SPELLFAMILY_MAGE:
          {
             if (m_spellInfo->Id == 11129) //Combustion idиko
