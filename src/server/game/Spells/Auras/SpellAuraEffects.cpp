@@ -6322,14 +6322,6 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
         else
             return;
     }
-
-    if(overrideId == 91711)
-    {
-        if(target->HasAura(91713)) //The nether ward talent
-            affSpell = 6229;
-        else
-            return;
-    }
 	if(overrideId == 92283) // Frostfire Orb Override
         affSpell = 82731;
 
