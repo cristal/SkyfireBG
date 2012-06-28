@@ -1321,6 +1321,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				else
 					caster->SetHavocTarget(NULL);
 			}
+			if(GetId() == 687 || GetId() == 28176) // Fel / Demon Armor
+			{
+				if(caster->HasAura(91713)) // Nether ward talent
+					GetEffect(2)->SetAmount(91711);
+			}
 			if(GetId() == 27243) // Seed of Corruption
 			{
 				if(apply)
