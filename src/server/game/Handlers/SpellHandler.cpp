@@ -417,10 +417,22 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             spellInfo = actualSpellInfo;
     }
 
-    Spell* spell = new Spell(mover, spellInfo, TRIGGERED_NONE, 0, false);
+	Spell *spell = new Spell(mover, spellInfo, TRIGGERED_NONE, 0, false, true);
     spell->_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
     spell->prepare(&targets);
+    if(_player->m_spellsinrow.find(spellInfo->Id) != _player->m_spellsinrow.end()) // Found it!
+    {
+        uint32 times = _player->m_spellsinrow.find(spellInfo->Id)->second;
+        _player->m_spellsinrow.clear();
+        _player->m_spellsinrow[spellInfo->Id] = times + 1;
+    }
+    if(_player->m_lastSpellCasted != spellInfo->Id)
+    {
+        _player->m_spellsinrow.clear(); // clear it
+        _player->m_spellsinrow[spellInfo->Id] = 1;
+    }
+    _player->m_lastSpellCasted = spellInfo->Id;
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)

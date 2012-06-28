@@ -6315,17 +6315,6 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
     if(spellOverride->affSpell)
 		affSpell = spellOverride->affSpell;
 
-	if(overrideId == 93402) // Sunfire
-    {
-        if(target->HasAura(48517)) // Sunfire talent
-            affSpell = 8921; // Moonfire
-        else
-            return;
-    }
-	if(overrideId == 92283) // Frostfire Orb Override
-        affSpell = 82731;
-
-
     //Check Aura
     if(aura > 0 && !target->HasAura(aura))
         return;

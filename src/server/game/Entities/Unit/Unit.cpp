@@ -921,6 +921,10 @@ void Unit::CastSpell(SpellCastTargets const& targets, SpellInfo const* spellInfo
 
     spell->_CastItem = castItem;
     spell->prepare(&targets, triggeredByAura);
+    m_lastSpellCasted = spellInfo->Id;
+    uint32 times = m_spellsinrow[spellInfo->Id];
+    m_spellsinrow.clear();
+    m_spellsinrow[spellInfo->Id] = times + 1;
 }
 
 void Unit::CastSpell(Unit* victim, uint32 spellId, bool triggered, Item* castItem, AuraEffect const* triggeredByAura, uint64 originalCaster)
@@ -950,6 +954,11 @@ void Unit::CastSpell(Unit* victim, SpellInfo const* spellInfo, TriggerCastFlags 
 {
     SpellCastTargets targets;
     targets.SetUnitTarget(victim);
+
+    m_lastSpellCasted = spellInfo->Id;
+    uint32 times = m_spellsinrow[spellInfo->Id];
+    m_spellsinrow.clear();
+    m_spellsinrow[spellInfo->Id] = times + 1;
 
     CastSpell(targets, spellInfo, NULL, triggerFlags, castItem, triggeredByAura, originalCaster);
 }
@@ -985,6 +994,11 @@ void Unit::CastCustomSpell(uint32 spellId, CustomSpellValues const& value, Unit*
     SpellCastTargets targets;
     targets.SetUnitTarget(victim);
 
+    m_lastSpellCasted = spellInfo->Id;
+    uint32 times = m_spellsinrow[spellInfo->Id];
+    m_spellsinrow.clear();
+    m_spellsinrow[spellInfo->Id] = times + 1;
+
     CastSpell(targets, spellInfo, &value, triggered ? TRIGGERED_FULL_MASK : TRIGGERED_NONE, castItem, triggeredByAura, originalCaster);
 }
 
@@ -1002,6 +1016,11 @@ void Unit::CastSpell(float x, float y, float z, uint32 spellId, bool triggered, 
     SpellCastTargets targets;
     targets.SetDst(x, y, z, GetOrientation());
 
+    m_lastSpellCasted = spellInfo->Id;
+    uint32 times = m_spellsinrow[spellInfo->Id];
+    m_spellsinrow.clear();
+    m_spellsinrow[spellInfo->Id] = times + 1;
+
     CastSpell(targets, spellInfo, NULL, triggered ? TRIGGERED_FULL_MASK : TRIGGERED_NONE, castItem, triggeredByAura, originalCaster);
 }
 
@@ -1017,6 +1036,11 @@ void Unit::CastSpell(GameObject *go, uint32 spellId, bool triggered, Item* castI
 
     SpellCastTargets targets;
     targets.SetGOTarget(go);
+
+	m_lastSpellCasted = spellInfo->Id;
+    uint32 times = m_spellsinrow[spellInfo->Id];
+    m_spellsinrow.clear();
+    m_spellsinrow[spellInfo->Id] = times + 1;
 
     CastSpell(targets, spellInfo, NULL, triggered ? TRIGGERED_FULL_MASK : TRIGGERED_NONE, castItem, triggeredByAura, originalCaster);
 }
