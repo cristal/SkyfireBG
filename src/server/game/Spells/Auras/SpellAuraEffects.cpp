@@ -388,7 +388,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleModCanCastWhileWalking,                    // 330 - SPELL_AURA_ALLOW_CAST_WHILE_MOVING
     &AuraEffect::HandleNULL,                                      // 331 - Weather related.
     &AuraEffect::HandleAuraSwapSpells,                            // 332 - SPELL_AURA_SWAP_SPELLS ( old - SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_1 )
-    &AuraEffect::HandleAuraSwapSpells,                           // 333 - SPELL_AURA_MOD_TRAP_LAUNCHER
+    &AuraEffect::HandleModTrapLauncher,                           // 333 - SPELL_AURA_MOD_TRAP_LAUNCHER
     &AuraEffect::HandleNULL,                                      // 334 - deal damage in x range. X - Aura Effect value.
     &AuraEffect::HandleNULL,                                      // 335 - something with invisibility.
     &AuraEffect::HandleNULL,                                      // 336 - disallow flight.
@@ -2850,19 +2850,6 @@ void AuraEffect::HandleAuraUntrackable(AuraApplication const* aurApp, uint8 mode
 /****************************/
 /***  SKILLS & TALENTS    ***/
 /****************************/
-
-//TODO: Finish this aura
-void AuraEffect::HandleModTrapLauncher(AuraApplication const *aurApp, uint8 mode, bool apply) const
-{
-    /*if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
-        return;
-
-    Unit *target = aurApp->GetTarget();
-
-    if (apply)
-    {
-        target->CastSpell(target, 77769, true);  // Trap Launcher*/
-}
 
 void AuraEffect::HandleAuraModPetTalentsPoints(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
 {
@@ -6370,6 +6357,25 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
         data << uint32(overrideId);
         data << uint32(affspell); // here should be affected spell - not really necessary, after casting the real spell again, it auto-fixes
         target->GetSession()->SendPacket(&data);
+    }
+}
+//trap launcher aura. Need cast or add spell on AB. need more ways for continues
+void AuraEffect::HandleModTrapLauncher(AuraApplication const *aurApp,
+      uint8 mode, bool apply) const {
+    if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
+            return;
+    Unit *target = aurApp->GetTarget();
+    if (apply)
+    {
+		target->GetCharmInfo()->AddSpellToActionBar(sSpellMgr->GetSpellInfo(60192));
+       target->GetCharmInfo()->AddSpellToActionBar(sSpellMgr->GetSpellInfo(82939));
+        target->GetCharmInfo()->AddSpellToActionBar(sSpellMgr->GetSpellInfo(82941));
+    }
+    else //not correct way?
+    {
+       target->GetCharmInfo()->RemoveSpellFromActionBar(60192);
+       target->GetCharmInfo()->RemoveSpellFromActionBar(82939);
+       target->GetCharmInfo()->RemoveSpellFromActionBar(82941);
     }
 }
 

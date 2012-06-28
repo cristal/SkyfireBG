@@ -395,7 +395,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             spellInfo = actualSpellInfo;
     }
 
-	Spell *spell = new Spell(mover, spellInfo, TRIGGERED_NONE, 0, false, true);
+	Spell* spell = new Spell(mover, spellInfo, TRIGGERED_NONE, 0, false);
     spell->_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
     spell->prepare(&targets);
