@@ -330,28 +330,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     uint32 newSpellId = 0;
-	if (_player->HasAuraType(SPELL_AURA_SWAP_SPELLS))
-    {
-        if (spellId == 8921)
-            newSpellId = 93402;
-        else if (spellId == 6229)
-        {
-            if(_player->HasAura(91713) && (_player->HasAura(687) || _player->HasAura(28176)))
-                newSpellId = 91711;
-        }
-        else if (_player->HasAura(74434))
-        {
-            if (spellId == 689)
-                newSpellId = 89420;
-            else if (spellId == 6262 || spellId == 23468 || spellId == 23469 || spellId == 56289)
-                _player->CastSpell(_player, 79437, true);
-            else if (spellId == 48020)
-                _player->CastSpell(_player, 79438, true);
-            else if (spellId == 5676)
-                _player->CastSpell(_player, 79440, true);
-        }
-        spellId = newSpellId ? newSpellId : spellId;
-    }
 
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
 
@@ -417,10 +395,22 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             spellInfo = actualSpellInfo;
     }
 
-    Spell* spell = new Spell(mover, spellInfo, TRIGGERED_NONE, 0, false);
+	Spell* spell = new Spell(mover, spellInfo, TRIGGERED_NONE, 0, false);
     spell->_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
     spell->prepare(&targets);
+    if(_player->m_spellsinrow.find(spellInfo->Id) != _player->m_spellsinrow.end()) // Found it!
+    {
+        uint32 times = _player->m_spellsinrow.find(spellInfo->Id)->second;
+        _player->m_spellsinrow.clear();
+        _player->m_spellsinrow[spellInfo->Id] = times + 1;
+    }
+    if(_player->m_lastSpellCasted != spellInfo->Id)
+    {
+        _player->m_spellsinrow.clear(); // clear it
+        _player->m_spellsinrow[spellInfo->Id] = 1;
+    }
+    _player->m_lastSpellCasted = spellInfo->Id;
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)

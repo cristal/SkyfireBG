@@ -388,7 +388,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleModCanCastWhileWalking,                    // 330 - SPELL_AURA_ALLOW_CAST_WHILE_MOVING
     &AuraEffect::HandleNULL,                                      // 331 - Weather related.
     &AuraEffect::HandleAuraSwapSpells,                            // 332 - SPELL_AURA_SWAP_SPELLS ( old - SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_1 )
-    &AuraEffect::HandleAuraSwapSpells,                           // 333 - SPELL_AURA_MOD_TRAP_LAUNCHER
+    &AuraEffect::HandleModTrapLauncher,                           // 333 - SPELL_AURA_MOD_TRAP_LAUNCHER
     &AuraEffect::HandleNULL,                                      // 334 - deal damage in x range. X - Aura Effect value.
     &AuraEffect::HandleNULL,                                      // 335 - something with invisibility.
     &AuraEffect::HandleNULL,                                      // 336 - disallow flight.
@@ -2850,19 +2850,6 @@ void AuraEffect::HandleAuraUntrackable(AuraApplication const* aurApp, uint8 mode
 /****************************/
 /***  SKILLS & TALENTS    ***/
 /****************************/
-
-//TODO: Finish this aura
-void AuraEffect::HandleModTrapLauncher(AuraApplication const *aurApp, uint8 mode, bool apply) const
-{
-    /*if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
-        return;
-
-    Unit *target = aurApp->GetTarget();
-
-    if (apply)
-    {
-        target->CastSpell(target, 77769, true);  // Trap Launcher*/
-}
 
 void AuraEffect::HandleAuraModPetTalentsPoints(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
 {
@@ -6309,44 +6296,61 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
 
     uint32 overrideId = GetAmount();
 
-    ActionBarSpellOverride const* spellOverride = sSpellMgr->GetActionBarSpellOverride(overrideId);
-
-    if(!spellOverride)
+    if (!overrideId)
         return;
+    SpellEntry const* spell = sSpellStore.LookupEntry(overrideId);
+    if (!spell)
+        return;
+    uint32 affspell = 0;
 
-    uint32 aura = spellOverride->aura;
-	uint32 affSpell = 77606; //Default: Dark Simulacrum since it can copy all kind of spells - DO NOT USE: Cause learning spells, BIG BUG
-    if(spellOverride->affSpell)
-		affSpell = spellOverride->affSpell;
-
-	if(overrideId == 93402) // Sunfire
+    if (overrideId == 93402)            // Sunfire
     {
-        if(target->HasAura(48517)) // Sunfire talent
-            affSpell = 8921; // Moonfire
+        if (target->HasAura(48517))     // Sunfire talent
+            affspell = 8921;            // Moonfire
         else
             return;
     }
 
-    if(overrideId == 91711)
+    if (overrideId == 91711)
     {
-        if(target->HasAura(91713)) //The nether ward talent
-            affSpell = 6229;
+        if (target->HasAura(91713)) // The nether ward talent
+            affspell = 6229;
         else
             return;
     }
-	if(overrideId == 92283) // Frostfire Orb Override
-        affSpell = 82731;
 
+    if (overrideId == 92315) // Pyroblast
+        affspell = 11366;
 
-    //Check Aura
-    if(aura > 0 && !target->HasAura(aura))
-        return;
+    if (overrideId == 82928) // Fire!
+        affspell = 19434;
+
+    if (overrideId == 89420) // Drain Life
+        affspell = 689;
+
+    if (overrideId == 81170) // Ravage
+        affspell = 6785;
+
+    if (overrideId == 93402) // Eclipse (Solar)
+        affspell = 8921;
+
+    if (overrideId == 92283) // Frostfire Orb Override
+        affspell = 82731;
+
+    if (overrideId == 88625) // Chakra: Serenity
+        affspell = 2050;
+
+    if (overrideId == 86213) // Soul Swap: Exhale
+        affspell = 86121;
+
+    if (overrideId == 88684 || overrideId == 88685) // Chakra
+        affspell = 88625;
 
     if (apply)
     {
         target->AddTemporarySpell(overrideId);
         WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
-        data << uint32(affSpell);
+        data << uint32(affspell); // here should be affected spell - not really necessary, after casting the real spell again, it auto-fixes
         data << uint32(overrideId);
         target->GetSession()->SendPacket(&data);
     }
@@ -6355,8 +6359,27 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
         target->RemoveTemporarySpell(overrideId);
         WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
         data << uint32(overrideId);
-        data << uint32(affSpell);
+        data << uint32(affspell); // here should be affected spell - not really necessary, after casting the real spell again, it auto-fixes
         target->GetSession()->SendPacket(&data);
+    }
+}
+//trap launcher aura. Need cast or add spell on AB. need more ways for continues
+void AuraEffect::HandleModTrapLauncher(AuraApplication const *aurApp,
+      uint8 mode, bool apply) const {
+    if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
+            return;
+    Unit *target = aurApp->GetTarget();
+    if (apply)
+    {
+		target->GetCharmInfo()->AddSpellToActionBar(sSpellMgr->GetSpellInfo(60192));
+       target->GetCharmInfo()->AddSpellToActionBar(sSpellMgr->GetSpellInfo(82939));
+        target->GetCharmInfo()->AddSpellToActionBar(sSpellMgr->GetSpellInfo(82941));
+    }
+    else //not correct way?
+    {
+       target->GetCharmInfo()->RemoveSpellFromActionBar(60192);
+       target->GetCharmInfo()->RemoveSpellFromActionBar(82939);
+       target->GetCharmInfo()->RemoveSpellFromActionBar(82941);
     }
 }
 
