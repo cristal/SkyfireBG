@@ -9656,12 +9656,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 				basepoints0 = CalculatePctN(int32(damage), triggerAmount);
 				break;
 			}
-		case 81162: //Will of the necropolis - proc only if 30% health
-			{
-				if(GetHealth() - damage > CountPctFromMaxHealth(30))
-					return false;
-				break;
-			}
 		case 89007: // Masochism
 			{
 				if(!(damage > CountPctFromMaxHealth(10) || (procSpell && procSpell->Id == 32409))) // Proc only if the damage is equal or more than 10% of the total health
