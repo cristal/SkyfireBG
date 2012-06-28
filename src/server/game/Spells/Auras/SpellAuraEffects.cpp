@@ -6305,25 +6305,61 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
 
     uint32 overrideId = GetAmount();
 
-    ActionBarSpellOverride const* spellOverride = sSpellMgr->GetActionBarSpellOverride(overrideId);
-
-    if(!spellOverride)
+    if (!overrideId)
         return;
-
-    uint32 aura = spellOverride->aura;
-	uint32 affSpell = 77606; //Default: Dark Simulacrum since it can copy all kind of spells - DO NOT USE: Cause learning spells, BIG BUG
-    if(spellOverride->affSpell)
-		affSpell = spellOverride->affSpell;
-
-    //Check Aura
-    if(aura > 0 && !target->HasAura(aura))
+    SpellEntry const* spell = sSpellStore.LookupEntry(overrideId);
+    if (!spell)
         return;
+    uint32 affspell = 0;
+
+    if (overrideId == 93402)            // Sunfire
+    {
+        if (target->HasAura(48517))     // Sunfire talent
+            affspell = 8921;            // Moonfire
+        else
+            return;
+    }
+
+    if (overrideId == 91711)
+    {
+        if (target->HasAura(91713)) // The nether ward talent
+            affspell = 6229;
+        else
+            return;
+    }
+
+    if (overrideId == 92315) // Pyroblast
+        affspell = 11366;
+
+    if (overrideId == 82928) // Fire!
+        affspell = 19434;
+
+    if (overrideId == 89420) // Drain Life
+        affspell = 689;
+
+    if (overrideId == 81170) // Ravage
+        affspell = 6785;
+
+    if (overrideId == 93402) // Eclipse (Solar)
+        affspell = 8921;
+
+    if (overrideId == 92283) // Frostfire Orb Override
+        affspell = 82731;
+
+    if (overrideId == 88625) // Chakra: Serenity
+        affspell = 2050;
+
+    if (overrideId == 86213) // Soul Swap: Exhale
+        affspell = 86121;
+
+    if (overrideId == 88684 || overrideId == 88685) // Chakra
+        affspell = 88625;
 
     if (apply)
     {
         target->AddTemporarySpell(overrideId);
         WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
-        data << uint32(affSpell);
+        data << uint32(affspell); // here should be affected spell - not really necessary, after casting the real spell again, it auto-fixes
         data << uint32(overrideId);
         target->GetSession()->SendPacket(&data);
     }
@@ -6332,7 +6368,7 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
         target->RemoveTemporarySpell(overrideId);
         WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
         data << uint32(overrideId);
-        data << uint32(affSpell);
+        data << uint32(affspell); // here should be affected spell - not really necessary, after casting the real spell again, it auto-fixes
         target->GetSession()->SendPacket(&data);
     }
 }
