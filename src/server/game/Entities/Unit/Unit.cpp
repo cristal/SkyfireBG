@@ -6286,11 +6286,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
 				int32 roll_chance = 0;
 				if(!ToPlayer()->isMoving())
-					if (AuraEffect const* aurEff = (*i)->GetBase()->GetEffect(EFFECT_0))
-						roll_chance = aurEff->GetAmount();
+						roll_chance = 12;
 					else
-						if (AuraEffect const* aurEff = (*i)->GetBase()->GetEffect(EFFECT_1))
-							roll_chance = aurEff->GetAmount();
+						roll_chance = 72;
 
 				// Summon Shadowy Apparition
 				if (roll_chance_i(roll_chance))
@@ -18370,6 +18368,8 @@ bool Unit::IsVisionObscured(Unit* victim)
 		victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, this->GetGUID());
 		victim->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0400000, 0, 0, this->GetGUID());
 	}
+	if(!this->IsFriendlyTo(victim) && victim->HasAura(76577) && this->HasAura(76577))
+		return false;
     if(!this->IsFriendlyTo(victim) && victim->HasAura(76577))
         return true;
 
