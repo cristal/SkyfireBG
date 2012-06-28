@@ -9352,9 +9352,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!HealthBelowPctDamaged(30, damage)) // Only proc if it brings us below 30% health
                 return false;
 
-            ToPlayer()->RemoveSpellCooldown(48982, true); // Remove cooldown of rune tap
-            CastSpell(this, 96171, true); // next rune tap wont cost runes
-            cooldown = 45000; // Can only happen once in 45 seconds
+            else if (!ToPlayer()->HasSpellCooldown(96171))
+            {   
+                ToPlayer()->RemoveSpellCooldown(48982, true); // Remove cooldown of rune tap
+                CastSpell(this, 96171, true); // next rune tap wont cost runes
+                ToPlayer()->AddSpellCooldown(96171, 0, time(NULL) + 45);
+            }
             break;
         }
         // Sudden Doom
