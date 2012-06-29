@@ -3017,7 +3017,7 @@ void SpellMgr::LoadSpellCustomAttr()
 			case 86477:
 			case 86478:
 			case 86479:
-				spellInfo->Effects[0].Effect = NULL;
+				spellInfo->Effects[0].BasePoints = 4;
 				break;
 			case 11113: // Blast Wave
 				// Had to do this, currently this spell is impossible to be implemented
