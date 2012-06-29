@@ -3003,26 +3003,26 @@ void SpellMgr::LoadSpellCustomAttr()
             case 76613: // Frostburn
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
                 spellInfo->Effects[0].MiscValue = 0;
-                break;
-            case 93072: // Bring our Boys back
-                spellInfo->Effects[0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
-                break;
-        case 87491:
-        case 87492:
-        case 87493:
-        case 86467:
-        case 87494:
-        case 87495:
-        case 87496:
-        case 87497:
-        case 87498:
-		case 87500:
-			spellInfo->Effects[0].Effect = NULL;
-			break;
-            case 11113: // Blast Wave
-                // Had to do this, currently this spell is impossible to be implemented
-                // on the current proc system
-                spellInfo->Effects[2].Effect = NULL;
+				break;
+			case 93072: // Bring our Boys back
+				spellInfo->Effects[0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
+				break;
+			case 86470:
+			case 86471:
+			case 86472:
+			case 86473:
+			case 86474:
+			case 86475:
+			case 86476:
+			case 86477:
+			case 86478:
+			case 86479:
+				spellInfo->Effects[0].Effect = NULL;
+				break;
+			case 11113: // Blast Wave
+				// Had to do this, currently this spell is impossible to be implemented
+				// on the current proc system
+				spellInfo->Effects[2].Effect = NULL;
                 spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
                 break;
             case 51514: // Hex
