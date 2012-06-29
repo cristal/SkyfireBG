@@ -3007,6 +3007,18 @@ void SpellMgr::LoadSpellCustomAttr()
             case 93072: // Bring our Boys back
                 spellInfo->Effects[0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
                 break;
+        case 87491:
+        case 87492:
+        case 87493:
+        case 86467:
+        case 87494:
+        case 87495:
+        case 87496:
+        case 87497:
+        case 87498:
+		case 87500:
+			spellInfo->Effects[0].Effect = NULL;
+			break;
             case 11113: // Blast Wave
                 // Had to do this, currently this spell is impossible to be implemented
                 // on the current proc system
