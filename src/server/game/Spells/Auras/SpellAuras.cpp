@@ -1590,6 +1590,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				if (caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 3029, 0)){
 					caster->CastSpell(caster, 57318, true);
 				}
+				case 82327: // Speed of Light
+                    {
+                        if (AuraEffect * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PALADIN, 5062, EFFECT_1))
+                        {
+                            int32 basepoints0 = aurEff->GetAmount();
+                            caster->CastCustomSpell(caster, 85497, &basepoints0, NULL, NULL, true);
+                        }
+                    }
 			}
 			if(GetId() == 85416)    // Grand Crusader                     
 			{     

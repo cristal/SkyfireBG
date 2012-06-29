@@ -39,9 +39,9 @@ public:
         gossip3 << "Observe a 3v3 match. (" << arenasQty[1] << " match(s) in progress)";
         gossip5 << "Observe a 5v5 match. (" << arenasQty[2] << " match(s) in progress)";
 
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, gossip2.str(), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, gossip3.str(), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, gossip5.str(), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, gossip2.str(), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, gossip3.str(), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_BATTLE, gossip5.str(), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
         player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_CHAT, "Observe a player.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4, "", 0, true);
         
         player->PlayerTalkClass->SendGossipMenu(player->GetGossipTextId(creature), creature->GetGUID());
