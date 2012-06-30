@@ -760,8 +760,8 @@ void BattlegroundQueue::BattleGroundDuelQueueUpdate(GroupQueueInfo* group1, Grou
             return;
     }
 
-    InviteGroupToBG(group1, bg2, ALLIANCE);
-    InviteGroupToBG(group2, bg2, HORDE);
+    InviteGroupToBG(group1, bg2, ALLIANCE, true);
+    InviteGroupToBG(group2, bg2, HORDE, true);
     // start bg
     bg2->StartBattleground();
 	bg2->RemoveFromBGFreeSlotQueue();

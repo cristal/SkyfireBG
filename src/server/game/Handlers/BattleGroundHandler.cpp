@@ -416,7 +416,9 @@ void WorldSession::HandleBattlegroundPortOpcode(WorldPacket &recv_data)
             action = 0;
         }
     }
-    uint32 queueSlot = _player->GetBattlegroundQueueIndex(bgQueueTypeId);
+    uint32 queueSlot = 0;
+	if (_player->getDuelState() == false)
+		uint32 queueSlot = _player->GetBattlegroundQueueIndex(bgQueueTypeId);
     WorldPacket data;
     switch (action >> 7)
     {
