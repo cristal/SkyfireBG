@@ -1387,6 +1387,7 @@ void AddBattlegroundScripts()
 /* This is where custom scripts' loading functions should be declared. */
 void AddSC_ArenaWatcher();
 void AddSC_challenge_commandscript();
+void AddSC_spec();
 #endif
 
 void AddCustomScripts()
@@ -1395,5 +1396,6 @@ void AddCustomScripts()
     /* This is where custom scripts should be added. */
 	AddSC_ArenaWatcher();
 	AddSC_challenge_commandscript();
+	AddSC_spec();
 #endif
 }
