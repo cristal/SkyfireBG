@@ -89,6 +89,7 @@ public:
         GroupQueueInfo* ginfo = bgQueue.AddGroup(_player, NULL, BATTLEGROUND_AA, bracketEntry, 1, false, false, 0, 0);
         GroupQueueInfo* ginfo2 = bgQueue.AddGroup(target, NULL, BATTLEGROUND_AA, bracketEntry, 1, false, false, 0, 0);
         bgQueue.BattleGroundDuelQueueUpdate(ginfo, ginfo2);
+		return true;
     }
 
     static bool HandleAgreeRequest(ChatHandler* handler, const char* args)
