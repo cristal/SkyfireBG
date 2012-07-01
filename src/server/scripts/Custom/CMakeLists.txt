@@ -15,7 +15,6 @@ set(scripts_STAT_SRCS
     Custom/challenge/challenge.h
     Custom/challenge/challenge_commands.cpp
     Custom/dynamic_teleporter.cpp
-    Custom/spec.cpp 
 )
 
 message("  -> Prepared: Custom")
