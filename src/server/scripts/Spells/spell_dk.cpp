@@ -653,12 +653,12 @@ public:
             Unit* caster = GetCaster();
             if (Unit* target = GetHitUnit())
             {
-                if (caster->IsFriendlyTo(target))
+                if (caster->IsFriendlyTo(target) && target->GetCreatureType() != CREATURE_TYPE_UNDEAD)
                 {
                     int32 bp = int32(damage * 1.5f);
                     caster->CastCustomSpell(target, SPELL_DEATH_COIL_HEAL, &bp, NULL, NULL, true);
                 }
-                else
+                else if(!caster->IsFriendlyTo(target))
                 {
                     if (AuraEffect const* auraEffect = caster->GetAuraEffect(SPELL_SIGIL_VENGEFUL_HEART, EFFECT_1))
                         damage += auraEffect->GetBaseAmount();
@@ -666,9 +666,21 @@ public:
                 }
             }
         }
+            SpellCastResult CheckCast()
+            {
+				Unit* target = GetHitUnit();
+				Unit* caster = GetCaster();
+                if (!target || (target->IsFriendlyTo(caster) && target->GetCreatureType() != CREATURE_TYPE_UNDEAD))
+                     return SPELL_FAILED_BAD_TARGETS;
+                if (!target->IsFriendlyTo(caster) && !caster->HasInArc(static_cast<float>(M_PI), target))
+                    return SPELL_FAILED_UNIT_NOT_INFRONT;
+
+                return SPELL_CAST_OK;
+            }
 
         void Register()
         {
+			OnCheckCast += SpellCheckCastFn(spell_dk_death_coil_SpellScript::CheckCast);
             OnEffectHitTarget += SpellEffectFn(spell_dk_death_coil_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };

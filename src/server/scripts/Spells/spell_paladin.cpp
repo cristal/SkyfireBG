@@ -629,19 +629,16 @@ public:
 	{
 		PrepareSpellScript(spell_pal_holy_wrath_SpellScript);
 		
-		void FilterTargets(std::list<Unit*>& unitList)
+		void FilterTargets(std::list<WorldObject*>& unitList)
 		{
-			std::list<Unit*> tempTargets;
+			std::list<WorldObject*> tempTargets;
 			Unit* caster = GetCaster();
 			if(!caster)
 				return;
 			
-			for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end(); ++itr)
-			{
-				sLog->outString("HERE 12365");
-				
-				
-				uint32 typeCreature = (*itr)->GetCreatureType();
+			for (std::list<WorldObject*>::iterator itr = unitList.begin() ; itr != unitList.end(); ++itr)
+			{			
+				uint32 typeCreature = (*itr)->ToUnit()->GetCreatureType();
 				bool isElemsAndDragonkins = caster->HasAura(2812);  // Stun holy wrathu
 				if ( (typeCreature != CREATURE_TYPE_DEMON || typeCreature != CREATURE_TYPE_UNDEAD) ||
 					(isElemsAndDragonkins && (typeCreature != CREATURE_TYPE_DRAGONKIN || typeCreature != CREATURE_TYPE_ELEMENTAL)) ) // Overenie creatury 
@@ -651,14 +648,14 @@ public:
 			}
 			
 			unitList.clear();
-			for (std::list<Unit*>::iterator itr = tempTargets.begin() ; itr != tempTargets.end(); ++itr)
+			for (std::list<WorldObject*>::iterator itr = tempTargets.begin() ; itr != tempTargets.end(); ++itr)
 				unitList.push_back(*itr);
 			
 		}
 		
 		void Register()
 		{
-			OnUnitTargetSelect += SpellUnitTargetFn(spell_pal_holy_wrath_SpellScript::FilterTargets, EFFECT_1, TARGET_SRC_CASTER);
+			OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_holy_wrath_SpellScript::FilterTargets, EFFECT_1, TARGET_SRC_CASTER);
 		}
 	};
 	
