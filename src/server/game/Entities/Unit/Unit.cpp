@@ -11217,10 +11217,11 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
             if (spellProto->SpellIconID == 186)
             {
                 if (victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+					DoneTotalMod *= 2.0f;
                 {
                     // Glyph of Ice Lance
                     if (owner->HasAura(56377) && victim->getLevel() > owner->getLevel())
-                        AddPctN(DoneTotalMod, 2);
+                        DoneTotalMod *= 1.05f;
                 }
             }
 
