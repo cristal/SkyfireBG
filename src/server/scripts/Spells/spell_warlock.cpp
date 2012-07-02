@@ -62,7 +62,7 @@ public:
             Unit* target = GetTarget();
            
             if (Unit *caster = aurEff->GetBase()->GetCaster())
-                if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 3220, 0))
+				if (caster->HasAura(47236))
                     if (target->isPet())
                         target->CastSpell(target, WARLOCK_DEMONIC_PACT_SPELL, true, NULL, aurEff);
         }

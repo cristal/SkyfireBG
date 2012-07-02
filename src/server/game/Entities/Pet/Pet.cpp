@@ -475,13 +475,15 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
 
             //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
-		if(getPetType() == SUMMON_PET && this->GetOwner() && this->GetOwner()->ToPlayer()->getClass() == CLASS_WARLOCK)
+		if(getPetType() == SUMMON_PET && this->GetOwner() && this->GetOwner()->ToPlayer()->getClass() == CLASS_WARLOCK && !this->GetOwner()->ToPlayer()->HasSpellCooldown(88448))
 		{
 			if(this->GetOwner()->HasAura(88446))
-				this->GetOwner()->CastCustomSpell(88448, SPELLVALUE_BASE_POINT0, 50, this, true);
+				this->GetOwner()->CastCustomSpell(88448, SPELLVALUE_BASE_POINT0, -50, this, true);
 
 			if(this->GetOwner()->HasAura(88447))
-				this->GetOwner()->CastCustomSpell(88448, SPELLVALUE_BASE_POINT0, 100, this, true);
+				this->GetOwner()->CastCustomSpell(88448, SPELLVALUE_BASE_POINT0, -100, this, true);
+
+			ToPlayer()->AddSpellCooldown(88448, 0, time(NULL) + 120);
 		}
     }
     else if (getDeathState() == ALIVE)
