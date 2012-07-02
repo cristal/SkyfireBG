@@ -83,6 +83,7 @@
 #include "Warden.h"
 #include "CalendarMgr.h"
 #include "ItemInfo.h"
+#include "DynamicTeleportMgr.h" // Cata - DYNAMIC TELEPORTER
 
 //TODO REMOVE
 #include "CreatureAISelector.h"
@@ -1888,8 +1889,11 @@ void World::SetInitialWorldSettings()
     }
     else
         sLog->SetLogDB(false);
+    
+	// CATA - DYNAMIC TELEPORTER
+    sDynamicTeleportMgr->Init();
 
-    uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
+   	uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
     sLog->outString();
     sLog->outString("WORLD: World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000) );
     sLog->outString();
