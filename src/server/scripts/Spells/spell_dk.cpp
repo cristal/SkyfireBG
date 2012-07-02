@@ -668,12 +668,17 @@ public:
         }
             SpellCastResult CheckCast()
             {
-				Unit* target = GetHitUnit();
-				Unit* caster = GetCaster();
-                if (!target || (target->IsFriendlyTo(caster) && target->GetCreatureType() != CREATURE_TYPE_UNDEAD))
-                     return SPELL_FAILED_BAD_TARGETS;
-                if (!target->IsFriendlyTo(caster) && !caster->HasInArc(static_cast<float>(M_PI), target))
-                    return SPELL_FAILED_UNIT_NOT_INFRONT;
+                Unit* caster = GetCaster();
+                if (Unit* target = GetExplTargetUnit())
+                {
+                    if (!caster->IsFriendlyTo(target) && !caster->isInFront(target))
+                        return SPELL_FAILED_UNIT_NOT_INFRONT;
+
+                    if (target->IsFriendlyTo(caster) && target->GetCreatureType() != CREATURE_TYPE_UNDEAD)
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                else
+                    return SPELL_FAILED_BAD_TARGETS;
 
                 return SPELL_CAST_OK;
             }
