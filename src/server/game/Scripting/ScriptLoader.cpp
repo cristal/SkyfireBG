@@ -1387,7 +1387,6 @@ void AddBattlegroundScripts()
 /* This is where custom scripts' loading functions should be declared. */
 void AddSC_ArenaWatcher();
 void AddSC_challenge_commandscript();
-void AddSC_spec_npc();
 void AddSC_npc_dynamic_teleporter();
 #endif
 
@@ -1397,7 +1396,6 @@ void AddCustomScripts()
     /* This is where custom scripts should be added. */
 	AddSC_ArenaWatcher();
 	AddSC_challenge_commandscript();
-	AddSC_spec_npc();
 	AddSC_npc_dynamic_teleporter();
 #endif
 }

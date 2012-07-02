@@ -134,7 +134,7 @@ class BattlegroundMgr
         static BattlegroundTypeId WeekendHolidayIdToBGType(HolidayIds holiday);
         static bool IsBGWeekend(BattlegroundTypeId bgTypeId);
         BattlegroundSet GetAllBattlegroundsWithTypeId(BattlegroundTypeId bgTypeId ) {return m_Battlegrounds[bgTypeId];}
-    public:
+    private:
         BattleMastersMap    mBattleMastersMap;
 
         typedef std::map<BattlegroundTypeId, uint8> BattlegroundSelectionWeightMap; // TypeId and its selectionWeight
