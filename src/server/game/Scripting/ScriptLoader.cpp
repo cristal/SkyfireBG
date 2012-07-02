@@ -1388,6 +1388,7 @@ void AddBattlegroundScripts()
 void AddSC_ArenaWatcher();
 void AddSC_challenge_commandscript();
 void AddSC_spec();
+void AddSC_npc_dynamic_teleporter();
 #endif
 
 void AddCustomScripts()
@@ -1397,5 +1398,6 @@ void AddCustomScripts()
 	AddSC_ArenaWatcher();
 	AddSC_challenge_commandscript();
 	AddSC_spec();
+	AddSC_npc_dynamic_teleporter();
 #endif
 }
