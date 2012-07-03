@@ -6298,11 +6298,10 @@ void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 m
 
 void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode, bool apply) const
 {
-     if (!(mode & AURA_EFFECT_HANDLE_REAL))
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
     Player* target = aurApp->GetTarget()->ToPlayer();
-
 
     if (!target)
         return;
@@ -6312,13 +6311,12 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
     PlayerSpellMap const& spells = target->GetSpellMap();
 
     for (PlayerSpellMap::const_iterator itr = spells.begin(); itr != spells.end(); ++itr)
-   {
-        if(itr->second->state == PLAYERSPELL_REMOVED)
-        continue;
+    {
+        if (itr->second->state == PLAYERSPELL_REMOVED)
+            continue;
 
         if (!itr->second->active || itr->second->disabled)
             continue;
-           return;
 
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
 
@@ -6341,6 +6339,7 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
             target->RemoveTemporarySpell(newSpellId);
     }
 }
+
 //trap launcher aura. Need cast or add spell on AB. need more ways for continues
 void AuraEffect::HandleModTrapLauncher(AuraApplication const *aurApp, uint8 mode, bool apply) const
 {
