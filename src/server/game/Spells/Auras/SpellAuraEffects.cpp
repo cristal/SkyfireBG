@@ -6318,9 +6318,12 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
         if (!itr->second->active || itr->second->disabled)
             continue;
 
+		if(itr->first == 6229 && !target->HasAura(91713))
+			return;
+
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
 
-        if (!(spellInfo->SpellFamilyFlags & GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask))
+        if (spellInfo && !(spellInfo->SpellFamilyFlags & GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask))
             continue;
 
         foundAny = true;

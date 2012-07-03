@@ -3421,6 +3421,10 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->Effects[0].TargetB = 0;
                 spellInfo->Effects[1].TargetB = 0;
                 break;
+			case 28176: // nether ward // fel armor // demon armor
+			case 687:
+				spellInfo->Effects[2].BasePoints = 91711;
+				break;
             case 53241: // Marked for Death (Rank 1)
             case 53243: // Marked for Death (Rank 2)
             case 53244: // Marked for Death (Rank 3)
