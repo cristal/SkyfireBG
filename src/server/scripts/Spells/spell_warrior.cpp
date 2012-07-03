@@ -617,7 +617,8 @@ public:
     }
 };
 
-// Heroic leap 6544
+// Heroic Leap
+// Spell Id: 52174
 class spell_warr_heroic_leap : public SpellScriptLoader
 {
     public:
@@ -625,39 +626,31 @@ class spell_warr_heroic_leap : public SpellScriptLoader
 
         class spell_warr_heroic_leap_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_warr_heroic_leap_SpellScript)
+            PrepareSpellScript(spell_warr_heroic_leap_SpellScript);
 
-            bool Validate(SpellEntry const * /*spellEntry*/)
+            void CalculateDamage(SpellEffIndex effect)
             {
-                if (!sSpellStore.LookupEntry(WARRIOR_SPELL_HEROIC_LEAP))
-                    return false;
-                return true;
-            }
-
-            bool Load()
-            {
-                if (!GetCaster())
-                    return false;
-
-                return true;
-            }
-            SpellCastResult CheckElevation()
-            {
-				Unit* caster = GetCaster();
-				WorldLocation const* const dest = GetExplTargetDest();
-
-                if (dest->GetPositionZ() > caster->GetPositionZ() + 5.0f) // Cant jump to higher ground
-                    return SPELL_FAILED_NOPATH;
-                return SPELL_CAST_OK;
+                int32 damage = GetHitDamage();
+                if (Unit* target = GetHitUnit())
+                {
+                    if (Unit* caster = GetCaster())
+                    {
+                        damage += CalculatePctN(caster->GetTotalAttackPowerValue(BASE_ATTACK), 50);
+                        
+                        int32 dmg = caster->SpellDamageBonus(target, GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE);
+                        SetHitDamage(dmg);
+                    }
+                }
             }
 
             void Register()
             {
-                OnCheckCast += SpellCheckCastFn(spell_warr_heroic_leap_SpellScript::CheckElevation);
+                OnEffectHitTarget += SpellEffectFn(spell_warr_heroic_leap::spell_warr_heroic_leap_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+
             }
         };
 
-        SpellScript *GetSpellScript() const
+        SpellScript* GetSpellScript() const
         {
             return new spell_warr_heroic_leap_SpellScript();
         }
