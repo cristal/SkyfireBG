@@ -618,7 +618,7 @@ public:
 };
 
 // Heroic Leap
-// Spell Id: 52174
+// Spell Id: 6544
 class spell_warr_heroic_leap : public SpellScriptLoader
 {
     public:
@@ -656,6 +656,52 @@ class spell_warr_heroic_leap : public SpellScriptLoader
         }
 };
 
+// Heroic leap building 6544
+class spell_warr_heroic_leap_build : public SpellScriptLoader
+{
+    public:
+        spell_warr_heroic_leap_build() : SpellScriptLoader("spell_warr_heroic_leap_build") { }
+
+        class spell_warr_heroic_leap_build_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_heroic_leap_build_SpellScript)
+
+            bool Validate(SpellEntry const * /*spellEntry*/)
+            {
+                if (!sSpellStore.LookupEntry(WARRIOR_SPELL_HEROIC_LEAP))
+                    return false;
+                return true;
+            }
+
+            bool Load()
+            {
+                if (!GetCaster())
+                    return false;
+
+                return true;
+            }
+            SpellCastResult CheckElevation()
+            {
+				Unit* caster = GetCaster();
+				WorldLocation const* const dest = GetExplTargetDest();
+
+                if (dest->GetPositionZ() > caster->GetPositionZ() + 5.0f) // Cant jump to higher ground
+                    return SPELL_FAILED_NOPATH;
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_warr_heroic_leap_build_SpellScript::CheckElevation);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_warr_heroic_leap_build_SpellScript();
+        }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_last_stand();
@@ -673,4 +719,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_charge();
     new spell_warr_slam();
 	new spell_warr_heroic_leap();
+	new spell_warr_heroic_leap_build();
 }
