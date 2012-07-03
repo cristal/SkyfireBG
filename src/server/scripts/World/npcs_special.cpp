@@ -3394,44 +3394,122 @@ class npc_power_word_barrier : public CreatureScript
     }
 };
 
-/*######
-# npc_mushroom
-######*/
-
-class npc_mushroom : public CreatureScript
+// Wild Mushroom for spell 88747
+enum WildMushroom
 {
-    public:
-    npc_mushroom() : CreatureScript("npc_mushroom") { }
+    NPC_WILD_MUSHROOM   = 47649,
+    SPELL_INVISIBILITY  = 43221
+};
 
-    struct npc_mushroomAI : CasterAI
+class npc_wild_mushroom : public CreatureScript
+{
+public:
+    npc_wild_mushroom() : CreatureScript("npc_wild_mushroom") { }
+
+    struct npc_wild_mushroomAI : public ScriptedAI
     {
-        npc_mushroomAI(Creature *c) : CasterAI(c) {}
-		
-		bool checker;
-        uint32 InvisibleTimer;
+        npc_wild_mushroomAI(Creature* creature) : ScriptedAI(creature) {}
 
+        bool isReady;
+        uint32 timer;
+
+        Unit* owner;
         void Reset()
         {
-            InvisibleTimer = 6000;
+            timer = 6000; // 6sec - the mushroom should become invisible
+            isReady = false;
         }
+
+        void InitializeAI()
+        {
+            ScriptedAI::InitializeAI();
+            owner = me->GetOwner();
+
+            if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            Creature* first;
+            uint32 count = 0;
+
+            if (!summoner)
+                return;
+
+            std::list<Creature*> templist;
+            float x, y, z;
+            me->GetPosition(x, y, z);
+            {
+                CellCoord pair(SkyFire::ComputeCellCoord(x, y));
+                Cell cell(pair);
+                cell.SetNoCreate();
+
+                std::list<Creature*> templist;
+                SkyFire::AllCreaturesOfEntryInRange check(me, NPC_WILD_MUSHROOM, 100);
+                SkyFire::CreatureListSearcher<SkyFire::AllCreaturesOfEntryInRange> searcher(me, templist, check);
+
+                TypeContainerVisitor<SkyFire::CreatureListSearcher<SkyFire::AllCreaturesOfEntryInRange>, GridTypeMapContainer> cSearcher(searcher);
+                cell.Visit(pair, cSearcher, *(me->GetMap()), *me, me->GetGridActivationRange());
+
+                if (!templist.empty())
+                for (std::list<Creature*>::const_iterator itr = templist.begin(); itr != templist.end(); ++itr)
+                    if (Unit* own = (*itr)->GetOwner())
+                    {
+                        if (own->GetGUID() == me->GetOwner()->GetGUID())
+                        {
+                            if (count == 0)
+                                first = (*itr);
+                            ++count;
+                        }
+                    }
+
+                sLog->outString("Found %u mushrooms", count);
+
+                if (count >= 3) // Only 3 mushrooms can be summoned at a time
+                {
+                    sLog->outString("Found %u mushrooms, deleting first", count);
+                    if (first)
+                    {
+                        first->DisappearAndDie();
+                        first = NULL;
+                        count = 0;
+                    }
+                }
+                templist.clear();
+            }
+        }
+        void EnterEvadeMode() { return; }
+
+        void EnterCombat(Unit* /*target*/) {}
 
         void UpdateAI(const uint32 diff)
         {
-        if (InvisibleTimer > 0)
-        {
-        if (InvisibleTimer < diff)
-            me->CastSpell(me, 92661, true); // zmiznú 
+            if (timer <= diff)
+            {
+                if (!isReady)
+                {
+                    sLog->outString("Invisible!");
+                    isReady = true;
 
-        InvisibleTimer -= diff;
-        return;
-        }
-        CasterAI::UpdateAI(diff);
+                    //Make it invisible
+                    me->CastSpell(me, SPELL_INVISIBILITY, true);
+                    return;
+                }
+                else return;
+            }
+            else timer -= diff;
+            return;
         }
     };
 
-    CreatureAI *GetAI(Creature *creature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new npc_mushroomAI(creature);
+        return new npc_wild_mushroomAI(creature);
     }
 };
 
@@ -3528,6 +3606,6 @@ void AddSC_npcs_special()
     new npc_ring_of_frost;
     new npc_frostfire_orb;
     new npc_power_word_barrier;
-    new npc_mushroom;
+    new npc_wild_mushroom;
 	new npc_shadowy_apparition();
 }
