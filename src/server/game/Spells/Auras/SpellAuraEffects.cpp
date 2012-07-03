@@ -388,7 +388,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleModCanCastWhileWalking,                    // 330 - SPELL_AURA_ALLOW_CAST_WHILE_MOVING
     &AuraEffect::HandleNULL,                                      // 331 - Weather related.
     &AuraEffect::HandleAuraSwapSpells,                            // 332 - SPELL_AURA_SWAP_SPELLS ( old - SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_1 )
-    &AuraEffect::HandleModTrapLauncher,                           // 333 - SPELL_AURA_MOD_TRAP_LAUNCHER
+    &AuraEffect::HandleAuraSwapSpells,                            // 333 - SPELL_AURA_SWAP_SPELLS_2
     &AuraEffect::HandleNULL,                                      // 334 - deal damage in x range. X - Aura Effect value.
     &AuraEffect::HandleNULL,                                      // 335 - something with invisibility.
     &AuraEffect::HandleNULL,                                      // 336 - disallow flight.
@@ -6298,83 +6298,47 @@ void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 m
 
 void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode, bool apply) const
 {
-    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+     if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
     Player* target = aurApp->GetTarget()->ToPlayer();
 
-    if (!target || !target->IsInWorld())
+
+    if (!target)
         return;
 
-    uint32 overrideId = GetAmount();
+    uint32 newSpellId = uint32(GetAmount());
+    bool foundAny = false;
+    PlayerSpellMap const& spells = target->GetSpellMap();
 
-    if (!overrideId)
-        return;
-    SpellEntry const* spell = sSpellStore.LookupEntry(overrideId);
-    if (!spell)
-        return;
-    uint32 affspell = 77606;
-
-    if (overrideId == 93402)            // Sunfire
+    for (PlayerSpellMap::const_iterator itr = spells.begin(); itr != spells.end(); ++itr)
    {
-       if (target->HasAura(48517))     // Sunfire talent
-           affspell = 8921;            // Moonfire
-       else
+        if(itr->second->state == PLAYERSPELL_REMOVED)
+        continue;
+
+        if (!itr->second->active || itr->second->disabled)
+            continue;
            return;
-   }
 
-   if (overrideId == 91711)
-   {
-       if (target->HasAura(91713)) // The nether ward talent
-           affspell = 6229;
-       else
-           return;
-   }
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
 
-   if (overrideId == 92315) // Pyroblast
-       affspell = 11366;
+        if (!(spellInfo->SpellFamilyFlags & GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask))
+            continue;
 
-   if (overrideId == 82928) // Fire!
-       affspell = 19434;
+        foundAny = true;
 
-   if (overrideId == 89420) // Drain Life
-       affspell = 689;
-
-   if (overrideId == 81170) // Ravage
-       affspell = 6785;
-
-   if (overrideId == 93402) // Eclipse (Solar)
-       affspell = 8921;
-
-   if (overrideId == 92283) // Frostfire Orb Override
-       affspell = 82731;
-
-   if (overrideId == 88625) // Chakra: Serenity
-       affspell = 2050;
-
-   if (overrideId == 86213) // Soul Swap: Exhale
-       affspell = 86121;
-
-   if (overrideId == 88684 || overrideId == 88685) // Chakra
-       affspell = 88625;
-
-
-
-    if (apply)
-    {
-        target->AddTemporarySpell(overrideId);
-        WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
-        data << uint32(affspell); // here should be affected spell - not really necessary, after casting the real spell again, it auto-fixes
-        data << uint32(overrideId);
-        target->GetSession()->SendPacket(&data);
+        if (apply)
+            target->AddSpellSwap(itr->first, newSpellId);
+        else
+            target->RemoveSpellSwap(itr->first);
     }
-    else
+
+    if (foundAny)
     {
-        target->RemoveTemporarySpell(overrideId);
-        WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
-        data << uint32(overrideId);
-        data << uint32(affspell); // here should be affected spell - not really necessary, after casting the real spell again, it auto-fixes
-        target->GetSession()->SendPacket(&data);
+        if (apply)
+            target->AddTemporarySpell(newSpellId);
+        else
+            target->RemoveTemporarySpell(newSpellId);
     }
 }
 //trap launcher aura. Need cast or add spell on AB. need more ways for continues
