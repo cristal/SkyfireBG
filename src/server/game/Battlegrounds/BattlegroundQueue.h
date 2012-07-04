@@ -72,6 +72,7 @@ class BattlegroundQueue
         ~BattlegroundQueue();
 
         void BattlegroundQueueUpdate(uint32 diff, BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id, uint8 arenaType = 0, bool isRated = false, uint32 minRating = 0);
+		void BattleGroundDuelQueueUpdate(GroupQueueInfo* group1, GroupQueueInfo* group2);
         void UpdateEvents(uint32 diff);
 
         void FillPlayersToBG(Battleground* bg, BattlegroundBracketId bracket_id);
@@ -121,7 +122,7 @@ class BattlegroundQueue
 
     private:
 
-        bool InviteGroupToBG(GroupQueueInfo* ginfo, Battleground* bg, uint32 side);
+        bool InviteGroupToBG(GroupQueueInfo* ginfo, Battleground* bg, uint32 side, bool slotforce = false);
         uint32 m_WaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME];
         uint32 m_WaitTimeLastPlayer[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
         uint32 m_SumOfWaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];

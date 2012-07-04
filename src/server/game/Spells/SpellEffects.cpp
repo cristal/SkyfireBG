@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
@@ -494,16 +494,20 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARRIOR: {
                 // Bloodthirst
-            if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
-                            {
-                              damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.8);
-                            }
+				if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
+				{
+					damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.8);
+				}
                 // Victory Rush
                 else if (m_spellInfo->SpellFamilyFlags[1] & 0x100)
                 {
                     damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45); // wowwiki formula
                     m_caster->RemoveAurasDueToSpell(32216); // Victorious
                 }
+				// Meat Cleaver
+				else if (m_spellInfo->Id == 1680)
+					if (m_caster->HasAura(12950)) // Ak má talent Meat Cleaver
+                    damage = uint32(1+ m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.10); // tak mu to na wrihlind zvýši damage o 10%
                 // Cleave
                 else if (m_spellInfo->Id == 845) 
                     damage = uint32(6 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45);
@@ -824,6 +828,24 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_DRUID:
             {
+				// Starfall
+            if (m_spellInfo->SpellFamilyFlags[2] & SPELLFAMILYFLAG2_DRUID_STARFALL)
+            {
+                // Shapeshifting into an animal form or mounting cancels the effect.
+                if (m_caster->GetCreatureType() == CREATURE_TYPE_BEAST || m_caster->IsMounted())
+                {
+                    if (m_triggeredByAuraSpell)
+                        m_caster->RemoveAurasDueToSpell(m_triggeredByAuraSpell->Id);
+                    return;
+                }
+
+                // Any effect which causes you to lose control of your character will supress the starfall effect.
+                if (m_caster->HasUnitState(UNIT_STATE_STUNNED | UNIT_STATE_FLEEING | UNIT_STATE_ROOT | UNIT_STATE_CONFUSED))
+                    return;
+
+                m_caster->CastSpell(unitTarget, damage, true);
+                return;
+            }
                 // Wrath
                 if (m_spellInfo->Id == 5176)
                 {
@@ -945,9 +967,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     if (m_caster->HasAura(16913)) // Moonfury
                     {
                         int32 eclipse = 0;
-                        if (m_caster->GetPower(POWER_ECLIPSE) < 0)
+                        if (m_caster->GetPower(POWER_ECLIPSE) < 100)
                             eclipse = -15;
-                        else if (m_caster->GetPower(POWER_ECLIPSE) > 0)
+                        else
                             eclipse = 15;
 
                         m_caster->SetEclipsePower(int32(m_caster->GetEclipsePower() + eclipse));
@@ -2141,10 +2163,10 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             // Death strike
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE)
             {
-               // if ((m_caster->CountPctFromMaxHealth(7)) > (20 * m_caster->GetDamageTakenInPastSecs(5) / 100))
+                //if ((m_caster->CountPctFromMaxHealth(7)) > (20 * m_caster->GetDamageTakenInPastSecs(5) / 100))
                     bp = m_caster->CountPctFromMaxHealth(7);
-             //   else
-              //      bp = (20 * m_caster->GetDamageTakenInPastSecs(5) / 100);
+              //  else
+                  //  bp = (20 * m_caster->GetDamageTakenInPastSecs(5) / 100);
 
                 // Improved Death Strike
                 if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
@@ -2162,17 +2184,32 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                    // Blood Presence
                    if (m_caster->HasAura(48263))
                    {
-                       int32 shield = CalculatePctN(bp, int32(aurEff->GetAmount() * m_caster->ToPlayer()->GetMasteryPoints()));
+                       int32 shield = int32(bp * (50.0f + (6.25f * m_caster->ToPlayer()->GetMasteryPoints())) / 100.0f);
                        m_caster->CastCustomSpell(m_caster, 77535, &shield, NULL, NULL, false);
                    }
                }
 
                 m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, false);
                 return;
-            }
-            switch (m_spellInfo->Id)
-            {
-            case 49020: // Obliterate
+			}
+			// Death Coil
+			if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_COIL)
+			{
+				if (m_caster->IsFriendlyTo(unitTarget))
+				{
+					int32 bp = (985 + damage) * 3.5;
+					m_caster->CastCustomSpell(unitTarget, 47633, &bp, NULL, NULL, true);
+				}
+				else
+				{
+					int32 bp = 985 + damage;
+					m_caster->CastCustomSpell(unitTarget, 47632, &bp, NULL, NULL, true);
+				}
+				return;
+			}
+			switch (m_spellInfo->Id)
+			{
+			case 49020: // Obliterate
             case 66198: // Obliterate Off-Hand
                 {
                     uint32 count = unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
@@ -3116,6 +3153,18 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 						if(caster->HasAura(85639) || caster->HasAura(85646)) // Guarded By The Light
 							caster->CastSpell(caster,87342,true);
 		}
+       if (caster->HasAura(76669)) // Illuminated Healing
+        {
+            if(caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                float mastery = caster->ToPlayer()->GetFloatValue(PLAYER_MASTERY);
+                int32 bp0 = int32(caster->ToPlayer()->GetHealingDoneInPastSecs(15) * ((1.5f * mastery) /100));
+                caster->ResetHealingDoneInPastSecs(120);
+                caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
+            }
+
+        m_damage -= addhealth;
+	   }
 		// Runic Healing Injector (heal increased by 25% for engineers - 3.2.0 patch change)
 		else if (m_spellInfo->Id == 67489)
 		{
@@ -3217,6 +3266,22 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
         m_damage -= addhealth;
     }
+
+       else if (m_spellInfo->Id == 52042) // Healing Stream
+       {
+               Unit *caster = m_originalCasterGUID ? m_originalCaster : m_caster;
+              
+               if (!caster)
+            return;
+
+               if (caster->GetTypeId() != TYPEID_PLAYER)
+                       return;
+
+               if (caster->HasAura(16187)) //Soothing Rains (Rank 1)
+                       m_healing = 1.25*m_healing;
+               else if (caster->HasAura(16205)) //Soothing Rains (Rank 2)
+                       m_healing = 1.50*m_healing;
+       }
 }
 
 void Spell::EffectHealPct(SpellEffIndex /*effIndex*/)
@@ -3296,25 +3361,7 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype)
         return;
     }
 
-    // bg reward have some special in code work
     uint32 bgType = 0;
-    switch (m_spellInfo->Id)
-    {
-        case SPELL_AV_MARK_WINNER:
-        case SPELL_AV_MARK_LOSER:
-            bgType = BATTLEGROUND_AV;
-            break;
-        case SPELL_WS_MARK_WINNER:
-        case SPELL_WS_MARK_LOSER:
-            bgType = BATTLEGROUND_WS;
-            break;
-        case SPELL_AB_MARK_WINNER:
-        case SPELL_AB_MARK_LOSER:
-            bgType = BATTLEGROUND_AB;
-            break;
-        default:
-            break;
-    }
 
     uint32 num_to_add = damage;
 
@@ -5220,6 +5267,8 @@ void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)
     {
         if (m_caster->GetGUID() == unitTarget->GetGUID())
             m_caster->CastSpell(m_caster, 25771, true); // Forbearance
+            m_caster->CastSpell(m_caster, 61988, true); // Immune shield marker (serverside)
+            m_caster->CastSpell(m_caster, 61987, true); // Avenging Wrath marker
     }
 
     // damage == 0 - heal for caster max health
@@ -5254,16 +5303,29 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                 && ((i == CURRENT_GENERIC_SPELL && curSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT)
                 || (i == CURRENT_CHANNELED_SPELL && curSpellInfo->ChannelInterruptFlags & CHANNEL_INTERRUPT_FLAG_INTERRUPT)))
             {
-                if (m_originalCaster)
-                {
-                    int32 duration = m_originalCaster->ModSpellDuration(m_spellInfo, unitTarget, m_originalCaster->CalcSpellDuration(m_spellInfo), false, 1 << effIndex);
-                    unitTarget->ProhibitSpellSchool(curSpellInfo->GetSchoolMask(), duration/*GetSpellDuration(m_spellInfo)*/);
-                }
-                ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
-                unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
-            }
-        }
-    }
+				if (m_originalCaster)
+				{
+					int32 duration = m_originalCaster->ModSpellDuration(m_spellInfo, unitTarget, m_originalCaster->CalcSpellDuration(m_spellInfo), false, 1 << effIndex);
+					unitTarget->ProhibitSpellSchool(curSpellInfo->GetSchoolMask(), duration/*GetSpellDuration(m_spellInfo)*/);
+				}
+				ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
+				unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
+				if(m_spellInfo->Id == 2139) // Counterspell
+				{
+					if(m_caster->HasAura(84722)) // Invocation rank 1
+					{
+						int32 bp = 5;
+						m_caster->CastCustomSpell(m_caster,87098,&bp,NULL,NULL,true);
+					}
+					if(m_caster->HasAura(84723)) // Invocation rank 2
+					{
+						int32 bp = 10;
+						m_caster->CastCustomSpell(m_caster,87098,&bp,NULL,NULL,true);
+					} 
+				}
+			}
+		}
+	}
 }
 
 void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
@@ -5754,17 +5816,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     sprintf(buf, "%s causually tosses %s [Worn Troll Dice]. One %u and one %u.", m_caster->GetName(), gender, urand(1, 6), urand(1, 6));
                     m_caster->MonsterTextEmote(buf, 0);
                     break;
-                }
-                // Vigilance
-                case 50725:
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Remove Taunt cooldown
-                    unitTarget->ToPlayer()->RemoveSpellCooldown(355, true);
-
-                    return;
                 }
                 // Death Knight Initiate Visual
                 case 51519:
@@ -6426,22 +6477,31 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            // Pestilence
-            if (m_spellInfo->SpellFamilyFlags[1] & 0x10000)
-            {
-                // Get diseases on target of spell
-                if (m_targets.GetUnitTarget() &&  // Glyph of Disease - cast on unit target too to refresh aura
-                    (m_targets.GetUnitTarget() != unitTarget || m_caster->GetAura(63334)))
-                {
-                    // And spread them on target
-                    // Blood Plague
-                    if (m_targets.GetUnitTarget()->GetAura(55078))
-                        m_caster->CastSpell(unitTarget, 55078, true);
-                    // Frost Fever
-                    if (m_targets.GetUnitTarget()->GetAura(55095))
-                        m_caster->CastSpell(unitTarget, 55095, true);
-                }
-            }
+			// Pestilence
+			if (m_spellInfo->SpellFamilyFlags[1] & 0x10000)
+			{
+				// Get diseases on target of spell
+				if (m_targets.GetUnitTarget() &&  // Glyph of Disease - cast on unit target too to refresh aura
+					(m_targets.GetUnitTarget() != unitTarget || m_caster->GetAura(63334)))
+				{
+					// And spread them on target
+					// Blood Plague
+					uint32 effectamount = 0;
+					if (effectamount = m_targets.GetUnitTarget()->GetAura(55078)->GetEffect(0)->GetAmount())
+					{
+						m_caster->CastSpell(unitTarget, 55078, true);
+						if(m_caster != unitTarget)
+							unitTarget->GetAura(55078)->GetEffect(0)->SetAmount(effectamount * 0.5);
+					}
+					// Frost Fever
+					if (effectamount = m_targets.GetUnitTarget()->GetAura(55095)->GetEffect(0)->GetAmount())
+					{
+						m_caster->CastSpell(unitTarget, 55095, true);
+						if(m_caster != unitTarget)
+							unitTarget->GetAura(55095)->GetEffect(0)->SetAmount(effectamount * 0.5);
+					}
+				}
+			}
             			// Festering Strike
 			if (m_spellInfo->Id == 85948)
             {
@@ -6502,29 +6562,39 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         m_caster->RemoveAurasDueToSpell(87118);
                     }
                 }
-           if (m_spellInfo->Id == 89490) // Strength of Soul
-           {
-               if (unitTarget->HasAura(6788))
-               {
-                   uint32 newCooldownDelay = unitTarget->GetAura(6788)->GetDuration();
-                   if (newCooldownDelay <= uint32(damage*1000))
-                       newCooldownDelay = 0;
-                   else
-                       newCooldownDelay -= uint32(damage*1000);
-
-                   unitTarget->GetAura(6788)->SetDuration(newCooldownDelay, true);
-               }
-           }
-           break;
-        }
+				if(m_spellInfo->Id == 89490) // Strenght of Soul
+				{
+					if(m_caster->HasAura(89488)) // Strenght of Soul rank 1
+					{
+						if(Aura* aur = unitTarget->GetAura(6788))
+						{
+							if(aur->GetDuration() >= 3000)
+								aur->SetDuration(aur->GetDuration() - 2000,true);
+							else
+								unitTarget->RemoveAurasDueToSpell(6788);
+						}
+					}
+					if(m_caster->HasAura(89489)) // Strenght of Soul rank 2
+					{
+						if(Aura* aur = unitTarget->GetAura(6788))
+						{
+							if(aur->GetDuration() >= 5000)
+								aur->SetDuration(aur->GetDuration() - 4000,true);
+							else
+								unitTarget->RemoveAurasDueToSpell(6788);
+						}
+					}
+				}
+		   } 
+		break;
           case SPELLFAMILY_MAGE:
          {
-            if (m_spellInfo->Id == 11129) //Combustion id�ko
+            if (m_spellInfo->Id == 11129) //Combustion idиko
             {
                 //ziadne dotky on target
                 int32 bp = 0;
                 Unit::AuraEffectList const &mPeriodic =    unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
-                //periodick� dmg
+                //periodickэ dmg
                 for (Unit::AuraEffectList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)                 
                     if ((*i)->GetCasterGUID() == m_caster->GetGUID())
                         bp += (*i)->GetAmount();             
@@ -6591,9 +6661,6 @@ void Spell::EffectSanctuary(SpellEffIndex /*effIndex*/)
         && (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_VANISH))
     {
         m_caster->ToPlayer()->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
-        // Overkill
-        if (m_caster->ToPlayer()->HasSpell(58426))
-           m_caster->CastSpell(m_caster, 58427, true);
     }
 }
 
@@ -6606,6 +6673,9 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
         return;
     
     if(this->effectHandleMode ==  SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
+        return;
+
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
     Player* player = m_caster->_movedPlayer;
@@ -6711,7 +6781,7 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
     // END
 
     // Send request
-    WorldPacket data(SMSG_DUEL_REQUESTED, 8 + 8);
+    WorldPacket data(SMSG_DUEL_REQUESTED, 8 + 8,true);
     data << uint64(pGameObj->GetGUID());
     data << uint64(caster->GetGUID());
     caster->GetSession()->SendPacket(&data);
@@ -8244,6 +8314,14 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
 
     float radius = 5.0f;
     int32 duration = m_spellInfo->GetDuration();
+
+   switch (m_spellInfo->Id)
+    {
+        case 49028: // Dancing Rune Weapon
+            if (AuraEffect *aurEff = m_originalCaster->GetAuraEffect(63330, 0)) // glyph of Dancing Rune Weapon
+                duration += aurEff->GetAmount();
+            break;
+    } 
 
     if (Player* modOwner = m_originalCaster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);

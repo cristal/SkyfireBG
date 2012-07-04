@@ -786,6 +786,8 @@ class World
         uint32 GetCleaningFlags() const { return m_CleaningFlags; }
         void   SetCleaningFlags(uint32 flags) { m_CleaningFlags = flags; }
         void   ResetEventSeasonalQuests(uint16 event_id);
+
+		void ResetCurrencyWeekCap();
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
@@ -797,7 +799,6 @@ class World
         void InitCurrencyResetTime();
         void ResetDailyQuests();
         void ResetWeeklyQuests();
-        void ResetCurrencyWeekCap();
         void ResetRandomBG();
     private:
         static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_stopEvent;

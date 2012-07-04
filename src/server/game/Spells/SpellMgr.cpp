@@ -232,8 +232,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
         return DIMINISHING_SLEEP;
     if (mechanic & ((1 << MECHANIC_SAPPED) | (1 << MECHANIC_POLYMORPH) | (1 << MECHANIC_SHACKLE)))
         return DIMINISHING_DISORIENT;
-    // Mechanic Knockout, except Blast Wave
-    if (mechanic & (1 << MECHANIC_KNOCKOUT) && spellproto->SpellIconID != 292)
+    // Mechanic Knockout
+    if (mechanic & (1 << MECHANIC_KNOCKOUT))
         return DIMINISHING_DISORIENT;
     if (mechanic & (1 << MECHANIC_DISARM))
         return DIMINISHING_DISARM;
@@ -2991,6 +2991,9 @@ void SpellMgr::LoadSpellCustomAttr()
 
         switch (spellInfo->Id)
         {
+            case 17: // Power Word: Shield manacost, 4.0.6 hotfix
+                spellInfo->ManaCostPercentage = 34;
+                break;
             case 79638: // Enhanced Strength
             case 79640: // Enhanced Intellect
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(367); // 2 hours instead of 1
@@ -3000,14 +3003,14 @@ void SpellMgr::LoadSpellCustomAttr()
             case 76613: // Frostburn
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
                 spellInfo->Effects[0].MiscValue = 0;
-                break;
-            case 93072: // Bring our Boys back
-                spellInfo->Effects[0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
-                break;
-            case 11113: // Blast Wave
-                // Had to do this, currently this spell is impossible to be implemented
-                // on the current proc system
-                spellInfo->Effects[2].Effect = NULL;
+				break;
+			case 93072: // Bring our Boys back
+				spellInfo->Effects[0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
+				break;
+			case 11113: // Blast Wave
+				// Had to do this, currently this spell is impossible to be implemented
+				// on the current proc system
+				spellInfo->Effects[2].Effect = NULL;
                 spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
                 break;
             case 51514: // Hex
@@ -3017,8 +3020,8 @@ void SpellMgr::LoadSpellCustomAttr()
             case 61721: // Polymorph (other animal)
             case 61780: // Polymorph (other animal)
             case 28271: // Polymorph (other animal)
-            case 8122:  // Physic Scream
-            case 5484:  // Howl of Terror
+        //    case 8122:  // Physic Scream
+        //    case 5484:  // Howl of Terror
             case 82691: // Ring of Frost
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                 break;
@@ -3080,6 +3083,10 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);
                 spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(14);
                 break;
+            case 88667: // Holy Word: Sanctuary
+            case 88668: // Holy Word: Sanctuary
+                spellInfo->SpellFamilyName = SPELLFAMILY_PRIEST;
+                break;
             case 87193: // Paralysis
             case 87194:
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_ROOT;
@@ -3089,6 +3096,13 @@ void SpellMgr::LoadSpellCustomAttr()
                 break;
             case 82661: // Aspect of the Fox
                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL;
+                break;
+            case 73920: // Healing rain targets fix
+            case 81262: // Efflorescence
+            case 88685: // Holy word: Sanctuary
+				spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
+				spellInfo->Effects[0].TargetB = TARGET_DEST_DYNOBJ_ALLY;
+				spellInfo->Effects[0].Amplitude = 2000; // Interval
                 break;
             case 87934: // Serpent Spread
             case 87935:
@@ -3136,6 +3150,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 63320: // Glyph of Life Tap
             // Entries were not updated after spell effect change, we have to do that manually :/
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED;
+                break;
+           case 25771: // Forbearance - wrong mechanic immunity in DBC since 3.0.x
+			   spellInfo->Effects[0].MiscValue = MECHANIC_IMMUNE_SHIELD;
                 break;
             case 59725: // Improved Spell Reflection - aoe aura
                 // Target entry seems to be wrong for this spell :/
@@ -3191,6 +3208,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 break;
             case 53385: // Divine Storm (Damage)
                 spellInfo->MaxAffectedTargets = 4;
+                break;
+            case 65156: // Juggernaut Buff
+                spellInfo->AttributesEx3 |=  SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED;
                 break;
             case 38310: // Multi-Shot
             case 42005: // Bloodboil
@@ -3260,7 +3280,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->ProcCharges = 1;
                 break;
             case 46915: // Bloodsurge
-                spellInfo->ProcCharges = 1;
+                spellInfo->ProcCharges = 30;
                 break;
            case 12295: // Tactical Mastery (Rank 1)
            case 12676: // Tactical Mastery (Rank 2)
@@ -3272,6 +3292,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_SWAP_SPELLS;
                 spellInfo->Effects[1].BasePoints = 92283;
                 break;
+            case 84617: // Revealing Strike
+				spellInfo->Effects[0].BasePoints = 125;
+                break; 
             case 44544: // Fingers of Frost
                 spellInfo->Effects[0].SpellClassMask = flag96(685904631, 1151048, 0);
                 break;
@@ -3398,6 +3421,10 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->Effects[0].TargetB = 0;
                 spellInfo->Effects[1].TargetB = 0;
                 break;
+			case 28176: // nether ward // fel armor // demon armor
+			case 687:
+				spellInfo->Effects[2].BasePoints = 91711;
+				break;
             case 53241: // Marked for Death (Rank 1)
             case 53243: // Marked for Death (Rank 2)
             case 53244: // Marked for Death (Rank 3)
@@ -3405,32 +3432,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 53246: // Marked for Death (Rank 5)
                 spellInfo->Effects[0].SpellClassMask = flag96(423937, 276955137, 2049);
                 break;
-            // Chakra spells needs moved to spellscripts this is a temp hack.
-            case 14751: // Chakra
-                spellInfo->Effects[0].ApplyAuraName = 0;
-                spellInfo->Effects[1].ApplyAuraName = 0;
-                spellInfo->Effects[2].ApplyAuraName = 0;
-                break;
-            case 81208: // Chakra: Serenity
-                spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_DUMMY;
-                spellInfo->Effects[2].ApplyAuraName = SPELL_AURA_DUMMY;
-                break;
-            case 81206: // Chakra: Sanctuary
-                spellInfo->Effects[2].ApplyAuraName = SPELL_AURA_DUMMY;
-                break;
             case 44614: // Frostfire Bolt
 			    spellInfo->StackAmount = 0; //TODO: remove when stacking of Decrease Run Speed % aura is fixed
 			    break;
-            case 81585: // Chakra: Serenity replace
-                spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
-                spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_SWAP_SPELLS;
-                spellInfo->Effects[0].BasePoints = 88684;
-                break;
-            case 81207: // Chakra: Sanctuary replace
-                spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
-                spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_SWAP_SPELLS;
-                spellInfo->Effects[0].BasePoints = 88685;
-                break;
             case 42650: // Army of the Dead - can be interrupted
                 spellInfo->InterruptFlags = SPELL_INTERRUPT_FLAG_INTERRUPT;
                 break;
@@ -3459,6 +3463,12 @@ void SpellMgr::LoadSpellCustomAttr()
                 break;
            case 22842: //Frenzied regeneration
                 spellInfo->Effects[1].Effect = SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT;
+                break;
+           case 93974: // Aura of Foreboding
+           case 93975:
+           case 93986:
+           case 93987:
+                spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(26);
                 break;
 			case 82928: // Aimed shot! should be instant
 				spellInfo->CastTimeEntry = 0;
@@ -3493,6 +3503,7 @@ void SpellMgr::LoadSpellCustomAttr()
             case 19975: // Entangling Roots (Rank 1) -- Nature's Grasp Proc
             case 27010: // Entangling Roots (Rank 7) -- Nature's Grasp Proc
             case 53313: // Entangling Roots (Rank 8) -- Nature's Grasp Proc
+				spellInfo->AttributesEx4 |= SPELL_ATTR4_TRIGGERED; 
                 spellInfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1);
                 break;
             case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with

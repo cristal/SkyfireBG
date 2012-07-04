@@ -74,14 +74,14 @@ class spell_warr_improved_spell_reflection : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_improved_spell_reflection_SpellScript);
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& unitList)
             {
                 unitList.remove(GetCaster());
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_warr_improved_spell_reflection_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_PARTY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_improved_spell_reflection_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_PARTY);
             }
         };
 
@@ -361,7 +361,7 @@ public:
 
         // Lock for avoid processing the same thing multiple times when we already know the result
         bool CheckAgain;
-        std::list<Unit*> targetList;
+        std::list<WorldObject*> targetList;
 
         bool Load()
         {
@@ -369,7 +369,7 @@ public:
             return true;
         }
 
-        void FilterTargets(std::list<Unit*>& unitList)
+        void FilterTargets(std::list<WorldObject*>& unitList)
         {
             targetList = unitList;
         }
@@ -401,8 +401,8 @@ public:
                                     if (target->HasAura(94009, caster->GetGUID())) // If the target has Rend
                                     {
                                         CheckAgain = false;
-                                        for (std::list<Unit*>::iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
-                                            if (Unit* curTrg = (*itr))
+                                        for (std::list<WorldObject*>::iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
+											if (Unit* curTrg = (*itr)->ToUnit())
                                                 caster->CastSpell(curTrg, 94009, true);
                                     }
                                 }
@@ -415,7 +415,7 @@ public:
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_warr_thunderclap::spell_warr_thunderclap_SpellScript::OnTargetHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_warr_thunderclap::spell_warr_thunderclap_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_thunderclap::spell_warr_thunderclap_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             OnCast += SpellCastFn(spell_warr_thunderclap::spell_warr_thunderclap_SpellScript::OnCastHandler);
         }
     };
@@ -497,12 +497,9 @@ public:
     }
 };
 
-enum DamageReductionAura
+enum Vigilance
 {
-    SPELL_BLESSING_OF_SANCTUARY         = 20911,
-    SPELL_GREATER_BLESSING_OF_SANCTUARY = 25899,
-    SPELL_RENEWED_HOPE                  = 63944,
-    SPELL_DAMAGE_REDUCTION_AURA         = 68066,
+    SPELL_WARRRIOR_TAUNT = 355,
 };
 
 class spell_warr_vigilance : public SpellScriptLoader
@@ -510,56 +507,42 @@ class spell_warr_vigilance : public SpellScriptLoader
 public:
     spell_warr_vigilance() : SpellScriptLoader("spell_warr_vigilance") { }
 
-    class spell_warr_vigilance_AuraScript : public AuraScript
+    class spell_warr_vigilance_SpellScript : public SpellScript
     {
-        PrepareAuraScript(spell_warr_vigilance_AuraScript);
+        PrepareSpellScript(spell_warr_vigilance_SpellScript);
 
         bool Validate(SpellInfo const* /*SpellEntry*/)
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_DAMAGE_REDUCTION_AURA))
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRRIOR_TAUNT))
                 return false;
             return true;
         }
 
-        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        void HandleScript(SpellEffIndex /*effIndex*/)
         {
-            Unit* target = GetTarget();
-            target->CastSpell(target, SPELL_DAMAGE_REDUCTION_AURA, true);
-        }
+            Unit* target = GetHitUnit();
 
-        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* target = GetTarget();
-
-            if (!target->HasAura(SPELL_DAMAGE_REDUCTION_AURA))
+            if (!target || target->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            if (target->HasAura(SPELL_BLESSING_OF_SANCTUARY) ||
-                target->HasAura(SPELL_GREATER_BLESSING_OF_SANCTUARY) ||
-                target->HasAura(SPELL_RENEWED_HOPE))
-                    return;
-
-            target->RemoveAurasDueToSpell(SPELL_DAMAGE_REDUCTION_AURA);
+            target->ToPlayer()->RemoveSpellCooldown(355, true);
         }
 
         void Register()
         {
-            OnEffectApply += AuraEffectApplyFn(spell_warr_vigilance_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-            OnEffectRemove += AuraEffectRemoveFn(spell_warr_vigilance_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            OnEffectHitTarget += SpellEffectFn(spell_warr_vigilance_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
-    AuraScript* GetAuraScript() const
+    SpellScript* GetSpellScript() const
     {
-        return new spell_warr_vigilance_AuraScript();
+        return new spell_warr_vigilance_SpellScript();
     }
 };
 
 enum Charge
 {
-    SPELL_JUGGERNAUT_CRIT_BONUS_TALENT      = 64976,
-    SPELL_JUGGERNAUT_CRIT_BONUS_BUFF        = 65156,
-    SPELL_CHARGE                            = 34846,
+    SPELL_CHARGE_ENERGIZE                  = 34846,
 };
 
 class spell_warr_charge : public SpellScriptLoader
@@ -573,19 +556,14 @@ public:
 
         bool Validate(SpellInfo const* /*SpellEntry*/)
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_JUGGERNAUT_CRIT_BONUS_TALENT) || !sSpellMgr->GetSpellInfo(SPELL_JUGGERNAUT_CRIT_BONUS_BUFF) || !sSpellMgr->GetSpellInfo(SPELL_CHARGE))
+            if (!sSpellMgr->GetSpellInfo(SPELL_CHARGE_ENERGIZE))
                 return false;
             return true;
         }
         void HandleDummy(SpellEffIndex /* effIndex */)
         {
-            int32 chargeBasePoints0 = GetEffectValue();
-            Unit* caster = GetCaster();
-            caster->CastCustomSpell(caster, SPELL_CHARGE, &chargeBasePoints0, NULL, NULL, true);
-
-            //Juggernaut crit bonus
-            if (caster->HasAura(SPELL_JUGGERNAUT_CRIT_BONUS_TALENT))
-                caster->CastSpell(caster, SPELL_JUGGERNAUT_CRIT_BONUS_BUFF, true);
+            int32 rageAmount = GetEffectValue();
+            GetCaster()->CastCustomSpell(GetCaster(), SPELL_CHARGE_ENERGIZE, &rageAmount, NULL, NULL, true);
         }
 
         void Register()
@@ -622,9 +600,9 @@ public:
         }
         void HandleDummy(SpellEffIndex /* effIndex */)
         {
-            int32 bp0 = GetEffectValue();
-            if (GetHitUnit())
-                GetCaster()->CastCustomSpell(GetHitUnit(), SPELL_SLAM, &bp0, NULL, NULL, true, 0);
+            Unit* target = GetHitUnit();
+            if (target)
+                GetCaster()->CastSpell(target, SPELL_SLAM, true);
         }
 
         void Register()
@@ -639,7 +617,8 @@ public:
     }
 };
 
-// Heroic leap 6544
+// Heroic Leap
+// Spell Id: 6544
 class spell_warr_heroic_leap : public SpellScriptLoader
 {
     public:
@@ -647,7 +626,45 @@ class spell_warr_heroic_leap : public SpellScriptLoader
 
         class spell_warr_heroic_leap_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_warr_heroic_leap_SpellScript)
+            PrepareSpellScript(spell_warr_heroic_leap_SpellScript);
+
+            void CalculateDamage(SpellEffIndex effect)
+            {
+                int32 damage = GetHitDamage();
+                if (Unit* target = GetHitUnit())
+                {
+                    if (Unit* caster = GetCaster())
+                    {
+                        damage += CalculatePctN(caster->GetTotalAttackPowerValue(BASE_ATTACK), 50);
+                        
+                        int32 dmg = caster->SpellDamageBonus(target, GetSpellInfo(), damage, SPELL_DIRECT_DAMAGE);
+                        SetHitDamage(dmg);
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_heroic_leap::spell_warr_heroic_leap_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warr_heroic_leap_SpellScript();
+        }
+};
+
+// Heroic leap building 6544
+class spell_warr_heroic_leap_build : public SpellScriptLoader
+{
+    public:
+        spell_warr_heroic_leap_build() : SpellScriptLoader("spell_warr_heroic_leap_build") { }
+
+        class spell_warr_heroic_leap_build_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_heroic_leap_build_SpellScript)
 
             bool Validate(SpellEntry const * /*spellEntry*/)
             {
@@ -675,13 +692,13 @@ class spell_warr_heroic_leap : public SpellScriptLoader
 
             void Register()
             {
-                OnCheckCast += SpellCheckCastFn(spell_warr_heroic_leap_SpellScript::CheckElevation);
+                OnCheckCast += SpellCheckCastFn(spell_warr_heroic_leap_build_SpellScript::CheckElevation);
             }
         };
 
         SpellScript *GetSpellScript() const
         {
-            return new spell_warr_heroic_leap_SpellScript();
+            return new spell_warr_heroic_leap_build_SpellScript();
         }
 };
 
@@ -702,4 +719,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_charge();
     new spell_warr_slam();
 	new spell_warr_heroic_leap();
+	new spell_warr_heroic_leap_build();
 }

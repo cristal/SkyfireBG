@@ -179,40 +179,6 @@ public:
         return new spell_pal_blessing_of_faith_SpellScript();
     }
 };
-// 63521 Guarded by The Light
-class spell_pal_guarded_by_the_light : public SpellScriptLoader
-{
-public:
-    spell_pal_guarded_by_the_light() : SpellScriptLoader("spell_pal_guarded_by_the_light") { }
-
-    class spell_pal_guarded_by_the_light_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_pal_guarded_by_the_light_SpellScript)
-        bool Validate(SpellInfo const* /*spellEntry*/)
-        {
-            if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_DIVINE_PLEA))
-                return false;
-            return true;
-        }
-
-        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
-        {
-            // Divine Plea
-            if (Aura* aura = GetCaster()->GetAura(PALADIN_SPELL_DIVINE_PLEA))
-                aura->RefreshDuration();
-        }
-
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_pal_guarded_by_the_light_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_pal_guarded_by_the_light_SpellScript();
-    }
-};
 
 class spell_pal_holy_shock : public SpellScriptLoader
 {
@@ -527,8 +493,8 @@ public:
         {
             // Had to do ALLLLLL the scaling manually because (afaik) there is no way to hook the GetHitHeal from the spell's effIndex 0
             Unit* caster = GetCaster();
-            int32 bonus = (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.198) + (caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.209);
-            int32 divinebonus = (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.594) + (caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.627);
+            int32 bonus = (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.198) + (caster->ToPlayer()->GetSpellPowerBonus() * 0.209);
+            int32 divinebonus = (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.594) + (caster->ToPlayer()->GetSpellPowerBonus() * 0.627);
             int32 multiplier;
 
             if (AuraEffect const* longWord = GetCaster()->GetDummyAuraEffect(SPELLFAMILY_PALADIN, 4127, 1))
@@ -545,13 +511,13 @@ public:
                     }
                     case 1:
                     {
-                       bonus = (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.396) + (caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.418);
+                       bonus = (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.396) + (caster->ToPlayer()->GetSpellPowerBonus() * 0.418);
                        multiplier = 2;
                        break;
                     }
                     case 2:
                     {
-                       bonus = (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.594) + (caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.627);
+                       bonus = (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.594) + (caster->ToPlayer()->GetSpellPowerBonus() * 0.627);
                        multiplier = 3;
                        break;
                     }
@@ -663,19 +629,16 @@ public:
 	{
 		PrepareSpellScript(spell_pal_holy_wrath_SpellScript);
 		
-		void FilterTargets(std::list<Unit*>& unitList)
+		void FilterTargets(std::list<WorldObject*>& unitList)
 		{
-			std::list<Unit*> tempTargets;
+			std::list<WorldObject*> tempTargets;
 			Unit* caster = GetCaster();
 			if(!caster)
 				return;
 			
-			for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end(); ++itr)
-			{
-				sLog->outString("HERE 12365");
-				
-				
-				uint32 typeCreature = (*itr)->GetCreatureType();
+			for (std::list<WorldObject*>::iterator itr = unitList.begin() ; itr != unitList.end(); ++itr)
+			{			
+				uint32 typeCreature = (*itr)->ToUnit()->GetCreatureType();
 				bool isElemsAndDragonkins = caster->HasAura(2812);  // Stun holy wrathu
 				if ( (typeCreature != CREATURE_TYPE_DEMON || typeCreature != CREATURE_TYPE_UNDEAD) ||
 					(isElemsAndDragonkins && (typeCreature != CREATURE_TYPE_DRAGONKIN || typeCreature != CREATURE_TYPE_ELEMENTAL)) ) // Overenie creatury 
@@ -685,14 +648,14 @@ public:
 			}
 			
 			unitList.clear();
-			for (std::list<Unit*>::iterator itr = tempTargets.begin() ; itr != tempTargets.end(); ++itr)
+			for (std::list<WorldObject*>::iterator itr = tempTargets.begin() ; itr != tempTargets.end(); ++itr)
 				unitList.push_back(*itr);
 			
 		}
 		
 		void Register()
 		{
-			OnUnitTargetSelect += SpellUnitTargetFn(spell_pal_holy_wrath_SpellScript::FilterTargets, EFFECT_1, TARGET_SRC_CASTER);
+			OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_holy_wrath_SpellScript::FilterTargets, EFFECT_1, TARGET_SRC_CASTER);
 		}
 	};
 	
@@ -800,7 +763,6 @@ void AddSC_paladin_spell_scripts()
 {
     new spell_pal_ardent_defender();
     new spell_pal_blessing_of_faith();
-    new spell_pal_guarded_by_the_light();
     new spell_pal_holy_shock();
     new spell_pal_shield_of_righteous();
     new spell_pal_judgements_of_the_bold();

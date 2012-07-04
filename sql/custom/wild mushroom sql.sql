@@ -1,0 +1,1 @@
+UPDATE creature_template SET scriptname = 'npc_wild_mushroom' WHERE entry = 47649;

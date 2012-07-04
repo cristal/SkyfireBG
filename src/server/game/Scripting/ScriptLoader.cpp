@@ -1385,13 +1385,17 @@ void AddBattlegroundScripts()
 
 #ifdef SCRIPTS
 /* This is where custom scripts' loading functions should be declared. */
-
+void AddSC_ArenaWatcher();
+void AddSC_challenge_commandscript();
+void AddSC_npc_dynamic_teleporter();
 #endif
 
 void AddCustomScripts()
 {
 #ifdef SCRIPTS
     /* This is where custom scripts should be added. */
-
+	AddSC_ArenaWatcher();
+	AddSC_challenge_commandscript();
+	AddSC_npc_dynamic_teleporter();
 #endif
 }

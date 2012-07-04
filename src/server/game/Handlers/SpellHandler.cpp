@@ -328,7 +328,11 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         recvPacket.rfinish(); // prevent spam at ignore packet
         return;
     }
-
+    uint32 newSpellId = 0;
+    
+    if (Player* plrMover = mover->ToPlayer())
+        spellId = plrMover->GetSpellForCast(spellId);
+ 
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
 
     if (!spellInfo)
@@ -344,7 +348,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
            mover->ToPlayer()->SetEmoteState(0);
 
         // not have spell in spellbook or spell passive and not casted by client
-        if (!mover->ToPlayer()->HasActiveSpell (spellId) || spellInfo->IsPassive())
+        if (!mover->ToPlayer()->HasActiveSpell(spellId) || spellInfo->IsPassive())
         {
             //cheater? kick? ban?
             recvPacket.rfinish(); // prevent spam at ignore packet
@@ -393,10 +397,22 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             spellInfo = actualSpellInfo;
     }
 
-    Spell* spell = new Spell(mover, spellInfo, TRIGGERED_NONE, 0, false);
+	Spell* spell = new Spell(mover, spellInfo, TRIGGERED_NONE, 0, false);
     spell->_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
     spell->prepare(&targets);
+    if(_player->m_spellsinrow.find(spellInfo->Id) != _player->m_spellsinrow.end()) // Found it!
+    {
+        uint32 times = _player->m_spellsinrow.find(spellInfo->Id)->second;
+        _player->m_spellsinrow.clear();
+        _player->m_spellsinrow[spellInfo->Id] = times + 1;
+    }
+    if(_player->m_lastSpellCasted != spellInfo->Id)
+    {
+        _player->m_spellsinrow.clear(); // clear it
+        _player->m_spellsinrow[spellInfo->Id] = 1;
+    }
+    _player->m_lastSpellCasted = spellInfo->Id;
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)

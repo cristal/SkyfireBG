@@ -348,6 +348,17 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
         if ((matchcount++) >= sWorld->getIntConfig(CONFIG_MAX_WHO))
             continue;
 
+        if (itr->second->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
+        {
+            pname = "<Dev>";
+            pname.append(itr->second->GetName());
+        }
+        else if (itr->second->isGameMaster())
+        {
+            pname = "<GM>";
+            pname.append(itr->second->GetName());
+        }
+
         data << pname;                                    // player name
         data << gname;                                    // guild name
         data << uint32(lvl);                              // player level
@@ -1200,7 +1211,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         return;
 
     uint32 talent_points = 0x29;
-    WorldPacket data(SMSG_INSPECT_TALENT, 8+4+talent_points);
+    WorldPacket data(SMSG_INSPECT_TALENT, 8+4+talent_points,true);
 
     data << uint64(player->GetGUID());
 

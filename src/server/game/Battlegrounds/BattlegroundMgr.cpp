@@ -295,7 +295,8 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
     }
     // last check on 4.0.6
     data->Initialize(MSG_PVP_LOG_DATA, (1+1+4+40*bg->GetPlayerScoresSize()));
-    *data << uint8(type);                              // type (battleground=0/arena=1)
+ 
+	*data << uint8(type);                              // type (battleground=0/arena=1)
 
     if ((type & 64) != 0)                              // arena
     {
@@ -307,14 +308,14 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                 *data << uint8(0);
         }
     }
-    if (type)                                                // arena
+    if((type & 128) != 0)
     {
         // it seems this must be according to BG_WINNER_A/H and _NOT_ BG_TEAM_A/H
         for (int8 i = 1; i >= 0; --i)
         {
             int32 rating_change = bg->GetArenaTeamRatingChangeByIndex(i);
 
-            uint32 pointsLost = rating_change < 0 ? -rating_change : 0;
+            uint32 pointsLost = rating_change < 0 ? abs(rating_change) : 0;
             uint32 pointsGained = rating_change > 0 ? rating_change : 0;
             uint32 MatchmakerRating = bg->GetArenaMatchmakerRatingByIndex(i);
 
@@ -322,13 +323,6 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
             *data << uint32(pointsGained);                  // Rating gained
             *data << uint32(MatchmakerRating);              // Matchmaking Value
             sLog->outDebug(LOG_FILTER_BATTLEGROUND, "rating change: %d", rating_change);
-        }
-        for (int8 i = 1; i >= 0; --i)
-        {
-            if (ArenaTeam* at = sArenaTeamMgr->GetArenaTeamById(bg->GetArenaTeamIdByIndex(i)))
-                *data << at->GetName();
-            else
-                *data << uint8(0);
         }
     }
 
@@ -402,7 +396,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
         *data << uint32(0);                                         // count of extra fields
         // next 3 fields enabled by flag
         *data << uint32(itr2->second->HonorableKills);
-        *data << uint32(itr2->second->BonusHonor);
+        *data << uint32(itr2->second->BonusHonor / 100);
         *data << uint32(itr2->second->Deaths);
 
         *data << uint64(itr2->first);
@@ -1094,6 +1088,8 @@ BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgType
         case BATTLEGROUND_RV:
             switch (arenaType)
             {
+				case ARENA_TYPE_1v1:
+					return BATTLEGROUND_QUEUE_1v1;
                 case ARENA_TYPE_2v2:
                     return BATTLEGROUND_QUEUE_2v2;
                 case ARENA_TYPE_3v3:
@@ -1130,6 +1126,7 @@ BattlegroundTypeId BattlegroundMgr::BGTemplateId(BattlegroundQueueTypeId bgQueue
             return BATTLEGROUND_BG;
         case BATTLEGROUND_QUEUE_RB:
             return BATTLEGROUND_RB;
+		case BATTLEGROUND_QUEUE_1v1:
         case BATTLEGROUND_QUEUE_2v2:
         case BATTLEGROUND_QUEUE_3v3:
         case BATTLEGROUND_QUEUE_5v5:
@@ -1143,6 +1140,8 @@ uint8 BattlegroundMgr::BGArenaType(BattlegroundQueueTypeId bgQueueTypeId)
 {
     switch (bgQueueTypeId)
     {
+		case BATTLEGROUND_QUEUE_1v1:
+			return ARENA_TYPE_1v1;
         case BATTLEGROUND_QUEUE_2v2:
             return ARENA_TYPE_2v2;
         case BATTLEGROUND_QUEUE_3v3:

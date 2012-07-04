@@ -36,6 +36,46 @@ enum WarlockSpells
     WARLOCK_HEALTHSTONE_CREATE              = 34130,
     WARLOCK_HEALTHSTONE_HEAL                = 6262,
 	WARLOCK_DARK_INTENT_EFFECT              = 85767,
+	WARLOCK_FELHUNTER_SHADOWBITE_R1         = 54049,
+    WARLOCK_DEMONIC_PACT_SPELL              = 53646
+};
+
+// 47236 - Demonic Pact
+class spell_warl_demonic_pact: public SpellScriptLoader {
+public:
+    spell_warl_demonic_pact() : SpellScriptLoader("spell_warl_demonic_pact") {}
+
+    class spell_warl_demonic_pact_AuraScript: public AuraScript
+    {
+        PrepareAuraScript(spell_warl_demonic_pact_AuraScript);
+
+        bool Validate(SpellEntry const * /*spellEntry*/)
+        {
+            if (!sSpellStore.LookupEntry(WARLOCK_DEMONIC_PACT_SPELL))
+                return false;
+
+            return true;
+        }
+
+        void HandleEffectApply(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* target = GetTarget();
+           
+            if (Unit *caster = aurEff->GetBase()->GetCaster())
+				if (caster->HasAura(47236))
+                    if (target->isPet())
+                        target->CastSpell(target, WARLOCK_DEMONIC_PACT_SPELL, true, NULL, aurEff);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_warl_demonic_pact_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const {
+        return new spell_warl_demonic_pact_AuraScript();
+    }
 };
 
 //80398 Dark Intent
@@ -266,15 +306,15 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warl_seed_of_corruption_SpellScript);
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
                 if (GetExplTargetUnit())
-                    unitList.remove(GetExplTargetUnit());
+                    targets.remove(GetExplTargetUnit());
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_warl_seed_of_corruption_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warl_seed_of_corruption_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
             }
         };
 
@@ -486,4 +526,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_drain_life();
     new spell_warl_fel_flame();
     new spell_warl_dark_intent();
+	new spell_warl_demonic_pact();
 }

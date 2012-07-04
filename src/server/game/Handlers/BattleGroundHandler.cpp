@@ -258,7 +258,7 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket & /*recv_
             if (hplayer)
                 ++count2;
 
-            WorldPacket data(SMSG_BATTLEGROUND_PLAYER_POSITIONS, (4+4+16*count1+16*count2));
+            WorldPacket data(SMSG_BATTLEGROUND_PLAYER_POSITIONS, (4+4+16*count1+16*count2),true);
             data << count1;                                     // alliance flag holders count
             data << count2;                                     // horde flag holders count
             if (aplayer)
@@ -283,7 +283,7 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket & /*recv_
         case BATTLEGROUND_AB:
         case BATTLEGROUND_AV:
         {
-            WorldPacket data(SMSG_BATTLEGROUND_PLAYER_POSITIONS, (4+4));
+            WorldPacket data(SMSG_BATTLEGROUND_PLAYER_POSITIONS, (4+4),true);
             data << uint32(0);
             data << uint32(0);
             SendPacket(&data);
@@ -416,7 +416,9 @@ void WorldSession::HandleBattlegroundPortOpcode(WorldPacket &recv_data)
             action = 0;
         }
     }
-    uint32 queueSlot = _player->GetBattlegroundQueueIndex(bgQueueTypeId);
+    uint32 queueSlot = 0;
+	if (_player->getDuelState() == false)
+		uint32 queueSlot = _player->GetBattlegroundQueueIndex(bgQueueTypeId);
     WorldPacket data;
     switch (action >> 7)
     {
@@ -503,7 +505,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
         sLog->outError("BattlegroundHandler: invalid bgtype (%u) with player (Name: %s, GUID: %u) received.", bgTypeId_, _player->GetName(), _player->GetGUIDLow());
         return;
     }
-    if (!_player->InBattlegroundQueue())
+    if (!_player->InBattlegroundQueue() && _player->getDuelState() == false)
     {
         sLog->outError("BattlegroundHandler: Invalid CMSG_BATTLEFIELD_PORT received from player (%u), he is not in bg_queue.", _player->GetGUIDLow());
         return;
@@ -564,12 +566,14 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
             action = 0;
         }
     }
-    uint32 queueSlot = _player->GetBattlegroundQueueIndex(bgQueueTypeId);
+    uint32 queueSlot = 0;
+	if (_player->getDuelState() == false)
+		uint32 queueSlot = _player->GetBattlegroundQueueIndex(bgQueueTypeId);
     WorldPacket data;
     switch (action)
     {
         case 1:                                         // port to battleground
-            if (!_player->IsInvitedForBattlegroundQueueType(bgQueueTypeId))
+            if (!_player->IsInvitedForBattlegroundQueueType(bgQueueTypeId) && _player->getDuelState() == false)
                 return;                                 // cheating?
 
             if (!_player->InBattleground())
@@ -663,6 +667,8 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recv_data*/)
     for (uint8 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
     {
         BattlegroundQueueTypeId bgQueueTypeId = _player->GetBattlegroundQueueTypeId(i);
+		if (_player->getDuelState() == true)
+			bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_AA, 2);
         if (!bgQueueTypeId)
             continue;
         BattlegroundTypeId bgTypeId = BattlegroundMgr::BGTemplateId(bgQueueTypeId);

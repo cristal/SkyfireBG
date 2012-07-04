@@ -1033,7 +1033,7 @@ public:
                 return;
 
             uint32 spellId = uint32(GetSpellInfo()->Effects[EFFECT_0].CalcValue());
-            target->CastSpell(caster, spellId, true);
+            caster->CastSpell(target, spellId, true);
 
             if (target->GetTypeId() == TYPEID_PLAYER)
                 return;
@@ -1238,7 +1238,7 @@ public:
 
         void Register()
         {
-            OnEffectHitTarget += SpellEffectFn(spell_gen_magic_rooster_SpellScript::HandleScript, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_gen_magic_rooster_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
         }
     };
 

@@ -10,6 +10,11 @@
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
+    Custom/ArenaWatcher.cpp
+    Custom/challenge/challenge.cpp
+    Custom/challenge/challenge.h
+    Custom/challenge/challenge_commands.cpp
+    Custom/dynamic_teleporter.cpp
 )
 
 message("  -> Prepared: Custom")

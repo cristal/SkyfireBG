@@ -210,7 +210,6 @@ void Player::UpdateArmor()
 
     value  = GetModifierValue(unitMod, BASE_VALUE);         // base armor (from items)
     value *= GetModifierValue(unitMod, BASE_PCT);           // armor percent from items
-    value += GetStat(STAT_AGILITY) * 2.0f;                  // armor bonus from stats
     value += GetModifierValue(unitMod, TOTAL_VALUE);
 
     //add dynamic flat mods
@@ -788,20 +787,30 @@ void Player::UpdateArmorPenetration(int32 amount)
     SetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_ARMOR_PENETRATION, amount);
 }
 
-void Player::UpdateMasteryPercentage()
+
+/* void Player::UpdateMasteryPercentage()
 {
     // No mastery
-    float value = 0.0f;
+    float value = 0.0f, basevalue = 0.0f;
     if (CanMastery())
     {
         value = 0.0f;
         // Mastery from SPELL_AURA_MASTERY aura
-        value += GetTotalAuraModifier(SPELL_AURA_MASTERY);
+        basevalue += GetTotalAuraModifier(SPELL_AURA_MASTERY);
         // Mastery from rating
         value += GetRatingBonusValue(CR_MASTERY);
-        value = value < 0.0f ? 0.0f : value;
+        value = ((value - basevalue) < 0.0f ? basevalue : value);
     }
     SetFloatValue(PLAYER_MASTERY, value);
+} */
+
+void Player::UpdateMasteryPercentage()
+{
+    if (CanMastery())
+    {
+        SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, _baseRatingValue[CR_MASTERY]);
+        SetFloatValue(PLAYER_MASTERY, GetMasteryPoints());
+    }
 }
 
 void Player::UpdateMeleeHitChances()

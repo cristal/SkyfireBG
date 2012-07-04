@@ -27,7 +27,10 @@
 
 enum DruidSpells
 {
-    DRUID_INCREASED_MOONFIRE_DURATION   = 38414,
+    DRUID_INCREASED_MOONFIRE_DURATION   = 38414, // Tier 6
+    DRUID_GENESIS_R1                    = 57810,
+    DRUID_GENESIS_R2                    = 57811,
+    DRUID_GENESIS_R3                    = 57812,
     DRUID_NATURES_SPLENDOR              = 57865,
     DRUID_NPC_WILD_MUSHROOM             = 47649,
     DRUID_TALENT_FUNGAL_GROWTH_1        = 78788,
@@ -216,9 +219,8 @@ class spell_dru_glyph_of_starfire : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(DRUID_INCREASED_MOONFIRE_DURATION))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(DRUID_NATURES_SPLENDOR))
+                if (!sSpellMgr->GetSpellInfo(DRUID_INCREASED_MOONFIRE_DURATION) ||
+                    !sSpellMgr->GetSpellInfo(DRUID_GENESIS_R1))
                     return false;
                 return true;
             }
@@ -233,10 +235,18 @@ class spell_dru_glyph_of_starfire : public SpellScriptLoader
 
                         uint32 countMin = aura->GetMaxDuration();
                         uint32 countMax = aura->GetSpellInfo()->GetMaxDuration() + 9000;
+
                         if (caster->HasAura(DRUID_INCREASED_MOONFIRE_DURATION))
                             countMax += 3000;
-                        if (caster->HasAura(DRUID_NATURES_SPLENDOR))
-                            countMax += 3000;
+
+                        if (caster->HasAura(DRUID_GENESIS_R1))
+                            countMax += 2000;
+
+                        if (caster->HasAura(DRUID_GENESIS_R2))
+                            countMax += 4000;
+
+                        if (caster->HasAura(DRUID_GENESIS_R3))
+                            countMax += 6000;
 
                         if (countMin < countMax)
                         {
@@ -255,50 +265,6 @@ class spell_dru_glyph_of_starfire : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_dru_glyph_of_starfire_SpellScript();
-        }
-};
-
-// 69366 - Moonkin Form passive
-class spell_dru_moonkin_form_passive : public SpellScriptLoader
-{
-    public:
-        spell_dru_moonkin_form_passive() : SpellScriptLoader("spell_dru_moonkin_form_passive") { }
-
-        class spell_dru_moonkin_form_passive_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_dru_moonkin_form_passive_AuraScript);
-
-            uint32 absorbPct;
-
-            bool Load()
-            {
-                absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
-                return true;
-            }
-
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
-            {
-                // Set absorbtion amount to unlimited
-                amount = -1;
-            }
-
-            void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
-            {
-                // reduces all damage taken while Stunned in Moonkin Form
-                if (GetTarget()->GetUInt32Value(UNIT_FIELD_FLAGS) & (UNIT_FLAG_STUNNED) && GetTarget()->HasAuraWithMechanic(1<<MECHANIC_STUN))
-                    absorbAmount = CalculatePctN(dmgInfo.GetDamage(), absorbPct);
-            }
-
-            void Register()
-            {
-                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_moonkin_form_passive_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-                 OnEffectAbsorb += AuraEffectAbsorbFn(spell_dru_moonkin_form_passive_AuraScript::Absorb, EFFECT_0);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_dru_moonkin_form_passive_AuraScript();
         }
 };
 
@@ -359,37 +325,37 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
                 return GetCaster()->GetTypeId() == TYPEID_PLAYER;
             }
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
                 if (!GetCaster()->ToPlayer()->GetGroup())
                 {
-                    unitList.clear();
-                    unitList.push_back(GetCaster());
+                    targets.clear();
+                    targets.push_back(GetCaster());
                 }
                 else
                 {
-                    unitList.remove(GetExplTargetUnit());
+                    targets.remove(GetExplTargetUnit());
                     std::list<Unit*> tempTargets;
-                    for (std::list<Unit*>::const_iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
-                        if ((*itr)->GetTypeId() == TYPEID_PLAYER && GetCaster()->IsInRaidWith(*itr))
-                            tempTargets.push_back(*itr);
+                    for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        if ((*itr)->GetTypeId() == TYPEID_PLAYER && GetCaster()->IsInRaidWith((*itr)->ToUnit()))
+                            tempTargets.push_back((*itr)->ToUnit());
 
                     if (tempTargets.empty())
                     {
-                        unitList.clear();
+                        targets.clear();
                         FinishCast(SPELL_FAILED_DONT_REPORT);
                         return;
                     }
 
                     Unit* target = SelectRandomContainerElement(tempTargets);
-                    unitList.clear();
-                    unitList.push_back(target);
+                    targets.clear();
+                    targets.push_back(target);
                 }
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_dru_t10_restoration_4p_bonus_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dru_t10_restoration_4p_bonus_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
             }
         };
 
@@ -408,14 +374,14 @@ class spell_dru_starfall_aoe : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dru_starfall_aoe_SpellScript);
 
-            void FilterTargets(std::list<Unit*>& unitList)
+            void FilterTargets(std::list<WorldObject*>& targets)
             {
-                unitList.remove(GetExplTargetUnit());
+                targets.remove(GetExplTargetUnit());
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_dru_starfall_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dru_starfall_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
@@ -474,13 +440,12 @@ class spell_dru_ferocious_bite : public SpellScriptLoader
                 {
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                         return;
-
-                    int32 damage = GetHitDamage();
+					int32 damage = GetHitDamage();
+					int32 numcombos = caster->ToPlayer()->GetComboPoints();
                     float ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    float multiple = ap / 410 + GetSpellInfo()->Effects[EFFECT_1].CalcValue();
-                    int32 energy = -(caster->ModifyPower(POWER_ENERGY, -30));
-                    damage += int32(energy * multiple);
-                    damage += int32(CalculatePctN(caster->ToPlayer()->GetComboPoints() * ap, 7));
+                    int32 energy = -(caster->ModifyPower(POWER_ENERGY, -35));
+					damage = int32(300 + 445 * numcombos  + ap * 0.11 * numcombos);
+					damage *= (100+(energy*100/35))/100;
                     SetHitDamage(damage);
                 }
             }
@@ -546,39 +511,9 @@ public:
     }
 };
 
-// Berserk
-// Spellid: 50334
-class spell_dru_berserk : public SpellScriptLoader
-{
-   public:
-       spell_dru_berserk() : SpellScriptLoader("spell_dru_berserk") {}
-
-       class spell_dru_berserk_AuraScript : public AuraScript
-       {
-           PrepareAuraScript(spell_dru_berserk_AuraScript);
-           void HandleEffectApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
-           {
-               if (Unit* target = GetTarget())
-                   if (target->GetTypeId() == TYPEID_PLAYER)
-                       target->ToPlayer()->RemoveSpellCategoryCooldown(971, true);
-           }
-
-           void Register()
-           {
-               OnEffectApply += AuraEffectApplyFn(spell_dru_berserk_AuraScript::HandleEffectApply, EFFECT_2, SPELL_AURA_MECHANIC_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
-           }
-       };
-
-       AuraScript* GetAuraScript() const
-       {
-           return new spell_dru_berserk_AuraScript();
-       }
-};
-
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_glyph_of_starfire();
-    new spell_dru_moonkin_form_passive();
     new spell_dru_savage_defense();
     new spell_dru_t10_restoration_4p_bonus();
     new spell_dru_starfall_aoe();
@@ -587,5 +522,4 @@ void AddSC_druid_spell_scripts()
     new spell_dru_mark_of_the_wild();
     new spell_druid_wild_mushroom();
     new spell_druid_wild_mushroom_detonate();
-    new spell_dru_berserk();
 }

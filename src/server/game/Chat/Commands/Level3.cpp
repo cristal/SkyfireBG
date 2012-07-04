@@ -4453,9 +4453,11 @@ bool ChatHandler::HandleSendMessageCommand(const char *args)
     return true;
 }
 
-bool ChatHandler::HandleFlushArenaPointsCommand(const char * /*args*/)
+bool ChatHandler::HandleCurrencyResetCommand(const char * /*args*/)
 {
-    sArenaTeamMgr->DistributeArenaPoints();
+	char* msg = "Week cap conquest pointu/honoru byl vyresetovan.";
+	sWorld->SendWorldText(LANG_SYSTEMMESSAGE,msg);
+	sWorld->ResetCurrencyWeekCap();
     return true;
 }
 

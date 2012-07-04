@@ -56,19 +56,8 @@ enum BattlegroundQuests
 
 enum BattlegroundMarks
 {
-    SPELL_WS_MARK_LOSER             = 24950,
-    SPELL_WS_MARK_WINNER            = 24951,
-    SPELL_AB_MARK_LOSER             = 24952,
-    SPELL_AB_MARK_WINNER            = 24953,
-    SPELL_AV_MARK_LOSER             = 24954,
-    SPELL_AV_MARK_WINNER            = 24955,
-    SPELL_SA_MARK_WINNER            = 61160,
-    SPELL_SA_MARK_LOSER             = 61159,
-    ITEM_AV_MARK_OF_HONOR           = 20560,
-    ITEM_WS_MARK_OF_HONOR           = 20558,
-    ITEM_AB_MARK_OF_HONOR           = 20559,
-    ITEM_EY_MARK_OF_HONOR           = 29024,
-    ITEM_SA_MARK_OF_HONOR           = 42425
+    ITEM_ARENA_MARK                 = 43686,
+    ITEM_BATTLEGROUND_MARK          = 45978
 };
 
 enum BattlegroundMarksCount
@@ -184,6 +173,7 @@ enum BattlegroundQueueTypeId
     BATTLEGROUND_QUEUE_2v2      = 10,
     BATTLEGROUND_QUEUE_3v3      = 11,
     BATTLEGROUND_QUEUE_5v5      = 12,
+	BATTLEGROUND_QUEUE_1v1      = 13,
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 
@@ -217,7 +207,8 @@ enum ScoreType
 
 enum ArenaType
 {
-    ARENA_TYPE_2v2          = 2,
+    ARENA_TYPE_1v1          = 1,
+	ARENA_TYPE_2v2          = 2,
     ARENA_TYPE_3v3          = 3,
     ARENA_TYPE_5v5          = 5
 };
@@ -579,6 +570,7 @@ class Battleground
 
         void RewardXPAtKill(Player* killer, Player* victim);
         bool CanAwardArenaPoints() const { return _LevelMin >= BG_AWARD_ARENA_POINTS_MIN_LEVEL; }
+		void RewardItem(Player* player, uint32 team, uint32 winner);
 
         virtual uint64 GetFlagPickerGUID(int32 /*team*/ = -1) const { return 0; }
     protected:

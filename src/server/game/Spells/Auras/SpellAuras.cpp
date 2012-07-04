@@ -80,6 +80,12 @@ _target(target), _base(aura), _slot(MAX_AURAS), _flags(AFLAG_NONE),
 			sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura: %u Effect: %d could not find empty unit visible slot", GetBase()->GetId(), GetEffectMask());
 	}
 
+    if ((target->HasAura(89488)) && GetBase()->GetId() == 89485) // strength of soul
+        caster->CastSpell(caster, 96266, true);
+
+    if ((target->HasAura(89489)) && GetBase()->GetId() == 89485) // strength of soul
+        caster->CastSpell(caster, 96267, true);
+
 	_InitFlags(caster, effMask);
 }
 
@@ -148,6 +154,8 @@ void AuraApplication::_InitFlags(Unit* caster, uint8 effMask)
 		}
 		_flags |= positiveFound ? AFLAG_POSITIVE : AFLAG_NEGATIVE;
 	}
+    if (GetBase()->GetSpellInfo()->HasAura(SPELL_AURA_SWAP_SPELLS))
+        _flags |= AFLAG_ANY_EFFECT_AMOUNT_SENT;
 }
 
 void AuraApplication::_HandleEffect(uint8 effIndex, bool apply)
@@ -952,7 +960,7 @@ bool Aura::CanBeSaved() const
 
 bool Aura::CanBeSentToClient() const
 {
-	return !IsPassive() || GetSpellInfo()->HasAreaAuraEffect() || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);
+	return !IsPassive() || GetSpellInfo()->HasAreaAuraEffect() || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE) || HasEffectType(SPELL_AURA_CAST_WHILE_WALKING);
 }
 
 void Aura::UnregisterSingleTarget()
@@ -1258,6 +1266,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 					else
 						target->AddAura(74396, target);
 				}
+			case 79683: //Arcane Missile!
+				{
+					if (caster->HasAura(44445) || // Hot Streak
+						caster->HasAura(44546) || caster->HasAura(44548) || caster->HasAura(44549)) // Brain Freeze
+					{
+						caster->RemoveAurasDueToSpell(79683);
+						break;
+					}
+				}
 			case 83301: // Improved Cone of Cold r1 freeze
 				if (!caster->HasAura(11190)) // r1 talent
 					target->RemoveAura(83301);
@@ -1305,11 +1322,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 					caster->SetHavocTarget(target);
 				else
 					caster->SetHavocTarget(NULL);
-			}
-			if(GetId() == 687 || GetId() == 28176) // Fel / Demon Armor
-			{
-				if(caster->HasAura(91713)) // Nether ward talent
-					GetEffect(2)->SetAmount(91711);
 			}
 			if(GetId() == 27243) // Seed of Corruption
 			{
@@ -1580,6 +1592,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				if (caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 3029, 0)){
 					caster->CastSpell(caster, 57318, true);
 				}
+				case 82327: // Speed of Light
+                    {
+                        if (AuraEffect * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PALADIN, 5062, EFFECT_1))
+                        {
+                            int32 basepoints0 = aurEff->GetAmount();
+                            caster->CastCustomSpell(caster, 85497, &basepoints0, NULL, NULL, true);
+                        }
+                    }
 			}
 			if(GetId() == 85416)    // Grand Crusader                     
 			{     
@@ -1699,23 +1719,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				if (target->HasAura(70752)) // Item - Mage T10 2P Bonus
 					target->CastSpell(target, 70753, true);
 				break;
-			default:
+			case 11426: // Ice Barrier
+                    {
+                        if (!caster)
+                            break;
+                        if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL)
+                            if (caster->HasAura(44745)) // Shattered Barrier, Rank 1
+                                caster->CastSpell(caster, 55080, true, NULL, GetEffect(0), GetCasterGUID());
+                            else if (caster->HasAura(54787)) // Shattered Barrier, Rank 2
+                                caster->CastSpell(caster, 83073, true, NULL, GetEffect(0), GetCasterGUID());
+                        break;
+                    }
+
+            default:
 				break;
 			}
-			if (!caster)
-				break;
-			// Ice barrier - dispel/absorb remove
-			if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL
-				&& GetSpellInfo()->SpellFamilyFlags[1] & 0x1) {
-					// Shattered Barrier
-					if (target->HasAura(44745)) {
-						caster->CastSpell(target, 55080, true);
-					}
-					if (target->HasAura(54787)) {
-						caster->CastSpell(target, 83073, true);
-					}
-			}
-			break;
 		case SPELLFAMILY_WARRIOR:
 			if (!caster)
 				break;
@@ -1971,15 +1989,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 	switch (GetSpellInfo()->SpellFamilyName)
 	{
 	case SPELLFAMILY_GENERIC:
-		switch (GetId())
-		{
-		case 50720: // Vigilance
-			if (apply)
-				target->CastSpell(caster, 59665, true, 0, 0, caster->GetGUID());
-			else
-				target->SetReducedThreatPercent(0, 0);
-			break;
-		}
+
 		break;
 	case SPELLFAMILY_DRUID:
 		// Enrage
@@ -2014,21 +2024,26 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 			// Master of subtlety
 			if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpell(31223, 0))
 			{
-				if (!apply)
-					caster->GetAura(31665)->SetDuration(6000, true);
-				else
+				if(target)
 				{
-					int32 basepoints0 = aurEff->GetAmount();
-					caster->CastCustomSpell(target, 31665, &basepoints0, NULL, NULL, true);
+					if (!apply)
+						if(target->HasAura(31665))
+							target->GetAura(31665)->SetDuration(6000, true);
+					else
+					{
+						int32 basepoints0 = aurEff->GetAmount();
+						target->CastCustomSpell(target, 31665, &basepoints0, NULL, NULL, true);
+					}
 				}
 			}
 			// Overkill
 			if (target->HasAura(58426))
 			{
-				if (!apply)
-					caster->GetAura(58427)->SetDuration(20000, true);
-				else
-					caster->CastSpell(target, 58427, true);
+					if (!apply)
+						if(target->HasAura(58427))
+							target->GetAura(58427)->SetDuration(20000, true);
+					else if(target)
+						target->CastSpell(target, 58427, true);
 			}
 			break;
 		}

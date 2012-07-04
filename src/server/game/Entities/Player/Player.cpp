@@ -146,7 +146,7 @@ enum CharacterCustomizeFlags
 #define DEATH_EXPIRE_STEP (5*MINUTE)
 #define MAX_DEATH_COUNT 3
 
-static uint32 copseReclaimDelay[MAX_DEATH_COUNT] = { 30, 60, 120 };
+static uint32 copseReclaimDelay[MAX_DEATH_COUNT] = { 15, 15, 15 };
 
 // == PlayerTaxi ================================================
 
@@ -810,6 +810,7 @@ Player::Player(WorldSession* session): Unit(true), _achievementMgr(this), _reput
 
     _activeSpec = 0;
     _specsCount = 1;
+	_duelState = false;
 
     for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
     {
@@ -1867,9 +1868,13 @@ void Player::setDeathState(DeathState s)
     if (s == JUST_DIED && cur && ressSpellId)
         SetUInt32Value(PLAYER_SELF_RES_SPELL, ressSpellId);
 
-    if (isAlive() && !cur)
-        //clear aura case after resurrection by another way (spells will be applied before next death)
-        SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+	if (isAlive() && !cur)
+	{
+		//clear aura case after resurrection by another way (spells will be applied before next death)
+		SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+		if (getClass() == CLASS_WARRIOR)
+			CastSpell(this, 2457, true);
+	}
 }
 
 bool Player::BuildEnumData(PreparedQueryResult result, WorldPacket* data)
@@ -5595,7 +5600,7 @@ void Player::RepopAtGraveyard()
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
     if ((!isAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || GetTransport() || GetPositionZ() < -500.0f)
     {
-        ResurrectPlayer(0.5f);
+        ResurrectPlayer(1.0f);
         SpawnCorpseBones();
     }
 
@@ -5608,11 +5613,9 @@ void Player::RepopAtGraveyard()
     {
         if (sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId()))
             ClosestGrave = sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId())->GetClosestGraveYard(this);
-        else
-            ClosestGrave = sObjectMgr->GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
     }
-
-    // stop countdown until repop
+    
+	// stop countdown until repop
     _deathTimer = 0;
 
     // if no grave found, stay at the current location
@@ -7363,7 +7366,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
 
         victim_guid = uVictim->GetGUID();
 
-        if (uVictim->GetTypeId() == TYPEID_PLAYER)
+        if (uVictim->GetTypeId() == TYPEID_PLAYER && InBattleground())
         {
             Player *victim = uVictim->ToPlayer();
 
@@ -7399,7 +7402,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
                 victim_guid = 0;                        // Don't show HK: <rank> message, only log.
 
             honor_f = ceil(SkyFire::Honor::hk_honor_at_level_f(k_level) * (v_level - k_grey) / (k_level - k_grey));
-
+			honor_f = honor_f * 3;
             // count the number of playerkills in one day
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
             // and those in a lifetime
@@ -7410,14 +7413,10 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, int32 honor, bool pvpt
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA, GetAreaId());
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, 1, 0, victim);
         }
-        else
-        {
-            if (!uVictim->ToCreature()->isRacialLeader())
-                return false;
-
-            honor_f = 100.0f;                               // ??? need more info
-            victim_rank = 19;                               // HK: Leader
-        }
+		else
+		{
+			honor_f = 0;
+		}
     }
 
     if (uVictim != NULL)
@@ -7721,6 +7720,8 @@ uint32 Player::GetLevelFromDB(uint64 guid)
 
 void Player::UpdateArea(uint32 newArea)
 {
+	if(!this)
+		return;
     // FFA_PVP flags are area and not zone id dependent
     // so apply them accordingly
     _areaUpdateId    = newArea;
@@ -7733,7 +7734,7 @@ void Player::UpdateArea(uint32 newArea)
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
     pvpInfo.inNoPvPArea = false;
-    if ((area && area->IsSanctuary()) || area->ID == 4821)    // in sanctuary
+	if ((area && area->IsSanctuary()) || area->ID == 4821 || area->ID == 4824 || area->zone == 5034)    // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.inNoPvPArea = true;
@@ -8014,7 +8015,7 @@ void Player::DuelComplete(DuelCompleteType type)
 
     sLog->outDebug(LOG_FILTER_UNITS, "Duel Complete %s %s", GetName(), duel->opponent->GetName());
 
-    WorldPacket data(SMSG_DUEL_COMPLETE, (1));
+    WorldPacket data(SMSG_DUEL_COMPLETE, (1), true);
     data << (uint8)((type != DUEL_INTERRUPTED) ? 1 : 0);
     GetSession()->SendPacket(&data);
 
@@ -8023,10 +8024,10 @@ void Player::DuelComplete(DuelCompleteType type)
 
     if (type != DUEL_INTERRUPTED)
     {
-        data.Initialize(SMSG_DUEL_WINNER, (1+20));          // we guess size
+        data.Initialize(SMSG_DUEL_WINNER, (1+20), true);          // we guess size
         data << uint8(type == DUEL_WON ? 0 : 1);            // 0 = just won; 1 = fled
-        data << GetName();
-        data << duel->opponent->GetName();
+        data << duel->opponent->GetName();       
+		data << GetName();
         SendMessageToSet(&data, true);
     }
 
@@ -9124,6 +9125,17 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
             if (FindCurrentSpellBySpellId(5938) && e_slot == TEMP_ENCHANTMENT_SLOT)
                 chance = 100.0f;
 
+            // Fan of Knives
+            if(FindCurrentSpellBySpellId(51723) && e_slot == TEMP_ENCHANTMENT_SLOT)
+            {
+                if(HasAura(16513)) // Vile Poisons rank 1
+                    chance = 33.0f;
+                if(HasAura(16514)) // Vile Poisons rank 2
+                    chance = 67.0f;
+                if(HasAura(16515)) // Vile Poisons rank 3
+                    chance = 100.0f;
+            }
+
             if (roll_chance_f(chance))
             {
                 if (spellInfo->IsPositive())
@@ -9667,7 +9679,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     // need know merged fishing/corpse loot type for achievements
     loot->loot_type = loot_type;
 
-    WorldPacket data(SMSG_LOOT_RESPONSE, (9+50+2));          // we guess size -- Checked for 406a
+    WorldPacket data(SMSG_LOOT_RESPONSE, (9+50+2), true);          // we guess size -- Checked for 406a
 
     data << uint64(guid);
     data << uint8(loot_type);
@@ -9720,7 +9732,7 @@ void Player::SendNotifyLootMoneyRemoved()
 
 void Player::SendNotifyLootItemRemoved(uint8 lootSlot)
 {
-    WorldPacket data(SMSG_LOOT_REMOVED, 3);         // Checked for 406a
+    WorldPacket data(SMSG_LOOT_REMOVED, 3, true);         // Checked for 406a
     data << uint8(lootSlot);
     GetSession()->SendPacket(&data);
 }
@@ -14121,7 +14133,7 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
 void Player::SendBuyError(BuyResult msg, Creature* creature, uint32 item, uint32 param)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_BUY_FAILED");
-    WorldPacket data(SMSG_BUY_FAILED, (8+4+4+1+2));
+    WorldPacket data(SMSG_BUY_FAILED, (8+4+4+1+2), true);
     data << uint64(creature ? creature->GetGUID() : 0);
     data << uint32(item);
     if (param > 0)
@@ -14874,7 +14886,7 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                         canTalk = false;
                     break;
                 case GOSSIP_OPTION_LEARNDUALSPEC:
-                    if (!(GetSpecsCount() == 1 && creature->isCanTrainingAndResetTalentsOf(this) && !(getLevel() < sWorld->getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL))))
+                    if (!(GetSpecsCount() == 1 && creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER) &&creature->isCanTrainingAndResetTalentsOf(this) && !(getLevel() < sWorld->getIntConfig(CONFIG_MIN_DUALSPEC_LEVEL))))
                         canTalk = false;
                     break;
                 case GOSSIP_OPTION_UNLEARNTALENTS:
@@ -17871,6 +17883,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     _specsCount = fields[58].GetUInt8();
     _activeSpec = fields[59].GetUInt8();
+	_duelState  = false;
 
     // sanity check
     if (_specsCount > MAX_TALENT_SPECS || _activeSpec > MAX_TALENT_SPEC || _specsCount < MIN_TALENT_SPECS)
@@ -20176,7 +20189,7 @@ void Player::_SaveStats(SQLTransaction& trans)
         << GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1) << ','
         << GetUInt32Value(UNIT_FIELD_ATTACK_POWER) << ','
         << GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) << ','
-        << GetBaseSpellPowerBonus() << ','
+        << GetSpellPowerBonus() << ','
         << GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_CRIT_TAKEN_SPELL) << ')';
     trans->Append(ss.str().c_str());
 }
@@ -24280,7 +24293,8 @@ void Player::RemoveRunesBySpell(uint32 spell_id)
 void Player::RestoreBaseRune(uint8 index)
 {
     uint32 spell_id = _runes->runes[index].spell_id;
-    SetRuneConvertSpell(index, 0);
+	ConvertRune(index, GetBaseRune(index));
+    SetRuneConvertSpell(index, NULL);
     // Only Blood Tap can be removed
     if (spell_id == 45529)
         RemoveAura(45529);
