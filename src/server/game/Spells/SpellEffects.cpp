@@ -6477,22 +6477,31 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            // Pestilence
-            if (m_spellInfo->SpellFamilyFlags[1] & 0x10000)
-            {
-                // Get diseases on target of spell
-                if (m_targets.GetUnitTarget() &&  // Glyph of Disease - cast on unit target too to refresh aura
-                    (m_targets.GetUnitTarget() != unitTarget || m_caster->GetAura(63334)))
-                {
-                    // And spread them on target
-                    // Blood Plague
-                    if (m_targets.GetUnitTarget()->GetAura(55078))
-                        m_caster->CastSpell(unitTarget, 55078, true);
-                    // Frost Fever
-                    if (m_targets.GetUnitTarget()->GetAura(55095))
-                        m_caster->CastSpell(unitTarget, 55095, true);
-                }
-            }
+			// Pestilence
+			if (m_spellInfo->SpellFamilyFlags[1] & 0x10000)
+			{
+				// Get diseases on target of spell
+				if (m_targets.GetUnitTarget() &&  // Glyph of Disease - cast on unit target too to refresh aura
+					(m_targets.GetUnitTarget() != unitTarget || m_caster->GetAura(63334)))
+				{
+					// And spread them on target
+					// Blood Plague
+					uint32 effectamount = 0;
+					if (effectamount = m_targets.GetUnitTarget()->GetAura(55078)->GetEffect(0)->GetAmount())
+					{
+						m_caster->CastSpell(unitTarget, 55078, true);
+						if(m_caster != unitTarget)
+							unitTarget->GetAura(55078)->GetEffect(0)->SetAmount(effectamount * 0.5);
+					}
+					// Frost Fever
+					if (effectamount = m_targets.GetUnitTarget()->GetAura(55095)->GetEffect(0)->GetAmount())
+					{
+						m_caster->CastSpell(unitTarget, 55095, true);
+						if(m_caster != unitTarget)
+							unitTarget->GetAura(55095)->GetEffect(0)->SetAmount(effectamount * 0.5);
+					}
+				}
+			}
             			// Festering Strike
 			if (m_spellInfo->Id == 85948)
             {
